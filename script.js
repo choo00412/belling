@@ -53,7 +53,7 @@ const webtoonCategories = [
   }
 ];
 
-// 💡 공통: 괄호 제거된 전체 리스트 뽑아두기 (게임용)
+// 공통: 괄호 제거된 전체 리스트 뽑아두기
 const cleanWebtoonList = [];
 webtoonCategories.forEach(c => c.list.forEach(name => {
   const cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim();
@@ -101,7 +101,8 @@ window.deleteProject = function(id) {
   if (confirm("정말 삭제하시겠습니까?")) { delete projects[id]; saveData(); renderHome(); }
 }
 
-// 화면 전환용 유틸
+let isFromWorkspace = false; // 비교소에서 뒤로가기 했을 때 원래 티어 화면으로 갈지 홈으로 갈지 결정
+
 function hideAllScreens() {
   document.getElementById('home-screen').style.display = 'none';
   document.getElementById('workspace-screen').style.display = 'none';
@@ -119,72 +120,103 @@ window.openProject = function(id) {
   renderItems();
 }
 
-// 모든 뒤로가기 버튼 처리
+// 홈으로 가기 버튼 (비교소 전용 뒤로가기 예외처리 포함)
 document.querySelectorAll('.go-home-btn').forEach(btn => {
-  btn.addEventListener('click', () => { hideAllScreens(); document.getElementById('home-screen').style.display = 'block'; });
+  btn.addEventListener('click', (e) => { 
+    hideAllScreens(); 
+    if(e.target.id === 'comp-back-btn' && isFromWorkspace) {
+      document.getElementById('workspace-screen').style.display = 'block';
+      isFromWorkspace = false;
+    } else {
+      document.getElementById('home-screen').style.display = 'block'; 
+    }
+  });
 });
 
 /* ====================================================================
-   💡 이상형 월드컵 로직
+   💡 이상형 월드컵 로직 (전체 작품 투입 & 랭킹 리스트 출력)
 ==================================================================== */
-let wcCurrentRound = []; // 이번 라운드 참가자
-let wcNextRound = [];    // 승리해서 다음으로 갈 참가자
-let wcMatchIndex = 0;    // 현재 몇 번째 매치인지
+let wcCurrentRound = []; 
+let wcNextRound = [];    
+let wcMatchIndex = 0;    
+let wcRankings = []; // 탈락자들 기록하는 배열
+let wcLosersThisRound = [];
 
 document.getElementById('btn-worldcup').addEventListener('click', () => {
   hideAllScreens();
   document.getElementById('worldcup-screen').style.display = 'block';
+  document.getElementById('wc-play-area').style.display = 'flex';
+  document.getElementById('wc-result-area').style.display = 'none';
   
-  // 랜덤으로 64개 섞어서 뽑기 (작품이 64개보다 적으면 있는 만큼만)
-  let shuffled = [...cleanWebtoonList].sort(() => Math.random() - 0.5);
-  let limit = shuffled.length >= 64 ? 64 : (shuffled.length >= 32 ? 32 : 16);
-  wcCurrentRound = shuffled.slice(0, limit);
+  // 전체 작품 몽땅 투입해서 셔플!
+  wcCurrentRound = [...cleanWebtoonList].sort(() => Math.random() - 0.5);
   wcNextRound = [];
   wcMatchIndex = 0;
+  wcRankings = [];
+  wcLosersThisRound = [];
   
   updateWcUI();
 });
 
 function updateWcUI() {
+  // 우승자 결정!
   if (wcCurrentRound.length === 1) {
-    // 최종 우승!
-    document.getElementById('wc-round-text').innerText = "🏆 최종 우승 🏆";
-    document.getElementById('wc-left').innerText = wcCurrentRound[0];
-    document.getElementById('wc-left').style.borderColor = "#FACC15";
-    document.getElementById('wc-right').style.display = "none";
-    document.querySelector('.wc-vs').style.display = "none";
+    document.getElementById('wc-play-area').style.display = 'none';
+    document.getElementById('wc-result-area').style.display = 'block';
+    document.getElementById('wc-round-text').innerText = "결과 발표";
+    
+    // 최종 랭킹 보여주기
+    const rankList = document.getElementById('wc-ranking-list');
+    rankList.innerHTML = `<div class="wc-rank-item"><span class="wc-medal">🥇</span> <span style="color:#E11D48;">${wcCurrentRound[0]}</span></div>`;
+    
+    // 탈락자들 역순으로 출력 (준우승 -> 4강 -> 8강...)
+    let rankCounter = 2;
+    wcRankings.forEach(losers => {
+      losers.forEach(loser => {
+        let medal = rankCounter === 2 ? '🥈' : (rankCounter === 3 ? '🥉' : `${rankCounter}위`);
+        rankList.innerHTML += `<div class="wc-rank-item"><span class="wc-medal" style="font-size:16px;">${medal}</span> ${loser}</div>`;
+        rankCounter++;
+      });
+    });
     return;
   }
 
-  // 라운드 텍스트 업데이트 (예: 64강 (1/32))
+  // 홀수 남았을 때 부전승 처리 로직
+  if (wcMatchIndex >= wcCurrentRound.length - 1) {
+    wcNextRound.push(wcCurrentRound[wcMatchIndex]); // 마지막 혼자 남은 애 부전승
+    wcRankings.unshift([...wcLosersThisRound]); // 이번 라운드 탈락자 저장
+    wcLosersThisRound = [];
+    wcCurrentRound = wcNextRound; // 라운드 교체
+    wcNextRound = [];
+    wcMatchIndex = 0;
+    return updateWcUI(); // 다시 UI 업데이트로
+  }
+
   const roundName = wcCurrentRound.length === 2 ? "결승전" : (wcCurrentRound.length === 4 ? "준결승" : `${wcCurrentRound.length}강`);
   const matchNum = (wcMatchIndex / 2) + 1;
-  const totalMatches = wcCurrentRound.length / 2;
+  const totalMatches = Math.floor(wcCurrentRound.length / 2);
   document.getElementById('wc-round-text').innerText = `${roundName} (${matchNum}/${totalMatches})`;
 
-  // 카드 보이기 복구
-  document.getElementById('wc-right').style.display = "flex";
-  document.querySelector('.wc-vs').style.display = "block";
-  document.getElementById('wc-left').style.borderColor = "transparent";
-  document.getElementById('wc-right').style.borderColor = "transparent";
-
-  // 매치 세팅
   document.getElementById('wc-left').innerText = wcCurrentRound[wcMatchIndex];
   document.getElementById('wc-right').innerText = wcCurrentRound[wcMatchIndex + 1];
 }
 
 window.selectWcItem = function(side) {
-  if(wcCurrentRound.length <= 1) return; // 이미 끝났으면 반응 안 함
+  if(wcCurrentRound.length <= 1) return; 
 
-  // 이긴 사람 다음 라운드 배열에 추가
-  if (side === 'left') wcNextRound.push(wcCurrentRound[wcMatchIndex]);
-  else wcNextRound.push(wcCurrentRound[wcMatchIndex + 1]);
+  let winner = side === 'left' ? wcCurrentRound[wcMatchIndex] : wcCurrentRound[wcMatchIndex + 1];
+  let loser = side === 'left' ? wcCurrentRound[wcMatchIndex + 1] : wcCurrentRound[wcMatchIndex];
 
-  wcMatchIndex += 2; // 다음 매치로 이동
+  wcNextRound.push(winner);
+  wcLosersThisRound.push(loser); // 진 애는 탈락자 명단에
+
+  wcMatchIndex += 2; 
 
   // 라운드가 끝났다면?
   if (wcMatchIndex >= wcCurrentRound.length) {
-    wcCurrentRound = wcNextRound; // 승자들을 현재 라운드로
+    wcRankings.unshift([...wcLosersThisRound]); // 배열 맨 앞에 탈락자들 쑤셔넣기
+    wcLosersThisRound = [];
+    wcCurrentRound = wcNextRound;
     wcNextRound = [];
     wcMatchIndex = 0;
   }
@@ -192,38 +224,89 @@ window.selectWcItem = function(side) {
 }
 
 /* ====================================================================
-   💡 1:1 비교 로직
+   💡 1:1 비교소 로직 (좌클릭/우클릭 + 전적 기록 + 티어 내부 비교)
 ==================================================================== */
+
+// 홈 화면에서 전체 비교소 열기
 document.getElementById('btn-compare').addEventListener('click', () => {
+  isFromWorkspace = false;
+  document.getElementById('comp-title').innerText = "전체 1:1 집중 비교소";
+  openCompareMode([...cleanWebtoonList].sort());
+});
+
+// 티어 화면에서 내부 비교 열기
+window.openTierCompare = function(tierId) {
+  const tierItems = projects[currentId].items.filter(i => i.zone === tierId).map(i => i.name);
+  if(tierItems.length < 2) return alert("이 티어에 비교할 작품이 2개 이상 없습니다!");
+  
+  isFromWorkspace = true;
+  document.getElementById('comp-title').innerText = `[${tierId}] 티어 내부 비교소`;
+  openCompareMode(tierItems.sort());
+}
+
+function openCompareMode(itemList) {
   hideAllScreens();
   document.getElementById('compare-screen').style.display = 'block';
   
-  // 리스트 뿌려주기
+  document.getElementById('comp-fixed').innerHTML = '목록에서<br><span style="color:#4F46E5;">우클릭</span> 하세요';
+  document.getElementById('comp-fixed').classList.add('empty');
+  document.getElementById('comp-target').innerHTML = '목록에서<br><span style="color:#E11D48;">좌클릭</span> 하세요';
+  document.getElementById('comp-target').classList.add('empty');
+  document.getElementById('comp-log').innerHTML = '<span style="color:#999; font-weight:normal;">기록이 없습니다. 승리 버튼을 눌러보세요!</span>';
+  
   const listArea = document.getElementById('comp-list');
   listArea.innerHTML = '';
   
-  // 가나다 순 정렬해서 보여주기
-  [...cleanWebtoonList].sort().forEach(name => {
+  itemList.forEach(name => {
     const btn = document.createElement('button');
     btn.className = 'comp-item-btn';
     btn.innerText = name;
-    btn.onclick = () => showCompareOptions(name);
+    
+    // 💡 좌클릭: 비교대상 (빨강)
+    btn.onclick = () => {
+      const target = document.getElementById('comp-target');
+      target.innerText = name; target.classList.remove('empty');
+    };
+    
+    // 💡 우클릭: 고정/기준점 (파랑)
+    btn.oncontextmenu = (e) => {
+      e.preventDefault(); // 기본 우클릭 메뉴 안 뜨게!
+      const fixed = document.getElementById('comp-fixed');
+      fixed.innerText = name; fixed.classList.remove('empty');
+    };
+    
     listArea.appendChild(btn);
   });
-});
-
-function showCompareOptions(name) {
-  // 모달 대신 간단한 confirm으로 물어보기 (왼쪽/오른쪽)
-  if (confirm(`[${name}]\n이 작품을 '기준점(고정)'으로 둘까요?\n(취소를 누르면 '비교 대상'으로 들어갑니다)`)) {
-    const fixed = document.getElementById('comp-fixed');
-    fixed.innerText = name; fixed.classList.remove('empty');
-  } else {
-    const target = document.getElementById('comp-target');
-    target.innerText = name; target.classList.remove('empty');
-  }
 }
 
-// ... (아래는 기존 아이템 추가 및 드래그 앤 드롭 함수들 그대로 유지) ...
+// 💡 승리 기록 남기기
+window.recordCompare = function(winnerSide) {
+  const fixed = document.getElementById('comp-fixed').innerText;
+  const target = document.getElementById('comp-target').innerText;
+  
+  if(fixed.includes('우클릭') || target.includes('좌클릭')) {
+    return alert("비교할 작품을 양쪽 다 채워주세요!");
+  }
+  
+  const log = document.getElementById('comp-log');
+  if(log.innerText.includes('기록이 없습니다')) log.innerHTML = '';
+  
+  const p = document.createElement('div');
+  p.style.padding = "5px 0";
+  p.style.borderBottom = "1px solid #f0f0f0";
+  
+  if(winnerSide === 'fixed') {
+    p.innerHTML = `<span style="color:#4F46E5; font-weight:800;">${fixed}</span> 🏆 <span style="color:#bbb; font-weight:normal;">(승) vs (패)</span> <span style="color:#777;">${target}</span>`;
+  } else {
+    p.innerHTML = `<span style="color:#777;">${fixed}</span> <span style="color:#bbb; font-weight:normal;">(패) vs (승)</span> 🏆 <span style="color:#E11D48; font-weight:800;">${target}</span>`;
+  }
+  
+  log.prepend(p); // 최신 기록이 맨 위로 오게 추가!
+}
+
+/* ====================================================================
+   💡 기존 드래그 앤 드롭 아이템 로직 (유지)
+==================================================================== */
 document.getElementById('add-item-btn').addEventListener('click', () => {
   const name = document.getElementById('item-name').value;
   const memo = document.getElementById('item-memo').value;

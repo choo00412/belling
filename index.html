@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -34,8 +34,8 @@
       <button id="btn-auto-webtoon-ranking" class="create-btn auto-btn">🏆 웹툰 랭킹</button>
     </div>
     <div class="auto-buttons" style="margin-top: -20px;">
-      <button id="btn-worldcup" class="create-btn auto-btn" style="background:#8B5CF6; border-color:#7C3AED;">⚔️ 웹툰 월드컵 (64강)</button>
-      <button id="btn-compare" class="create-btn auto-btn" style="background:#10B981; border-color:#059669;">⚖️ 1:1 비교 모드</button>
+      <button id="btn-worldcup" class="create-btn auto-btn" style="background:#8B5CF6; border-color:#7C3AED;">⚔️ 웹툰 월드컵 (전체)</button>
+      <button id="btn-compare" class="create-btn auto-btn" style="background:#10B981; border-color:#059669;">⚖️ 전체 1:1 비교소</button>
     </div>
     
     <div class="project-list" id="project-list"></div>
@@ -63,13 +63,13 @@
 
       <div class="content-area">
         <div id="tier-mode" class="mode-area">
-          <div class="tier-row"><div class="tier-label SSR">SSR</div><div class="tier-items" data-zone="SSR"></div></div>
-          <div class="tier-row"><div class="tier-label SR">SR</div><div class="tier-items" data-zone="SR"></div></div>
-          <div class="tier-row"><div class="tier-label S">S</div><div class="tier-items" data-zone="S"></div></div>
-          <div class="tier-row"><div class="tier-label A">A</div><div class="tier-items" data-zone="A"></div></div>
-          <div class="tier-row"><div class="tier-label B">B</div><div class="tier-items" data-zone="B"></div></div>
-          <div class="tier-row"><div class="tier-label C">C</div><div class="tier-items" data-zone="C"></div></div>
-          <div class="tier-row"><div class="tier-label D">D</div><div class="tier-items" data-zone="D"></div></div>
+          <div class="tier-row"><div class="tier-label SSR">SSR<button class="tier-comp-btn" onclick="openTierCompare('SSR')">⚖️ 비교</button></div><div class="tier-items" data-zone="SSR"></div></div>
+          <div class="tier-row"><div class="tier-label SR">SR<button class="tier-comp-btn" onclick="openTierCompare('SR')">⚖️ 비교</button></div><div class="tier-items" data-zone="SR"></div></div>
+          <div class="tier-row"><div class="tier-label S">S<button class="tier-comp-btn" onclick="openTierCompare('S')">⚖️ 비교</button></div><div class="tier-items" data-zone="S"></div></div>
+          <div class="tier-row"><div class="tier-label A">A<button class="tier-comp-btn" onclick="openTierCompare('A')">⚖️ 비교</button></div><div class="tier-items" data-zone="A"></div></div>
+          <div class="tier-row"><div class="tier-label B">B<button class="tier-comp-btn" onclick="openTierCompare('B')">⚖️ 비교</button></div><div class="tier-items" data-zone="B"></div></div>
+          <div class="tier-row"><div class="tier-label C">C<button class="tier-comp-btn" onclick="openTierCompare('C')">⚖️ 비교</button></div><div class="tier-items" data-zone="C"></div></div>
+          <div class="tier-row"><div class="tier-label D">D<button class="tier-comp-btn" onclick="openTierCompare('D')">⚖️ 비교</button></div><div class="tier-items" data-zone="D"></div></div>
         </div>
         <div id="ranking-mode" class="mode-area" style="display: none;"><div class="ranking-list" id="ranking-list" data-zone="ranking"></div></div>
       </div>
@@ -79,38 +79,50 @@
   <div id="worldcup-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title">웹툰 이상형 월드컵</div>
-    <div id="wc-round-text" class="wc-round">64강 (1/32)</div>
+    <div id="wc-round-text" class="wc-round">준비 중...</div>
     
-    <div class="wc-container">
+    <div class="wc-container" id="wc-play-area">
       <div id="wc-left" class="wc-card" onclick="selectWcItem('left')">왼쪽</div>
       <div class="wc-vs">VS</div>
       <div id="wc-right" class="wc-card" onclick="selectWcItem('right')">오른쪽</div>
     </div>
+    
+    <div id="wc-result-area" style="display: none; text-align: center; margin-top: 30px;">
+      <h2 style="margin-bottom: 20px;">🏆 최종 랭킹 🏆</h2>
+      <div id="wc-ranking-list" class="wc-ranking-box"></div>
+    </div>
   </div>
 
   <div id="compare-screen" style="display: none;" class="game-screen">
-    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
-    <div class="wc-title">1:1 집중 비교소</div>
-    <p style="color:#666; margin-bottom: 30px;">아래 목록에서 작품을 클릭해 '기준'과 '비교 대상'을 설정해보세요!</p>
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn" id="comp-back-btn">⬅</button></div>
+    <div class="wc-title" id="comp-title">1:1 집중 비교소</div>
+    <p style="color:#666; margin-bottom: 30px;">목록에서 <b>[우클릭]하면 기준(고정)</b>, <b>[좌클릭]하면 비교대상</b>으로 설정됩니다.</p>
 
     <div class="compare-container">
       <div class="compare-slot">
-        <div class="compare-label">📌 내 기준점 (고정)</div>
-        <div id="comp-fixed" class="wc-card empty">아래 목록에서<br>선택해주세요</div>
+        <div class="compare-label" style="background:#4F46E5;">📌 내 기준점 (고정)</div>
+        <div id="comp-fixed" class="wc-card empty">목록에서<br><span style="color:#4F46E5;">우클릭</span> 하세요</div>
+        <button class="win-btn win-blue" onclick="recordCompare('fixed')">🏆 이 작품 승리!</button>
       </div>
       <div class="wc-vs">VS</div>
       <div class="compare-slot">
-        <div class="compare-label">⚔️ 비교 대상</div>
-        <div id="comp-target" class="wc-card empty">아래 목록에서<br>선택해주세요</div>
+        <div class="compare-label" style="background:#E11D48;">⚔️ 비교 대상</div>
+        <div id="comp-target" class="wc-card empty">목록에서<br><span style="color:#E11D48;">좌클릭</span> 하세요</div>
+        <button class="win-btn win-red" onclick="recordCompare('target')">🏆 이 작품 승리!</button>
       </div>
     </div>
 
-    <div style="margin-top: 50px; text-align: left;">
-      <h3 style="margin-bottom: 15px;">전체 후보 목록</h3>
+    <div style="margin-top: 40px; text-align: center;">
+      <h3 style="margin-bottom: 15px; color:#555;">📝 서열 정리 기록</h3>
+      <div id="comp-log" class="comp-log-area">기록이 없습니다. 승리 버튼을 눌러보세요!</div>
+    </div>
+
+    <div style="margin-top: 40px; text-align: left;">
+      <h3 style="margin-bottom: 15px;">비교할 작품 목록</h3>
       <div id="comp-list" class="comp-list-area"></div>
     </div>
   </div>
 
-  <script src="script.js?v=14"></script>
+  <script src="script.js?v=15"></script>
 </body>
 </html>
