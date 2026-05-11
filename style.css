@@ -43,7 +43,7 @@ body {
 .btn-confirm:hover { background: #eab308; }
 
 /* 홈 화면 */
-#home-screen { padding: 40px 20px; text-align: left; max-width: 1200px; margin: 0 auto; }
+#home-screen { padding: 40px 20px; text-align: left; max-width: 1600px; margin: 0 auto; }
 h1 { font-size: 44px; margin-bottom: 20px; font-weight: 800; }
 .home-buttons { display: flex; gap: 12px; margin-bottom: 10px; }
 .create-btn { padding: 14px 28px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s ease; }
@@ -66,7 +66,7 @@ h1 { font-size: 44px; margin-bottom: 20px; font-weight: 800; }
 .project-actions button.del-btn { background: #fee2e2; color: #ef4444; }
 
 /* 💡 작업 화면 넓게 확장 */
-#workspace-screen { padding: 0 20px 120px 20px; max-width: 1200px; margin: 0 auto; }
+#workspace-screen { padding: 0 20px 120px 20px; max-width: 1600px; margin: 0 auto; }
 .header { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
 .header button { border:none; background:none; font-size:24px; cursor:pointer; color: #555;}
 h2 { font-size: 24px; font-weight: 700; }
@@ -84,7 +84,7 @@ h2 { font-size: 24px; font-weight: 700; }
 
 /* 💡 좌측 대기실 (스크롤 시 고정됨) */
 .sidebar-pool {
-  flex: 0 0 320px; /* 좌측 공간 고정 (약 4칸 들어가는 너비) */
+  flex: 0 0 450px; /* 좌측 공간 고정 (약 4칸 들어가는 너비) */
   position: sticky;
   top: 20px; 
   display: flex;
