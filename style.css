@@ -275,3 +275,31 @@ h2 { font-size: 24px; font-weight: 700; }
   display: none; align-items: center; justify-content: center; line-height: 1; z-index: 10;
 }
 .cand-wrapper:hover .cand-del-btn { display: flex; }
+/* ... 기존 내용 유지 ... */
+
+/* 💡 비교 모드 하단 레이아웃 (기록 반, 랭킹 반) */
+.compare-bottom-layout { 
+  display: flex; gap: 20px; max-width: 1000px; margin: 40px auto; 
+  flex-wrap: wrap; text-align: left;
+}
+.comp-half { flex: 1; min-width: 320px; }
+
+/* 💡 전적 기록 박스 (높이 고정하고 예쁘게) */
+.comp-log-area { 
+  background: white; border-radius: 16px; padding: 15px; border: 1px solid #eee; 
+  min-height: 250px; max-height: 250px; overflow-y: auto; text-align: left; 
+  font-size: 15px; font-weight: 600; color: #444; line-height: 1.8;
+}
+
+/* 💡 실시간 랭킹 박스 */
+.comp-analysis-area {
+  background: white; border-radius: 16px; padding: 15px; border: 1px solid #eee; 
+  min-height: 250px; max-height: 250px; overflow-y: auto; font-size: 15px; font-weight: 600; color: #333;
+}
+.rank-bar {
+  display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f0; padding: 10px 0; align-items: center;
+}
+.rank-bar:last-child { border-bottom: none; }
+.rank-name-box { display: flex; align-items: center; gap: 10px; }
+.rank-medal { display: inline-block; width: 35px; text-align: center; font-weight: 800; color: #4F46E5; font-size: 16px; }
+.rank-stats { font-size: 13px; color: #888; background: #f9f9fa; padding: 4px 8px; border-radius: 8px; }

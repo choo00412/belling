@@ -3,7 +3,7 @@ let currentId = null;
 let draggedItem = null;
 let pendingProjectType = ''; 
 
-// 💡 1:1 비교 전적 기록 & 삭제한 후보 영구 저장
+// 1:1 비교 전적 기록 & 삭제한 후보 영구 저장
 let compareLogs = JSON.parse(localStorage.getItem('ti-me-logs')) || [];
 let deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
 
@@ -118,8 +118,6 @@ let wcCurrentRound = []; let wcNextRound = []; let wcMatchIndex = 0; let wcRanki
 document.getElementById('btn-worldcup').addEventListener('click', () => {
   hideAllScreens(); document.getElementById('worldcup-screen').style.display = 'block';
   document.getElementById('wc-play-area').style.display = 'flex'; document.getElementById('wc-result-area').style.display = 'none';
-  
-  // 💡 삭제한 작품(deletedCands)은 월드컵에서도 안 나오게 필터링!
   let activeList = cleanWebtoonList.filter(name => !deletedCands.includes(name));
   wcCurrentRound = [...activeList].sort(() => Math.random() - 0.5);
   wcNextRound = []; wcMatchIndex = 0; wcRankings = []; wcLosersThisRound = [];
@@ -167,21 +165,68 @@ window.selectWcItem = function(side) {
 }
 
 /* ====================================================================
-   💡 1:1 비교소 & 기록 로직
+   💡 1:1 비교소 & 실시간 데이터 분석 랭킹
 ==================================================================== */
-// 💡 전적 기록 화면에 그리기
+
+// 💡 1. 전적 로그 렌더링
 function renderLogs() {
   const logArea = document.getElementById('comp-log');
   if (compareLogs.length === 0) {
-    logArea.innerHTML = '<span style="color:#999; font-weight:normal;">기록이 없습니다. 승리 버튼을 눌러보세요!</span>'; return;
+    logArea.innerHTML = '<span style="color:#999; font-weight:normal;">기록이 없습니다. 승리 버튼을 눌러보세요!</span>'; 
+  } else {
+    logArea.innerHTML = '';
+    compareLogs.forEach(log => {
+      const p = document.createElement('div');
+      p.style.padding = "8px 0"; p.style.borderBottom = "1px solid #f0f0f0";
+      p.style.display = "flex"; p.style.justifyContent = "space-between"; p.style.alignItems = "center";
+      p.innerHTML = `<div>${log.html}</div><button onclick="deleteLog(${log.id})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:16px;">×</button>`;
+      logArea.appendChild(p);
+    });
   }
-  logArea.innerHTML = '';
+  renderAnalysis(); // 💡 로그가 바뀔 때마다 랭킹 분석도 다시 돌림!
+}
+
+// 💡 2. 승률/전적 기반 자동 랭킹 분석 엔진!
+function renderAnalysis() {
+  const analysisArea = document.getElementById('comp-analysis');
+  if (compareLogs.length === 0) {
+    analysisArea.innerHTML = '<span style="color:#999; font-weight:normal;">비교 기록이 쌓이면 자동으로 순위가 분석됩니다.</span>';
+    return;
+  }
+
+  // 1) 승패 데이터 수집
+  let stats = {};
   compareLogs.forEach(log => {
-    const p = document.createElement('div');
-    p.style.padding = "8px 0"; p.style.borderBottom = "1px solid #f0f0f0";
-    p.style.display = "flex"; p.style.justifyContent = "space-between"; p.style.alignItems = "center";
-    p.innerHTML = `<div>${log.html}</div><button onclick="deleteLog(${log.id})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:16px;">×</button>`;
-    logArea.appendChild(p);
+    if(log.winner && log.loser) {
+      if(!stats[log.winner]) stats[log.winner] = { wins: 0, losses: 0 };
+      if(!stats[log.loser]) stats[log.loser] = { wins: 0, losses: 0 };
+      stats[log.winner].wins++;
+      stats[log.loser].losses++;
+    }
+  });
+
+  // 2) 배열로 만들어서 승률 계산 및 정렬
+  let rankArr = Object.keys(stats).map(name => {
+    const w = stats[name].wins;
+    const l = stats[name].losses;
+    const total = w + l;
+    const rate = Math.round((w / total) * 100);
+    return { name, wins: w, losses: l, rate };
+  });
+
+  // 3) 정렬 기준: 1순위 다승, 2순위 승률, 3순위 적은 패배
+  rankArr.sort((a, b) => b.wins - a.wins || b.rate - a.rate || a.losses - b.losses);
+
+  // 4) UI에 예쁘게 그리기
+  analysisArea.innerHTML = '';
+  rankArr.forEach((item, idx) => {
+    let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx+1}위`));
+    analysisArea.innerHTML += `
+      <div class="rank-bar">
+        <div class="rank-name-box"><span class="rank-medal">${medal}</span> <span>${item.name}</span></div>
+        <div class="rank-stats">${item.wins}승 ${item.losses}패 (승률 ${item.rate}%)</div>
+      </div>
+    `;
   });
 }
 
@@ -205,11 +250,11 @@ function openCompareMode(itemList) {
   document.getElementById('comp-fixed').innerHTML = '목록에서<br><span style="color:#4F46E5;">우클릭</span> 하세요'; document.getElementById('comp-fixed').classList.add('empty');
   document.getElementById('comp-target').innerHTML = '목록에서<br><span style="color:#E11D48;">좌클릭</span> 하세요'; document.getElementById('comp-target').classList.add('empty');
   
-  renderLogs(); // 들어올 때마다 저장된 기록 불러오기!
+  renderLogs(); 
   
   const listArea = document.getElementById('comp-list'); listArea.innerHTML = '';
   itemList.forEach(name => {
-    if(deletedCands.includes(name)) return; // 💡 삭제된 작품은 목록에 안 띄움!
+    if(deletedCands.includes(name)) return; 
 
     const wrapper = document.createElement('div'); wrapper.className = 'cand-wrapper';
     const btn = document.createElement('button'); btn.className = 'comp-item-btn'; btn.innerText = name;
@@ -217,7 +262,6 @@ function openCompareMode(itemList) {
     btn.onclick = () => { const target = document.getElementById('comp-target'); target.innerText = name; target.classList.remove('empty'); };
     btn.oncontextmenu = (e) => { e.preventDefault(); const fixed = document.getElementById('comp-fixed'); fixed.innerText = name; fixed.classList.remove('empty'); };
     
-    // 💡 비교 목록용 후보 영구 삭제 버튼
     const delBtn = document.createElement('button'); delBtn.className = 'cand-del-btn'; delBtn.innerText = '×';
     delBtn.onclick = () => {
       if(confirm(`'${name}' 후보를 목록에서 영구 삭제할까요?\n(월드컵에서도 제외됩니다)`)) {
@@ -228,16 +272,30 @@ function openCompareMode(itemList) {
   });
 }
 
+// 💡 3. 승리 기록 남길 때 승자/패자 데이터도 같이 저장
 window.recordCompare = function(winnerSide) {
   const fixed = document.getElementById('comp-fixed').innerText;
   const target = document.getElementById('comp-target').innerText;
   if(fixed.includes('우클릭') || target.includes('좌클릭')) return alert("비교할 작품을 양쪽 다 채워주세요!");
   
   let htmlString = "";
-  if(winnerSide === 'fixed') { htmlString = `<span style="color:#4F46E5; font-weight:800;">${fixed}</span> 🏆 <span style="color:#bbb; font-weight:normal;">(승) vs (패)</span> <span style="color:#777;">${target}</span>`; } 
-  else { htmlString = `<span style="color:#777;">${fixed}</span> <span style="color:#bbb; font-weight:normal;">(패) vs (승)</span> 🏆 <span style="color:#E11D48; font-weight:800;">${target}</span>`; }
+  let winnerName = "", loserName = "";
+
+  if(winnerSide === 'fixed') { 
+    htmlString = `<span style="color:#4F46E5; font-weight:800;">${fixed}</span> 🏆 <span style="color:#bbb; font-weight:normal;">(승) vs (패)</span> <span style="color:#777;">${target}</span>`; 
+    winnerName = fixed; loserName = target;
+  } else { 
+    htmlString = `<span style="color:#777;">${fixed}</span> <span style="color:#bbb; font-weight:normal;">(패) vs (승)</span> 🏆 <span style="color:#E11D48; font-weight:800;">${target}</span>`; 
+    winnerName = target; loserName = fixed;
+  }
   
-  compareLogs.unshift({ id: Date.now(), html: htmlString }); // 새 기록을 맨 앞에 추가
+  compareLogs.unshift({ 
+    id: Date.now(), 
+    html: htmlString,
+    winner: winnerName, // 💡 요렇게 데이터를 남겨놔야 분석을 할 수 있음!
+    loser: loserName
+  }); 
+  
   saveLogs(); renderLogs();
 }
 
@@ -270,11 +328,10 @@ function renderItems() {
     if (item.color) { itemEl.classList.add(item.color); }
     itemEl.draggable = true; itemEl.id = item.itemId;
     
-    // 💡 티어 화면 후보 삭제 버튼 추가
     itemEl.innerHTML = `<div class="name-tag">${item.name}</div>${item.memo ? `<div class="item-memo-tooltip">${item.memo}</div>` : ''}<button class="item-del-btn">×</button>`;
     
     itemEl.querySelector('.item-del-btn').addEventListener('click', (e) => {
-      e.stopPropagation(); // 삭제 누를 땐 드래그 안 되게 막기
+      e.stopPropagation(); 
       if(confirm(`'${item.name}' 후보를 삭제할까요?`)) {
         projects[currentId].items = projects[currentId].items.filter(i => i.itemId !== item.itemId);
         saveData(); renderItems();

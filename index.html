@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="style.css?v=17">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -37,7 +37,6 @@
       <button id="btn-worldcup" class="create-btn auto-btn" style="background:#8B5CF6; border-color:#7C3AED;">⚔️ 웹툰 월드컵 (전체)</button>
       <button id="btn-compare" class="create-btn auto-btn" style="background:#10B981; border-color:#059669;">⚖️ 전체 1:1 비교소</button>
     </div>
-    
     <div class="project-list" id="project-list"></div>
   </div>
 
@@ -112,20 +111,29 @@
       </div>
     </div>
 
-    <div style="margin-top: 40px; text-align: center;">
-      <div style="display: flex; justify-content: space-between; max-width: 600px; margin: 0 auto 10px auto; align-items: flex-end;">
-        <h3 style="color:#555; margin:0;">📝 서열 정리 기록</h3>
-        <button onclick="clearLogs()" style="padding: 6px 12px; font-size:12px; background:#fee2e2; color:#ef4444; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🗑️ 전체 기록 삭제</button>
+    <div class="compare-bottom-layout">
+      
+      <div class="comp-half">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: flex-end;">
+          <h3 style="color:#555; margin:0;">📝 서열 정리 기록</h3>
+          <button onclick="clearLogs()" style="padding: 6px 12px; font-size:12px; background:#fee2e2; color:#ef4444; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🗑️ 기록 싹 지우기</button>
+        </div>
+        <div id="comp-log" class="comp-log-area">기록이 없습니다. 승리 버튼을 눌러보세요!</div>
       </div>
-      <div id="comp-log" class="comp-log-area">기록이 없습니다. 승리 버튼을 눌러보세요!</div>
+
+      <div class="comp-half">
+        <h3 style="color:#555; margin-bottom: 15px; text-align: left;">📊 실시간 데이터 랭킹</h3>
+        <div id="comp-analysis" class="comp-analysis-area">비교 기록이 쌓이면 자동으로 순위가 분석됩니다.</div>
+      </div>
+
     </div>
 
     <div style="margin-top: 40px; text-align: left;">
-      <h3 style="margin-bottom: 15px;">비교할 작품 목록</h3>
+      <h3 style="margin-bottom: 15px;">비교할 작품 목록 (목록에서 삭제하면 여기도 안 뜹니다)</h3>
       <div id="comp-list" class="comp-list-area"></div>
     </div>
   </div>
 
-  <script src="script.js?v=16"></script>
+  <script src="script.js?v=17"></script>
 </body>
 </html>
