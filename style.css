@@ -140,7 +140,7 @@ h2 { font-size: 24px; font-weight: 700; }
   box-shadow: 0 4px 10px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05);
   flex-shrink: 0; 
 }
-.item .name-tag { background: rgba(255,255,255,0.9); width: 100%; padding: 4px; text-align: center; font-size: 11px; word-break: keep-all; line-height: 1.2;}
+.item .name-tag { background: transparent; width: 100%; padding: 4px; text-align: center; font-size: 11px; word-break: keep-all; line-height: 1.2;}
 .item-memo-tooltip { 
   display: none; position: absolute; bottom: 105%; left: 0; 
   background: rgba(0,0,0,0.8); color: #fff; padding: 8px 12px; border-radius: 8px; 
