@@ -162,3 +162,8 @@ h2 { font-size: 24px; font-weight: 700; }
   .sidebar-pool { width: 100%; position: static; flex: none; margin-bottom: 20px;}
   .pool { max-height: 250px; }
 }
+
+/* 💡 작품 그룹별 배경색 (연한 색상) */
+.item.bg-skyblue { background-color: #E6F3FF !important; border-color: #B3D9FF !important; }
+.item.bg-red { background-color: #FFEBEB !important; border-color: #FFC2C2 !important; }
+.item.bg-pink { background-color: #FFF0F5 !important; border-color: #FFB3D9 !important; }
