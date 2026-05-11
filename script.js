@@ -42,10 +42,11 @@ function getNextTitle(baseTitle) {
   return `${baseTitle} ${count}`;
 }
 
-// 💡 그룹별로 색상을 지정해서 리스트 분리!
+// 💡 그룹별로 색상과 어느 대기실(zoneId)에 들어갈지 연결해 둠!
 const webtoonCategories = [
   {
-    color: "bg-skyblue", // 1번 그룹: 하늘색
+    color: "bg-skyblue", 
+    zoneId: "pool-skyblue", // 1번 박스
     list: [
       "일간알바", "코드네임 아나스타샤", "소꿉친구와 감금당했다", "공과 사는 구분해!", "그 가이드가 집착광공의 품에서 벗어나는 방법", 
       "더 뮤즈", "쉬운 선배", "노 모럴", "러브 오더", "솔트 소사이어티", "녹색전상", "고양이 테라피", "텐(TEN)", 
@@ -53,7 +54,7 @@ const webtoonCategories = [
       "비밀이 많은 XX", "아우토반 로맨스", "아늑한 집착", "모두에게 친절한 너는 왜", "갱생의 여지", "그림자의 영역", 
       "늑대 신랑 ", "과수원의 사정", "알파 트라우마", "오메가 콤플렉스", "서킷 브레이커", "롤플레잉-경찰❤️파일럿", 
       "친구새끼들한테 따먹혔습니다", "실연 중독", "성실한 채무자?", "형제애", 
-      "위험한 편의점", "럽미닥터!", "상극", "피자배달부와 골드팰리스", "패션", 
+      "위험한 편의점", "럽미닥터!", "상극", "피자배달부와 골드팰리스", "패션(PASSION)", 
       "실수로 잘못 고백했는데", "더러운 욕망", "XX하면 알 수 있지 않을까?", "테라노 군과 쿠마자키 군", 
       "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "페이크 팩트 립스", "소꿉친구로는 참을 수 없어", 
       " 운명의 짝이 너라니", "오프 스테이지 러브 사이드", "테라피 게임", "나츠메 씨는 개발당하고 싶다", 
@@ -64,25 +65,27 @@ const webtoonCategories = [
     ]
   },
   {
-    color: "bg-red", // 2번 그룹: 연한 빨간색
+    color: "bg-red", 
+    zoneId: "pool-red", // 2번 박스
     list: [
-      "호식이 이야기", "강아지는 건드리지 마라", "슬립 업", "가장 깊은 고백", "소꿉친구와 감금당했다",
-      "키스 미 이프 유 캔", "드라이버스 하이", "해빙곡선", "장미와 샴페인",
-      "리미티드 런", "FlashLight", "외사랑", "이리 사랑스러운 너", "스미르나 앤 카프리", "뱀 굴",
+      "호식이 이야기", "강아지는 건드리지 마라", "슬립 업(Slip Up)", "가장 깊은 고백", "소꿉친구와 감금당했다",
+      "키스 미 이프 유 캔(Kiss Me If You Can)", "드라이버스 하이 (Driver's high)", "해빙곡선", "장미와 샴페인",
+      "리미티드 런", "FlashLight (플래시라이트)", "외사랑", "이리 사랑스러운 너", "스미르나 앤 카프리", "뱀 굴",
       "야화첩", "하이스쿨 솔티 하트", "조개소년 : 발화 / 조개소년", "징크스", "향의 경계", "선 넘는 사이",
-      "언슬립", "알페가", "풀북", "멍멍한 관계", "백라이트", "내가 네 운명의 가이드는 아니지만",
+      "언슬립", "알페가(Alphega)", "풀북", "멍멍한 관계", "백라이트", "내가 네 운명의 가이드는 아니지만",
       "녹색전상 : 몽리 / 녹색전상", "유원불변", "해와 달의 공생관계", "너드프로젝트", "시시포스의 개들",
       "뼈와 꽃잎", "박하사탕", "더블다운", "캐시 오어 크레딧", "남보다 못한 사이", "바라메 강림하여 주소서",
       "제물 남편", "시거나 떫거나", "은총의 밤", "가장 완벽한 도형", "백련이 피는 온도", "논제로섬", "아이돌 보러 간다며!"
     ]
   },
   {
-    color: "bg-pink", // 3번 그룹: 핑크색
+    color: "bg-white", 
+    zoneId: "pool-white", // 3번 박스
     list: [
-      "등쳐먹는 연애", "홍실퀘스트", "필 마이 베네핏", "작전명 마레오", "망돌 콤플렉스", "인 마이 배드",
+      "등쳐먹는 연애", "홍실퀘스트", "필 마이 베네핏", "작전명 마레오", "망돌 콤플렉스", "인 마이 배드(In My Bad)",
       "너는 나의 세상", "하절기", "짝사랑 필승법", "솔직하고 대담하게", "넌 내게 수치심을 줬어❤️", "환장의 가이딩",
-      "신을 품는 방법", "꽃이 지는 연못", "원룸 조교님", "엎질러진 피", "코티지 가든", "외사랑",
-      "럭키 다이스", "러브 올 플레이", "구른 김에 왕까지", "월요일의 구원자", "엑시덴탈 베이비",
+      "신을 품는 방법", "꽃이 지는 연못", "원룸 조교님", "엎질러진 피", "코티지 가든(Cottage garden)", "외사랑",
+      "럭키 다이스", "러브 올 플레이(LOVE ALL PLAY)", "구른 김에 왕까지", "월요일의 구원자", "엑시덴탈 베이비(Accidental baby)",
       "피앙세는 토마토", "유성이 내리는 우주", "스테이지 비하인드", "방문 판매 왔습니다!", "백야의 꽃길",
       "당신이 방심한 사이", "미혹의 경계", "아기 삶을 낳아줘, 나 미치는 꼴 보기 싫으면!", "그래서 누가 깔린건데?",
       "스쿠프", "해 뜨는 집", "물가의 밤", "파도의 해안", "누군가 정해둔 것처럼", "짝사랑 필승법", "자두를 누르지 마시오",
@@ -101,10 +104,8 @@ function createAutoProject(type) {
   
   let itemIndex = 0;
   
-  // 💡 그룹별로 돌면서 색상값(color)까지 같이 저장해 줘
   webtoonCategories.forEach(category => {
     category.list.forEach(name => {
-      // 괄호랑 그 안의 글씨 날려버리기
       let cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim(); 
       
       projects[id].items.push({
@@ -112,8 +113,8 @@ function createAutoProject(type) {
         name: cleanName,
         memo: '',
         img: null,
-        zone: 'pool',
-        color: category.color // 각 항목에 색상 태그 부착!
+        zone: category.zoneId, // 각자 맞는 방(박스)으로 배정!
+        color: category.color 
       });
     });
   });
@@ -179,7 +180,8 @@ document.getElementById('add-item-btn').addEventListener('click', () => {
   
   if (!name) return alert("이름을 입력하세요!");
 
-  const newItem = { itemId: Date.now().toString(), name: name, memo: memo, img: null, zone: 'pool' };
+  // 수동으로 추가하는 항목은 1번(하늘색) 박스를 기본값으로 설정
+  const newItem = { itemId: Date.now().toString(), name: name, memo: memo, img: null, zone: 'pool-skyblue' };
 
   if (fileInput.files && fileInput.files[0]) {
     const reader = new FileReader();
@@ -215,10 +217,7 @@ function renderItems() {
     const itemEl = document.createElement('div');
     itemEl.className = 'item';
     
-    // 💡 저장해둔 색상 태그가 있으면 옷 입혀주기!
-    if (item.color) {
-      itemEl.classList.add(item.color);
-    }
+    if (item.color) { itemEl.classList.add(item.color); }
 
     itemEl.draggable = true; itemEl.id = item.itemId;
 

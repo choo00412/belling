@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=10">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -54,8 +54,14 @@
     <div class="workspace-layout">
       
       <div class="sidebar-pool">
-        <p class="pool-label">대기실 (상하 스크롤)</p>
-        <div class="pool" id="item-pool" data-zone="pool"></div>
+        <p class="pool-label">대기실 (하늘색 그룹)</p>
+        <div class="pool" id="pool-skyblue" data-zone="pool-skyblue"></div>
+
+        <p class="pool-label" style="margin-top: 20px;">대기실 (빨간색 그룹)</p>
+        <div class="pool" id="pool-red" data-zone="pool-red"></div>
+
+        <p class="pool-label" style="margin-top: 20px;">대기실 (흰색 그룹)</p>
+        <div class="pool" id="pool-white" data-zone="pool-white"></div>
       </div>
 
       <div class="content-area">
