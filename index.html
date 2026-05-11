@@ -4,15 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=14">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
 <body>
 
-  <div class="character-container">
-    <img id="usagi" src="usagi1.gif" alt="우사기">
-  </div>
+  <div class="character-container"><img id="usagi" src="usagi1.gif" alt="우사기"></div>
 
   <div id="custom-modal" class="modal-overlay" style="display: none;">
     <div class="modal-box">
@@ -35,12 +33,17 @@
       <button id="btn-auto-webtoon-tier" class="create-btn auto-btn">📚 웹툰 티어</button>
       <button id="btn-auto-webtoon-ranking" class="create-btn auto-btn">🏆 웹툰 랭킹</button>
     </div>
+    <div class="auto-buttons" style="margin-top: -20px;">
+      <button id="btn-worldcup" class="create-btn auto-btn" style="background:#8B5CF6; border-color:#7C3AED;">⚔️ 웹툰 월드컵 (64강)</button>
+      <button id="btn-compare" class="create-btn auto-btn" style="background:#10B981; border-color:#059669;">⚖️ 1:1 비교 모드</button>
+    </div>
+    
     <div class="project-list" id="project-list"></div>
   </div>
 
   <div id="workspace-screen" style="display: none;">
     <div class="header" style="padding-top: 20px;">
-      <button id="back-btn">⬅</button>
+      <button id="back-btn" class="go-home-btn">⬅</button>
       <h2 id="current-project-title">주제 이름</h2>
     </div>
 
@@ -52,16 +55,10 @@
     </div>
 
     <div class="workspace-layout">
-      
       <div class="sidebar-pool">
-        <p class="pool-label">대기실 (하늘색 그룹)</p>
-        <div class="pool" id="pool-skyblue" data-zone="pool-skyblue"></div>
-
-        <p class="pool-label" style="margin-top: 20px;">대기실 (빨간색 그룹)</p>
-        <div class="pool" id="pool-red" data-zone="pool-red"></div>
-
-        <p class="pool-label" style="margin-top: 20px;">대기실 (흰색 그룹)</p>
-        <div class="pool" id="pool-white" data-zone="pool-white"></div>
+        <p class="pool-label">대기실 (하늘색 그룹)</p><div class="pool" id="pool-skyblue" data-zone="pool-skyblue"></div>
+        <p class="pool-label" style="margin-top: 20px;">대기실 (빨간색 그룹)</p><div class="pool" id="pool-red" data-zone="pool-red"></div>
+        <p class="pool-label" style="margin-top: 20px;">대기실 (흰색 그룹)</p><div class="pool" id="pool-white" data-zone="pool-white"></div>
       </div>
 
       <div class="content-area">
@@ -74,15 +71,46 @@
           <div class="tier-row"><div class="tier-label C">C</div><div class="tier-items" data-zone="C"></div></div>
           <div class="tier-row"><div class="tier-label D">D</div><div class="tier-items" data-zone="D"></div></div>
         </div>
-
-        <div id="ranking-mode" class="mode-area" style="display: none;">
-          <div class="ranking-list" id="ranking-list" data-zone="ranking"></div>
-        </div>
+        <div id="ranking-mode" class="mode-area" style="display: none;"><div class="ranking-list" id="ranking-list" data-zone="ranking"></div></div>
       </div>
-
     </div>
   </div>
 
-  <script src="script.js?v=13"></script>
+  <div id="worldcup-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
+    <div class="wc-title">웹툰 이상형 월드컵</div>
+    <div id="wc-round-text" class="wc-round">64강 (1/32)</div>
+    
+    <div class="wc-container">
+      <div id="wc-left" class="wc-card" onclick="selectWcItem('left')">왼쪽</div>
+      <div class="wc-vs">VS</div>
+      <div id="wc-right" class="wc-card" onclick="selectWcItem('right')">오른쪽</div>
+    </div>
+  </div>
+
+  <div id="compare-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
+    <div class="wc-title">1:1 집중 비교소</div>
+    <p style="color:#666; margin-bottom: 30px;">아래 목록에서 작품을 클릭해 '기준'과 '비교 대상'을 설정해보세요!</p>
+
+    <div class="compare-container">
+      <div class="compare-slot">
+        <div class="compare-label">📌 내 기준점 (고정)</div>
+        <div id="comp-fixed" class="wc-card empty">아래 목록에서<br>선택해주세요</div>
+      </div>
+      <div class="wc-vs">VS</div>
+      <div class="compare-slot">
+        <div class="compare-label">⚔️ 비교 대상</div>
+        <div id="comp-target" class="wc-card empty">아래 목록에서<br>선택해주세요</div>
+      </div>
+    </div>
+
+    <div style="margin-top: 50px; text-align: left;">
+      <h3 style="margin-bottom: 15px;">전체 후보 목록</h3>
+      <div id="comp-list" class="comp-list-area"></div>
+    </div>
+  </div>
+
+  <script src="script.js?v=14"></script>
 </body>
 </html>
