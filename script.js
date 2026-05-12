@@ -3,9 +3,11 @@ let currentId = null;
 let draggedItem = null;
 let pendingProjectType = ''; 
 
-// 1:1 비교 전적 기록 & 삭제한 후보 영구 저장
+// 1:1 비교 전적 기록 & 삭제한 후보
 let compareLogs = JSON.parse(localStorage.getItem('ti-me-logs')) || [];
 let deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
+let currentCompareTier = null; 
+let currentRankArr = [];       
 
 function saveLogs() { localStorage.setItem('ti-me-logs', JSON.stringify(compareLogs)); }
 function saveDeletedCands() { localStorage.setItem('ti-me-del-cands', JSON.stringify(deletedCands)); }
@@ -17,7 +19,6 @@ setInterval(() => { if (!isDragging) { usagi.src = `usagi${Math.floor(Math.rando
 
 const modal = document.getElementById('custom-modal');
 const modalInput = document.getElementById('modal-input');
-
 document.getElementById('btn-new-tier').addEventListener('click', () => openModal('tier'));
 document.getElementById('btn-new-ranking').addEventListener('click', () => openModal('ranking'));
 
@@ -57,30 +58,21 @@ function createAutoProject(type) {
   let itemIndex = 0;
   webtoonCategories.forEach(category => {
     category.list.forEach(name => {
-      projects[id].items.push({
-        itemId: id + '-' + (itemIndex++),
-        name: name.replace(/\[.*?\]|\(.*?\)/g, '').trim(),
-        memo: '', img: null, zone: category.zoneId, color: category.color 
-      });
+      projects[id].items.push({ itemId: id + '-' + (itemIndex++), name: name.replace(/\[.*?\]|\(.*?\)/g, '').trim(), memo: '', img: null, zone: category.zoneId, color: category.color });
     });
   });
   saveData(); renderHome(); openProject(id);
 }
 
 function createProject(type, title) {
-  const id = Date.now().toString();
-  projects[id] = { id, title, type, items: [] };
-  saveData(); renderHome(); openProject(id);
+  const id = Date.now().toString(); projects[id] = { id, title, type, items: [] }; saveData(); renderHome(); openProject(id);
 }
 
 function renderHome() {
   const list = document.getElementById('project-list'); list.innerHTML = '';
   Object.values(projects).forEach(p => {
     const card = document.createElement('div'); card.className = 'project-card';
-    card.innerHTML = `
-      <div><span style="font-size:12px; color:#888; font-weight:600; margin-bottom:6px; display:block;">${p.type === 'tier' ? '티어 모드' : '랭킹 모드'}</span><h3>${p.title}</h3></div>
-      <div class="project-actions"><button onclick="openProject('${p.id}')">열기</button><button onclick="deleteProject('${p.id}')" class="del-btn">삭제</button></div>
-    `;
+    card.innerHTML = `<div><span style="font-size:12px; color:#888; font-weight:600; margin-bottom:6px; display:block;">${p.type === 'tier' ? '티어 모드' : '랭킹 모드'}</span><h3>${p.title}</h3></div><div class="project-actions"><button onclick="openProject('${p.id}')">열기</button><button onclick="deleteProject('${p.id}')" class="del-btn">삭제</button></div>`;
     list.appendChild(card);
   });
 }
@@ -94,12 +86,9 @@ function hideAllScreens() {
 }
 
 window.openProject = function(id) {
-  currentId = id; const p = projects[id];
-  document.getElementById('current-project-title').innerText = p.title;
-  document.getElementById('tier-mode').style.display = p.type === 'tier' ? 'block' : 'none';
-  document.getElementById('ranking-mode').style.display = p.type === 'ranking' ? 'block' : 'none';
-  hideAllScreens(); document.getElementById('workspace-screen').style.display = 'block';
-  renderItems();
+  currentId = id; const p = projects[id]; document.getElementById('current-project-title').innerText = p.title;
+  document.getElementById('tier-mode').style.display = p.type === 'tier' ? 'block' : 'none'; document.getElementById('ranking-mode').style.display = p.type === 'ranking' ? 'block' : 'none';
+  hideAllScreens(); document.getElementById('workspace-screen').style.display = 'block'; renderItems();
 }
 
 document.querySelectorAll('.go-home-btn').forEach(btn => {
@@ -111,13 +100,11 @@ document.querySelectorAll('.go-home-btn').forEach(btn => {
 });
 
 /* ====================================================================
-   💡 이상형 월드컵 로직
+   💡 월드컵 로직
 ==================================================================== */
 let wcCurrentRound = []; let wcNextRound = []; let wcMatchIndex = 0; let wcRankings = []; let wcLosersThisRound = [];
-
 document.getElementById('btn-worldcup').addEventListener('click', () => {
-  hideAllScreens(); document.getElementById('worldcup-screen').style.display = 'block';
-  document.getElementById('wc-play-area').style.display = 'flex'; document.getElementById('wc-result-area').style.display = 'none';
+  hideAllScreens(); document.getElementById('worldcup-screen').style.display = 'block'; document.getElementById('wc-play-area').style.display = 'flex'; document.getElementById('wc-result-area').style.display = 'none';
   let activeList = cleanWebtoonList.filter(name => !deletedCands.includes(name));
   wcCurrentRound = [...activeList].sort(() => Math.random() - 0.5);
   wcNextRound = []; wcMatchIndex = 0; wcRankings = []; wcLosersThisRound = [];
@@ -126,10 +113,8 @@ document.getElementById('btn-worldcup').addEventListener('click', () => {
 
 function updateWcUI() {
   if (wcCurrentRound.length === 1) {
-    document.getElementById('wc-play-area').style.display = 'none'; document.getElementById('wc-result-area').style.display = 'block';
-    document.getElementById('wc-round-text').innerText = "결과 발표";
-    const rankList = document.getElementById('wc-ranking-list');
-    rankList.innerHTML = `<div class="wc-rank-item"><span class="wc-medal">🥇</span> <span style="color:#E11D48;">${wcCurrentRound[0]}</span></div>`;
+    document.getElementById('wc-play-area').style.display = 'none'; document.getElementById('wc-result-area').style.display = 'block'; document.getElementById('wc-round-text').innerText = "결과 발표";
+    const rankList = document.getElementById('wc-ranking-list'); rankList.innerHTML = `<div class="wc-rank-item"><span class="wc-medal">🥇</span> <span style="color:#E11D48;">${wcCurrentRound[0]}</span></div>`;
     let rankCounter = 2;
     wcRankings.forEach(losers => {
       losers.forEach(loser => {
@@ -137,94 +122,98 @@ function updateWcUI() {
         rankList.innerHTML += `<div class="wc-rank-item"><span class="wc-medal" style="font-size:16px;">${medal}</span> ${loser}</div>`;
         rankCounter++;
       });
-    });
-    return;
+    }); return;
   }
-  if (wcMatchIndex >= wcCurrentRound.length - 1) {
-    wcNextRound.push(wcCurrentRound[wcMatchIndex]); 
-    wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = []; wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0;
-    return updateWcUI(); 
-  }
+  if (wcMatchIndex >= wcCurrentRound.length - 1) { wcNextRound.push(wcCurrentRound[wcMatchIndex]); wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = []; wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0; return updateWcUI(); }
   const roundName = wcCurrentRound.length === 2 ? "결승전" : (wcCurrentRound.length === 4 ? "준결승" : `${wcCurrentRound.length}강`);
   const matchNum = (wcMatchIndex / 2) + 1; const totalMatches = Math.floor(wcCurrentRound.length / 2);
   document.getElementById('wc-round-text').innerText = `${roundName} (${matchNum}/${totalMatches})`;
-  document.getElementById('wc-left').innerText = wcCurrentRound[wcMatchIndex];
-  document.getElementById('wc-right').innerText = wcCurrentRound[wcMatchIndex + 1];
+  document.getElementById('wc-left').innerText = wcCurrentRound[wcMatchIndex]; document.getElementById('wc-right').innerText = wcCurrentRound[wcMatchIndex + 1];
 }
 
 window.selectWcItem = function(side) {
   if(wcCurrentRound.length <= 1) return; 
   let winner = side === 'left' ? wcCurrentRound[wcMatchIndex] : wcCurrentRound[wcMatchIndex + 1];
   let loser = side === 'left' ? wcCurrentRound[wcMatchIndex + 1] : wcCurrentRound[wcMatchIndex];
-  wcNextRound.push(winner); wcLosersThisRound.push(loser); 
-  wcMatchIndex += 2; 
-  if (wcMatchIndex >= wcCurrentRound.length) {
-    wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = []; wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0;
-  }
+  wcNextRound.push(winner); wcLosersThisRound.push(loser); wcMatchIndex += 2; 
+  if (wcMatchIndex >= wcCurrentRound.length) { wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = []; wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0; }
   updateWcUI();
 }
 
 /* ====================================================================
-   💡 1:1 비교소 & 실시간 데이터 분석 랭킹
+   💡 1:1 비교소 & 🧠 엘로 레이팅(Elo Rating) 기반 랭킹 알고리즘
 ==================================================================== */
-
-// 💡 1. 전적 로그 렌더링
 function renderLogs() {
   const logArea = document.getElementById('comp-log');
-  if (compareLogs.length === 0) {
-    logArea.innerHTML = '<span style="color:#999; font-weight:normal;">기록이 없습니다. 승리 버튼을 눌러보세요!</span>'; 
-  } else {
+  if (compareLogs.length === 0) { logArea.innerHTML = '<span style="color:#999; font-weight:normal;">기록이 없습니다. 승리 버튼을 눌러보세요!</span>'; } 
+  else {
     logArea.innerHTML = '';
     compareLogs.forEach(log => {
-      const p = document.createElement('div');
-      p.style.padding = "8px 0"; p.style.borderBottom = "1px solid #f0f0f0";
-      p.style.display = "flex"; p.style.justifyContent = "space-between"; p.style.alignItems = "center";
+      const p = document.createElement('div'); p.style.padding = "8px 0"; p.style.borderBottom = "1px solid #f0f0f0"; p.style.display = "flex"; p.style.justifyContent = "space-between"; p.style.alignItems = "center";
       p.innerHTML = `<div>${log.html}</div><button onclick="deleteLog(${log.id})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:16px;">×</button>`;
       logArea.appendChild(p);
     });
   }
-  renderAnalysis(); // 💡 로그가 바뀔 때마다 랭킹 분석도 다시 돌림!
+  renderAnalysis(); 
 }
 
-// 💡 2. 승률/전적 기반 자동 랭킹 분석 엔진!
 function renderAnalysis() {
   const analysisArea = document.getElementById('comp-analysis');
   if (compareLogs.length === 0) {
-    analysisArea.innerHTML = '<span style="color:#999; font-weight:normal;">비교 기록이 쌓이면 자동으로 순위가 분석됩니다.</span>';
+    analysisArea.innerHTML = '<span style="color:#999; font-weight:normal;">비교 기록이 쌓이면 엘로(Elo) 평점 기반으로 순위가 분석됩니다.</span>';
+    currentRankArr = [];
     return;
   }
 
-  // 1) 승패 데이터 수집
-  let stats = {};
-  compareLogs.forEach(log => {
+  // 1) 체스/롤에서 쓰는 엘로 평점 시스템 도입! (기본점수 1000점)
+  let eloStats = {};
+  const K = 32; // 점수 변동 폭을 결정하는 K-Factor
+
+  function getElo(name) {
+    if (!eloStats[name]) eloStats[name] = { rating: 1000, wins: 0, losses: 0 };
+    return eloStats[name];
+  }
+
+  // 2) 전적 로그를 '과거'부터 '현재'순으로 돌리면서 점수 뺏고 뺏기기 시뮬레이션!
+  const chronologicalLogs = [...compareLogs].reverse();
+  
+  chronologicalLogs.forEach(log => {
     if(log.winner && log.loser) {
-      if(!stats[log.winner]) stats[log.winner] = { wins: 0, losses: 0 };
-      if(!stats[log.loser]) stats[log.loser] = { wins: 0, losses: 0 };
-      stats[log.winner].wins++;
-      stats[log.loser].losses++;
+      let pWinner = getElo(log.winner);
+      let pLoser = getElo(log.loser);
+
+      let expectedWinRateWinner = 1 / (1 + Math.pow(10, (pLoser.rating - pWinner.rating) / 400));
+      let expectedWinRateLoser = 1 / (1 + Math.pow(10, (pWinner.rating - pLoser.rating) / 400));
+
+      pWinner.rating = pWinner.rating + K * (1 - expectedWinRateWinner);
+      pLoser.rating = pLoser.rating + K * (0 - expectedWinRateLoser);
+
+      pWinner.wins++;
+      pLoser.losses++;
     }
   });
 
-  // 2) 배열로 만들어서 승률 계산 및 정렬
-  let rankArr = Object.keys(stats).map(name => {
-    const w = stats[name].wins;
-    const l = stats[name].losses;
-    const total = w + l;
-    const rate = Math.round((w / total) * 100);
-    return { name, wins: w, losses: l, rate };
+  // 3) 최종 점수(Rating)가 높은 순서대로 1등부터 줄 세우기!
+  let rankArr = Object.keys(eloStats).map(name => {
+    return {
+      name: name,
+      rating: Math.round(eloStats[name].rating),
+      wins: eloStats[name].wins,
+      losses: eloStats[name].losses
+    };
   });
 
-  // 3) 정렬 기준: 1순위 다승, 2순위 승률, 3순위 적은 패배
-  rankArr.sort((a, b) => b.wins - a.wins || b.rate - a.rate || a.losses - b.losses);
+  rankArr.sort((a, b) => b.rating - a.rating);
+  currentRankArr = rankArr; // 티어 순위 자동 배치를 위해 저장
 
-  // 4) UI에 예쁘게 그리기
+  // 4) 화면에 예쁘게 그려주기
   analysisArea.innerHTML = '';
   rankArr.forEach((item, idx) => {
     let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx+1}위`));
     analysisArea.innerHTML += `
       <div class="rank-bar">
         <div class="rank-name-box"><span class="rank-medal">${medal}</span> <span>${item.name}</span></div>
-        <div class="rank-stats">${item.wins}승 ${item.losses}패 (승률 ${item.rate}%)</div>
+        <div class="rank-stats" style="color:#4F46E5; font-weight:700;">${item.rating}점 <span style="font-weight:normal; color:#888; font-size:12px;">(${item.wins}승 ${item.losses}패)</span></div>
       </div>
     `;
   });
@@ -234,68 +223,77 @@ window.deleteLog = function(id) { compareLogs = compareLogs.filter(l => l.id !==
 window.clearLogs = function() { if(confirm("모든 전적 기록을 삭제하시겠습니까?")) { compareLogs = []; saveLogs(); renderLogs(); } }
 
 document.getElementById('btn-compare').addEventListener('click', () => {
-  isFromWorkspace = false; document.getElementById('comp-title').innerText = "전체 1:1 집중 비교소";
+  isFromWorkspace = false; currentCompareTier = null;
+  document.getElementById('btn-apply-rank').style.display = 'none'; 
+  document.getElementById('comp-title').innerText = "전체 1:1 집중 비교소";
   openCompareMode([...cleanWebtoonList].sort());
 });
 
 window.openTierCompare = function(tierId) {
   const tierItems = projects[currentId].items.filter(i => i.zone === tierId).map(i => i.name);
   if(tierItems.length < 2) return alert("이 티어에 비교할 작품이 2개 이상 없습니다!");
-  isFromWorkspace = true; document.getElementById('comp-title').innerText = `[${tierId}] 티어 내부 비교소`;
+  
+  isFromWorkspace = true; currentCompareTier = tierId; 
+  document.getElementById('btn-apply-rank').style.display = 'block'; 
+  document.getElementById('comp-title').innerText = `[${tierId}] 티어 내부 비교소`;
+  
+  // 티어 비교소를 열 때, 이전의 잡다한 전적 기록은 초기화!
+  compareLogs = []; saveLogs(); 
+  
   openCompareMode(tierItems.sort());
+}
+
+// 💡 엘로 레이팅 순서대로 티어 박스 안의 아이템 정렬해주기! (네가 요청한 바로 그 기능!)
+window.applyRankingToTier = function() {
+  if(!currentCompareTier) return;
+  if(currentRankArr.length === 0) return alert("먼저 승리 버튼을 눌러 순위를 결정지어 주세요!");
+
+  let sortedNames = currentRankArr.map(r => r.name);
+  
+  let tierItems = projects[currentId].items.filter(i => i.zone === currentCompareTier);
+  let otherItems = projects[currentId].items.filter(i => i.zone !== currentCompareTier);
+  
+  tierItems.sort((a, b) => {
+    let idxA = sortedNames.indexOf(a.name);
+    let idxB = sortedNames.indexOf(b.name);
+    if(idxA === -1) idxA = 999; 
+    if(idxB === -1) idxB = 999;
+    return idxA - idxB;
+  });
+  
+  projects[currentId].items = [...otherItems, ...tierItems]; 
+  saveData();
+  
+  alert(`${currentCompareTier} 티어 박스 안에 순위가 자동 정렬되었습니다!`);
+  document.getElementById('comp-back-btn').click(); // 자동으로 티어 화면으로 이동
 }
 
 function openCompareMode(itemList) {
   hideAllScreens(); document.getElementById('compare-screen').style.display = 'block';
   document.getElementById('comp-fixed').innerHTML = '목록에서<br><span style="color:#4F46E5;">우클릭</span> 하세요'; document.getElementById('comp-fixed').classList.add('empty');
   document.getElementById('comp-target').innerHTML = '목록에서<br><span style="color:#E11D48;">좌클릭</span> 하세요'; document.getElementById('comp-target').classList.add('empty');
-  
   renderLogs(); 
-  
   const listArea = document.getElementById('comp-list'); listArea.innerHTML = '';
   itemList.forEach(name => {
     if(deletedCands.includes(name)) return; 
-
     const wrapper = document.createElement('div'); wrapper.className = 'cand-wrapper';
     const btn = document.createElement('button'); btn.className = 'comp-item-btn'; btn.innerText = name;
-    
     btn.onclick = () => { const target = document.getElementById('comp-target'); target.innerText = name; target.classList.remove('empty'); };
     btn.oncontextmenu = (e) => { e.preventDefault(); const fixed = document.getElementById('comp-fixed'); fixed.innerText = name; fixed.classList.remove('empty'); };
-    
     const delBtn = document.createElement('button'); delBtn.className = 'cand-del-btn'; delBtn.innerText = '×';
-    delBtn.onclick = () => {
-      if(confirm(`'${name}' 후보를 목록에서 영구 삭제할까요?\n(월드컵에서도 제외됩니다)`)) {
-        deletedCands.push(name); saveDeletedCands(); wrapper.remove();
-      }
-    }
+    delBtn.onclick = () => { if(confirm(`'${name}' 후보를 영구 삭제할까요?`)) { deletedCands.push(name); saveDeletedCands(); wrapper.remove(); } }
     wrapper.appendChild(btn); wrapper.appendChild(delBtn); listArea.appendChild(wrapper);
   });
 }
 
-// 💡 3. 승리 기록 남길 때 승자/패자 데이터도 같이 저장
 window.recordCompare = function(winnerSide) {
   const fixed = document.getElementById('comp-fixed').innerText;
   const target = document.getElementById('comp-target').innerText;
   if(fixed.includes('우클릭') || target.includes('좌클릭')) return alert("비교할 작품을 양쪽 다 채워주세요!");
-  
-  let htmlString = "";
-  let winnerName = "", loserName = "";
-
-  if(winnerSide === 'fixed') { 
-    htmlString = `<span style="color:#4F46E5; font-weight:800;">${fixed}</span> 🏆 <span style="color:#bbb; font-weight:normal;">(승) vs (패)</span> <span style="color:#777;">${target}</span>`; 
-    winnerName = fixed; loserName = target;
-  } else { 
-    htmlString = `<span style="color:#777;">${fixed}</span> <span style="color:#bbb; font-weight:normal;">(패) vs (승)</span> 🏆 <span style="color:#E11D48; font-weight:800;">${target}</span>`; 
-    winnerName = target; loserName = fixed;
-  }
-  
-  compareLogs.unshift({ 
-    id: Date.now(), 
-    html: htmlString,
-    winner: winnerName, // 💡 요렇게 데이터를 남겨놔야 분석을 할 수 있음!
-    loser: loserName
-  }); 
-  
+  let htmlString = ""; let winnerName = "", loserName = "";
+  if(winnerSide === 'fixed') { htmlString = `<span style="color:#4F46E5; font-weight:800;">${fixed}</span> 🏆 <span style="color:#bbb; font-weight:normal;">(승) vs (패)</span> <span style="color:#777;">${target}</span>`; winnerName = fixed; loserName = target; } 
+  else { htmlString = `<span style="color:#777;">${fixed}</span> <span style="color:#bbb; font-weight:normal;">(패) vs (승)</span> 🏆 <span style="color:#E11D48; font-weight:800;">${target}</span>`; winnerName = target; loserName = fixed; }
+  compareLogs.unshift({ id: Date.now(), html: htmlString, winner: winnerName, loser: loserName }); 
   saveLogs(); renderLogs();
 }
 
@@ -303,12 +301,10 @@ window.recordCompare = function(winnerSide) {
    💡 기존 드래그 앤 드롭 아이템 로직
 ==================================================================== */
 document.getElementById('add-item-btn').addEventListener('click', () => {
-  const name = document.getElementById('item-name').value;
-  const memo = document.getElementById('item-memo').value;
+  const name = document.getElementById('item-name').value; const memo = document.getElementById('item-memo').value;
   if (!name) return alert("이름을 입력하세요!");
   projects[currentId].items.push({ itemId: Date.now().toString(), name: name, memo: memo, img: null, zone: 'pool-skyblue' });
-  saveData(); renderItems();
-  document.getElementById('item-name').value = ''; document.getElementById('item-memo').value = '';
+  saveData(); renderItems(); document.getElementById('item-name').value = ''; document.getElementById('item-memo').value = '';
 });
 
 function getDragAfterElement(container, x, y) {
@@ -316,8 +312,7 @@ function getDragAfterElement(container, x, y) {
   return draggableElements.reduce((closest, child) => {
     const box = child.getBoundingClientRect();
     const offset = container.classList.contains('ranking-list') ? y - box.top - box.height / 2 : x - box.left - box.width / 2;
-    if (offset < 0 && offset > closest.offset) { return { offset: offset, element: child }; } 
-    else { return closest; }
+    if (offset < 0 && offset > closest.offset) { return { offset: offset, element: child }; } else { return closest; }
   }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
@@ -327,17 +322,10 @@ function renderItems() {
     const itemEl = document.createElement('div'); itemEl.className = 'item';
     if (item.color) { itemEl.classList.add(item.color); }
     itemEl.draggable = true; itemEl.id = item.itemId;
-    
     itemEl.innerHTML = `<div class="name-tag">${item.name}</div>${item.memo ? `<div class="item-memo-tooltip">${item.memo}</div>` : ''}<button class="item-del-btn">×</button>`;
-    
     itemEl.querySelector('.item-del-btn').addEventListener('click', (e) => {
-      e.stopPropagation(); 
-      if(confirm(`'${item.name}' 후보를 삭제할까요?`)) {
-        projects[currentId].items = projects[currentId].items.filter(i => i.itemId !== item.itemId);
-        saveData(); renderItems();
-      }
+      e.stopPropagation(); if(confirm(`'${item.name}' 후보를 삭제할까요?`)) { projects[currentId].items = projects[currentId].items.filter(i => i.itemId !== item.itemId); saveData(); renderItems(); }
     });
-
     itemEl.addEventListener('dragstart', function(e) { draggedItem = item; itemEl.classList.add('dragging'); isDragging = true; usagi.src = 'usagi2.gif'; });
     itemEl.addEventListener('dragend', function() {
       itemEl.classList.remove('dragging'); isDragging = false; usagi.src = 'usagi1.gif';
@@ -348,27 +336,20 @@ function renderItems() {
       });
       projects[currentId].items = newItems; saveData(); renderItems(); 
     });
-    const dropZone = document.querySelector(`[data-zone="${item.zone}"]`);
-    if(dropZone) dropZone.appendChild(itemEl);
+    const dropZone = document.querySelector(`[data-zone="${item.zone}"]`); if(dropZone) dropZone.appendChild(itemEl);
   });
   updateRanking();
 }
 
 document.querySelectorAll('.tier-items, .pool, .ranking-list').forEach(zone => {
   zone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    const afterElement = getDragAfterElement(zone, e.clientX, e.clientY);
-    const dragging = document.querySelector('.dragging');
-    if (dragging) {
-      if (afterElement == null) { zone.appendChild(dragging); } 
-      else { zone.insertBefore(dragging, afterElement); }
-    }
+    e.preventDefault(); const afterElement = getDragAfterElement(zone, e.clientX, e.clientY); const dragging = document.querySelector('.dragging');
+    if (dragging) { if (afterElement == null) { zone.appendChild(dragging); } else { zone.insertBefore(dragging, afterElement); } }
   });
 });
 
 function updateRanking() {
-  const rankingList = document.getElementById('ranking-list');
-  const items = rankingList.querySelectorAll('.item');
+  const rankingList = document.getElementById('ranking-list'); const items = rankingList.querySelectorAll('.item');
   items.forEach((item, index) => {
     let numSpan = item.querySelector('.ranking-number');
     if (!numSpan) { numSpan = document.createElement('div'); numSpan.className = 'ranking-number'; item.prepend(numSpan); }
