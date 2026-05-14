@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=20">
+  <link rel="stylesheet" href="style.css?v=21">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -37,6 +37,16 @@
       <button id="btn-worldcup" class="create-btn auto-btn" style="background:#8B5CF6; border-color:#7C3AED;">⚔️ 웹툰 월드컵 (전체)</button>
       <button id="btn-compare" class="create-btn auto-btn" style="background:#10B981; border-color:#059669;">⚖️ 전체 1:1 비교소</button>
     </div>
+
+    <div class="wishlist-section">
+      <h3>➕ 보고 싶은 작품 적어두기</h3>
+      <div class="wish-input-box">
+        <input type="text" id="wish-input" placeholder="작품 이름을 입력하세요">
+        <button onclick="addWishItem()">추가</button>
+      </div>
+      <div id="wish-list" class="wish-list-container"></div>
+    </div>
+    
     <div class="project-list" id="project-list"></div>
   </div>
 
@@ -79,13 +89,11 @@
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title">웹툰 이상형 월드컵</div>
     <div id="wc-round-text" class="wc-round">준비 중...</div>
-    
     <div class="wc-container" id="wc-play-area">
       <div id="wc-left" class="wc-card" onclick="selectWcItem('left')">왼쪽</div>
       <div class="wc-vs">VS</div>
       <div id="wc-right" class="wc-card" onclick="selectWcItem('right')">오른쪽</div>
     </div>
-    
     <div id="wc-result-area" style="display: none; text-align: center; margin-top: 30px;">
       <h2 style="margin-bottom: 20px;">🏆 최종 랭킹 🏆</h2>
       <div id="wc-ranking-list" class="wc-ranking-box"></div>
@@ -95,37 +103,62 @@
   <div id="compare-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn" id="comp-back-btn">⬅</button></div>
     <div class="wc-title" id="comp-title">1:1 집중 비교소</div>
-    <p style="color:#666; margin-bottom: 30px;">목록에서 <b>[우클릭]하면 기준(고정)</b>, <b>[좌클릭]하면 비교대상</b>으로 설정됩니다.</p>
+    <p style="color:#666; margin-bottom: 30px;"><b>우클릭:기준(고정)</b> / <b>좌클릭:대상</b> <br>각 부문별로 승자를 선택하면 순위가 세밀하게 분석됩니다.</p>
 
     <div class="compare-container">
       <div class="compare-slot">
-        <div class="compare-label" style="background:#4F46E5;">📌 내 기준점 (고정)</div>
-        <div id="comp-fixed" class="wc-card empty">목록에서<br><span style="color:#4F46E5;">우클릭</span> 하세요</div>
-        <button class="win-btn win-blue" onclick="recordCompare('fixed')">🏆 이 작품 승리!</button>
+        <div class="compare-label" style="background:#4F46E5;">📌 기준 작품</div>
+        <div id="comp-fixed" class="wc-card empty">우클릭 하세요</div>
       </div>
-      <div class="wc-vs">VS</div>
+
+      <div class="category-vs-box">
+        <div class="cat-row">
+          <button class="cat-btn left" onclick="recordCategoryWin('art', 'fixed')">◀ 작화 승</button>
+          <span class="cat-label">🎨 작화</span>
+          <button class="cat-btn right" onclick="recordCategoryWin('art', 'target')">작화 승 ▶</button>
+        </div>
+        <div class="cat-row">
+          <button class="cat-btn left" onclick="recordCategoryWin('story', 'fixed')">◀ 스토리 승</button>
+          <span class="cat-label">📖 스토리</span>
+          <button class="cat-btn right" onclick="recordCategoryWin('story', 'target')">스토리 승 ▶</button>
+        </div>
+        <div class="cat-row">
+          <button class="cat-btn left" onclick="recordCategoryWin('scene', 'fixed')">◀ 씬 승</button>
+          <span class="cat-label">🔥 씬</span>
+          <button class="cat-btn right" onclick="recordCategoryWin('scene', 'target')">씬 승 ▶</button>
+        </div>
+        <hr style="width:100%; border:0; border-top:1px solid #e2e8f0; margin:10px 0;">
+        <button class="total-win-btn" onclick="recordCompare('fixed')">👑 기준 작품 종합 승리</button>
+        <button class="total-win-btn" style="background:#E11D48;" onclick="recordCompare('target')">👑 비교 대상 종합 승리</button>
+      </div>
+
       <div class="compare-slot">
         <div class="compare-label" style="background:#E11D48;">⚔️ 비교 대상</div>
-        <div id="comp-target" class="wc-card empty">목록에서<br><span style="color:#E11D48;">좌클릭</span> 하세요</div>
-        <button class="win-btn win-red" onclick="recordCompare('target')">🏆 이 작품 승리!</button>
+        <div id="comp-target" class="wc-card empty">좌클릭 하세요</div>
       </div>
     </div>
 
     <div class="compare-bottom-layout">
       <div class="comp-half">
         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: flex-end;">
-          <h3 style="color:#555; margin:0;">📝 서열 정리 기록</h3>
-          <button onclick="clearLogs()" style="padding: 6px 12px; font-size:12px; background:#fee2e2; color:#ef4444; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🗑️ 기록 싹 지우기</button>
+          <h3 style="color:#555; margin:0;">📝 분석 기록</h3>
+          <button onclick="clearLogs()" style="padding: 6px 12px; font-size:12px; background:#fee2e2; color:#ef4444; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🗑️ 기록 삭제</button>
         </div>
-        <div id="comp-log" class="comp-log-area">기록이 없습니다. 승리 버튼을 눌러보세요!</div>
+        <div id="comp-log" class="comp-log-area"></div>
       </div>
 
       <div class="comp-half">
         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: flex-end;">
-          <h3 style="color:#555; margin:0; text-align: left;">📊 실시간 데이터 랭킹</h3>
-          <button id="btn-apply-rank" onclick="applyRankingToTier()" style="display:none; padding: 6px 12px; font-size:12px; background:#10B981; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">✅ 현재 티어 순위로 적용</button>
+          <h3 style="color:#555; margin:0;">📊 부문별 데이터 랭킹</h3>
+          <button id="btn-apply-rank" onclick="applyRankingToTier()" style="display:none; padding: 6px 12px; font-size:12px; background:#10B981; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">✅ 티어 순위로 적용</button>
         </div>
-        <div id="comp-analysis" class="comp-analysis-area">비교 기록이 쌓이면 자동으로 순위가 분석됩니다.</div>
+        <div class="rank-tabs">
+          <button class="rank-tab active" onclick="changeRankTab('total', this)">종합</button>
+          <button class="rank-tab" onclick="changeRankTab('art', this)">작화</button>
+          <button class="rank-tab" onclick="changeRankTab('story', this)">스토리</button>
+          <button class="rank-tab" onclick="changeRankTab('scene', this)">씬</button>
+        </div>
+        <div id="comp-analysis" class="comp-analysis-area"></div>
       </div>
     </div>
 
@@ -135,6 +168,6 @@
     </div>
   </div>
 
-  <script src="script.js?v=20"></script>
+  <script src="script.js?v=21"></script>
 </body>
 </html>
