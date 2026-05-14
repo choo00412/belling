@@ -1,8 +1,9 @@
-let projects = JSON.parse(localStorage.getItem('ti-me-data')) || {};
-let wishList = JSON.parse(localStorage.getItem('ti-me-wish')) || [];
-let scrapList = JSON.parse(localStorage.getItem('ti-me-scraps')) || [];
-let compareLogs = JSON.parse(localStorage.getItem('ti-me-logs')) || [];
-let deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
+// 1. 초기 변수 세팅 (빈 상태로 시작)
+let projects = {};
+let wishList = [];
+let scrapList = [];
+let compareLogs = [];
+let deletedCands = [];
 
 let currentId = null;
 let draggedItem = null;
@@ -12,11 +13,76 @@ let pendingProjectType = '';
 let currentCompareTier = null; 
 let currentRankArr = [];
 
-function saveData() { localStorage.setItem('ti-me-data', JSON.stringify(projects)); }
-function saveWish() { localStorage.setItem('ti-me-wish', JSON.stringify(wishList)); }
-function saveScraps() { localStorage.setItem('ti-me-scraps', JSON.stringify(scrapList)); }
-function saveLogs() { localStorage.setItem('ti-me-logs', JSON.stringify(compareLogs)); }
-function saveDeletedCands() { localStorage.setItem('ti-me-del-cands', JSON.stringify(deletedCands)); }
+// 2. 파이어베이스 연동 및 데이터 불러오기 로직
+let dbRef = null;
+
+// index.html에서 파이어베이스가 준비될 때까지 기다렸다가 실행
+const checkFirebase = setInterval(async () => {
+  if (window.db) {
+    clearInterval(checkFirebase);
+    
+    try {
+      // 동적 모듈 임포트로 Firestore 함수 가져오기
+      const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+      
+      // 내 데이터가 저장될 서버 공간 (ti_me_data 폴더의 my_shared_data 문서)
+      dbRef = doc(window.db, "ti_me_data", "my_shared_data");
+      
+      // 서버에서 데이터 불러오기
+      const snap = await getDoc(dbRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        projects = data.projects || {};
+        wishList = data.wishList || [];
+        scrapList = data.scrapList || [];
+        compareLogs = data.compareLogs || [];
+        deletedCands = data.deletedCands || [];
+      } else {
+        // 처음 연결 시: 기존 브라우저(로컬) 데이터를 서버로 자동 백업
+        projects = JSON.parse(localStorage.getItem('ti-me-data')) || {};
+        wishList = JSON.parse(localStorage.getItem('ti-me-wish')) || [];
+        scrapList = JSON.parse(localStorage.getItem('ti-me-scraps')) || [];
+        compareLogs = JSON.parse(localStorage.getItem('ti-me-logs')) || [];
+        deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
+        saveToFirebase(); // 서버로 업로드
+      }
+      
+      // 데이터 로딩 완료 후 화면 렌더링
+      renderHome(); 
+    } catch (error) {
+      console.error("Firebase 로딩 에러:", error);
+    }
+  }
+}, 100);
+
+// 3. 파이어베이스 통합 저장 함수
+async function saveToFirebase() {
+  if (!dbRef) return;
+  try {
+    const { setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+    await setDoc(dbRef, { 
+      projects: projects, 
+      wishList: wishList, 
+      scrapList: scrapList, 
+      compareLogs: compareLogs, 
+      deletedCands: deletedCands 
+    });
+  } catch (error) {
+    console.error("데이터 저장 실패:", error);
+    alert("저장에 실패했습니다! (첨부한 이미지 용량이 너무 클 수 있습니다.)");
+  }
+}
+
+// 4. 기존 로컬 저장 함수들을 파이어베이스 저장 함수로 연결
+function saveData() { saveToFirebase(); }
+function saveWish() { saveToFirebase(); }
+function saveScraps() { saveToFirebase(); }
+function saveLogs() { saveToFirebase(); }
+function saveDeletedCands() { saveToFirebase(); }
+
+/* ====================================================================
+   여기서부터는 기존 로직 그대로 유지
+==================================================================== */
 
 const usagi = document.getElementById('usagi');
 setInterval(() => {
@@ -659,5 +725,3 @@ function updateRanking() {
     numSpan.innerText = (index + 1);
   });
 }
-
-renderHome();

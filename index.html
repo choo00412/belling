@@ -8,6 +8,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
+
 <body>
 
   <div class="character-container"><img id="usagi" src="usagi1.gif" alt="우사기"></div>
@@ -185,6 +186,31 @@
     </div>
   </div>
 
+  <!-- 기존 스크립트 파일 불러오기 -->
   <script src="script.js?v=23"></script>
+
+  <!-- Firebase 연동 스크립트 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCUC7GJj3rXRfB_vz5LCcQJrB_TCpXMx8I",
+      authDomain: "belling-f298f.firebaseapp.com",
+      projectId: "belling-f298f",
+      storageBucket: "belling-f298f.firebasestorage.app",
+      messagingSenderId: "980068063348",
+      appId: "1:980068063348:web:59d80f1ff000ccd576d921",
+      measurementId: "G-HQ6XVNXY9J"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    // script.js에서 db에 접근할 수 있도록 전역 변수로 설정
+    window.db = db;
+  </script>
 </body>
 </html>
