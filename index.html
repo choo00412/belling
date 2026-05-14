@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=22">
+  <link rel="stylesheet" href="style.css?v=23">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -23,12 +23,14 @@
     </div>
   </div>
 
+  <!-- 1. 홈 화면 -->
   <div id="home-screen">
     <h1>티메</h1>
     <div class="home-buttons">
       <button id="btn-new-tier" class="create-btn tier-btn">티어 생성</button>
       <button id="btn-new-ranking" class="create-btn ranking-btn">랭킹 생성</button>
-      <button id="btn-open-wishlist" class="create-btn" style="background:#F43F5E; color:white;">📝 보고 싶은 작품 (위시리스트)</button>
+      <button id="btn-open-wishlist" class="create-btn" style="background:#F43F5E; color:white;">📝 위시리스트</button>
+      <button id="btn-open-scrap" class="create-btn" style="background:#fb923c; color:white;">📌 스크랩 보드</button>
     </div>
     <div class="auto-buttons">
       <button id="btn-auto-webtoon-tier" class="create-btn auto-btn">📚 웹툰 티어</button>
@@ -42,6 +44,7 @@
     <div class="project-list" id="project-list"></div>
   </div>
 
+  <!-- 2. 위시리스트 전용 페이지 -->
   <div id="wishlist-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📝 보고 싶은 작품 모음</div>
@@ -56,6 +59,26 @@
     </div>
   </div>
 
+  <!-- 3. 스크랩 보드 전용 페이지 -->
+  <div id="scrap-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
+    <div class="wc-title" style="text-align: left;">📌 나만의 스크랩 보드</div>
+    <p style="color:#666; margin-bottom: 30px; text-align: left;">좋아하는 링크, 이미지, 그리고 주접글을 게시글 형태로 남겨보세요!</p>
+
+    <div class="scrap-input-section">
+      <input type="text" id="scrap-url" placeholder="복사한 링크(URL)를 붙여넣으세요">
+      <textarea id="scrap-comment" placeholder="여기에 주접을 마음껏 떨으세요 (감상평 등)"></textarea>
+      <div class="scrap-file-row">
+        <label for="scrap-image">🖼️ 이미지 올리기</label>
+        <input type="file" id="scrap-image" accept="image/*">
+      </div>
+      <button id="btn-add-scrap" onclick="addScrapItem()">스크랩 게시하기</button>
+    </div>
+
+    <div id="scrap-list" class="scrap-container"></div>
+  </div>
+
+  <!-- 4. 작업 화면 (티어) -->
   <div id="workspace-screen" style="display: none;">
     <div class="header" style="padding-top: 20px;">
       <button id="back-btn" class="go-home-btn">⬅</button>
@@ -91,11 +114,11 @@
     </div>
   </div>
 
+  <!-- 5. 세부 순위 (작화/스토리/씬) 화면 -->
   <div id="category-rank-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-workspace-btn">⬅</button></div>
-    <div class="wc-title" id="cat-rank-title" style="text-align: left;">[SR] 부문별 세부 순위</div>
-    <p style="color:#666; margin-bottom: 30px; text-align: left;">각 줄 안에서 작품을 드래그하여 왼쪽(1등)부터 오른쪽으로 순서를 직접 정해보세요!</p>
-
+    <div class="wc-title" id="cat-rank-title" style="text-align: left;">세부 순위</div>
+    <p style="color:#666; margin-bottom: 30px; text-align: left;">드래그하여 왼쪽(1등)부터 순서를 정해보세요!</p>
     <div class="content-area">
       <div class="tier-row"><div class="tier-label" style="background:#EEF2FF; color:#4F46E5;">🎨 작화</div><div class="tier-items cat-list" id="cat-art-list"></div></div>
       <div class="tier-row"><div class="tier-label" style="background:#FDF4FF; color:#C026D3;">📖 스토리</div><div class="tier-items cat-list" id="cat-story-list"></div></div>
@@ -103,6 +126,7 @@
     </div>
   </div>
 
+  <!-- 6. 이상형 월드컵 화면 -->
   <div id="worldcup-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title">웹툰 이상형 월드컵</div>
@@ -118,6 +142,7 @@
     </div>
   </div>
 
+  <!-- 7. 1:1 비교 화면 -->
   <div id="compare-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn" id="comp-back-btn">⬅</button></div>
     <div class="wc-title" id="comp-title">1:1 집중 비교소</div>
@@ -145,7 +170,6 @@
         </div>
         <div id="comp-log" class="comp-log-area"></div>
       </div>
-
       <div class="comp-half">
         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: flex-end;">
           <h3 style="color:#555; margin:0;">📊 실시간 데이터 랭킹</h3>
@@ -161,6 +185,6 @@
     </div>
   </div>
 
-  <script src="script.js?v=22"></script>
+  <script src="script.js?v=23"></script>
 </body>
 </html>
