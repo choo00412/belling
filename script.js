@@ -5,10 +5,10 @@ let deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
 
 let currentId = null;
 let draggedItem = null;
+let draggedCatItem = null; // 💡 세부 순위 페이지용
 let isDragging = false;
 let pendingProjectType = ''; 
 let currentCompareTier = null; 
-let currentRankTab = 'total'; 
 let currentRankArr = [];
 
 function saveData() { localStorage.setItem('ti-me-data', JSON.stringify(projects)); }
@@ -16,25 +16,11 @@ function saveWish() { localStorage.setItem('ti-me-wish', JSON.stringify(wishList
 function saveLogs() { localStorage.setItem('ti-me-logs', JSON.stringify(compareLogs)); }
 function saveDeletedCands() { localStorage.setItem('ti-me-del-cands', JSON.stringify(deletedCands)); }
 
-// 💡 홈 화면 위시리스트 관리
-function addWishItem() {
-  const input = document.getElementById('wish-input');
-  if (!input.value.trim()) return;
-  wishList.push({ id: Date.now(), name: input.value.trim() });
-  input.value = ''; saveWish(); renderWishList();
-}
-function deleteWishItem(id) { wishList = wishList.filter(i => i.id !== id); saveWish(); renderWishList(); }
-function renderWishList() {
-  const container = document.getElementById('wish-list'); container.innerHTML = '';
-  wishList.forEach(item => {
-    container.innerHTML += `<div class="wish-item">${item.name} <button onclick="deleteWishItem(${item.id})">×</button></div>`;
-  });
-}
-
-// 우사기 타이머
+// 💡 우사기 애니메이션
 const usagi = document.getElementById('usagi');
 setInterval(() => { if (!isDragging) { usagi.src = `usagi${Math.floor(Math.random() * 4) + 1}.gif`; } }, 10000);
 
+// 💡 모달 창 로직
 const modal = document.getElementById('custom-modal');
 const modalInput = document.getElementById('modal-input');
 document.getElementById('btn-new-tier').addEventListener('click', () => openModal('tier'));
@@ -62,10 +48,15 @@ webtoonCategories.forEach(c => c.list.forEach(name => {
 document.getElementById('btn-auto-webtoon-tier').addEventListener('click', () => createAutoProject('tier'));
 document.getElementById('btn-auto-webtoon-ranking').addEventListener('click', () => createAutoProject('ranking'));
 
+function getNextTitle(baseTitle) {
+  const existingTitles = Object.values(projects).map(p => p.title);
+  if (!existingTitles.includes(baseTitle)) return baseTitle;
+  let count = 2; while (existingTitles.includes(`${baseTitle} ${count}`)) { count++; } return `${baseTitle} ${count}`;
+}
+
 function createAutoProject(type) {
   const id = Date.now().toString();
-  const title = (Object.values(projects).some(p => p.title === '웹툰 취향 리스트')) ? `웹툰 취향 리스트 ${Object.values(projects).length + 1}` : '웹툰 취향 리스트';
-  projects[id] = { id, title, type, items: [] };
+  projects[id] = { id, title: getNextTitle('웹툰 취향 리스트'), type: type, items: [] };
   let itemIndex = 0;
   webtoonCategories.forEach(category => {
     category.list.forEach(name => {
@@ -83,10 +74,9 @@ function renderHome() {
   const list = document.getElementById('project-list'); list.innerHTML = '';
   Object.values(projects).forEach(p => {
     const card = document.createElement('div'); card.className = 'project-card';
-    card.innerHTML = `<div><span style="font-size:12px; color:#888; font-weight:600;">${p.type === 'tier' ? '티어' : '랭킹'}</span><h3>${p.title}</h3></div><div class="project-actions"><button onclick="openProject('${p.id}')">열기</button><button onclick="deleteProject('${p.id}')" class="del-btn">삭제</button></div>`;
+    card.innerHTML = `<div><span style="font-size:12px; color:#888; font-weight:600;">${p.type === 'tier' ? '티어 모드' : '랭킹 모드'}</span><h3>${p.title}</h3></div><div class="project-actions"><button onclick="openProject('${p.id}')">열기</button><button onclick="deleteProject('${p.id}')" class="del-btn">삭제</button></div>`;
     list.appendChild(card);
   });
-  renderWishList();
 }
 
 window.deleteProject = function(id) { if (confirm("정말 삭제하시겠습니까?")) { delete projects[id]; saveData(); renderHome(); } }
@@ -94,6 +84,7 @@ window.deleteProject = function(id) { if (confirm("정말 삭제하시겠습니�
 function hideAllScreens() {
   document.getElementById('home-screen').style.display = 'none'; document.getElementById('workspace-screen').style.display = 'none';
   document.getElementById('worldcup-screen').style.display = 'none'; document.getElementById('compare-screen').style.display = 'none';
+  document.getElementById('wishlist-screen').style.display = 'none'; document.getElementById('category-rank-screen').style.display = 'none';
 }
 
 window.openProject = function(id) {
@@ -102,6 +93,7 @@ window.openProject = function(id) {
   hideAllScreens(); document.getElementById('workspace-screen').style.display = 'block'; renderItems();
 }
 
+// 홈으로 가기 버튼들
 document.querySelectorAll('.go-home-btn').forEach(btn => {
   btn.addEventListener('click', (e) => { 
     hideAllScreens(); 
@@ -109,29 +101,150 @@ document.querySelectorAll('.go-home-btn').forEach(btn => {
     else { document.getElementById('home-screen').style.display = 'block'; renderHome(); }
   });
 });
+// 세부 순위 페이지에서 작업 화면으로 돌아가는 전용 버튼
+document.querySelectorAll('.go-workspace-btn').forEach(btn => {
+  btn.addEventListener('click', () => { hideAllScreens(); document.getElementById('workspace-screen').style.display = 'block'; });
+});
 
 /* ====================================================================
-   💡 부문별 1:1 비교 로직 (Elo Rating & 탭 메뉴)
+   💡 위시리스트 전용 페이지 로직
 ==================================================================== */
-function changeRankTab(tab, btn) {
-  currentRankTab = tab;
-  document.querySelectorAll('.rank-tab').forEach(el => el.classList.remove('active'));
-  btn.classList.add('active');
-  renderAnalysis();
+document.getElementById('btn-open-wishlist').addEventListener('click', () => {
+  hideAllScreens(); document.getElementById('wishlist-screen').style.display = 'block'; renderWishList();
+});
+
+window.addWishItem = function() {
+  const input = document.getElementById('wish-input');
+  if (!input.value.trim()) return;
+  wishList.push({ id: Date.now(), name: input.value.trim() });
+  input.value = ''; saveWish(); renderWishList();
+}
+window.deleteWishItem = function(id) { wishList = wishList.filter(i => i.id !== id); saveWish(); renderWishList(); }
+
+function renderWishList() {
+  const container = document.getElementById('wish-list'); container.innerHTML = '';
+  wishList.forEach(item => {
+    container.innerHTML += `<div class="wish-item"><span>${item.name}</span> <button onclick="deleteWishItem(${item.id})">×</button></div>`;
+  });
 }
 
+/* ====================================================================
+   💡 3대 요소 세부 순위 페이지 (작화/스토리/씬 드래그)
+==================================================================== */
+window.openCategoryRank = function(tierId) {
+  const tierItems = projects[currentId].items.filter(i => i.zone === tierId);
+  if(tierItems.length < 2) return alert("작품이 2개 이상 있어야 줄을 세울 수 있어요!");
+  
+  hideAllScreens(); document.getElementById('category-rank-screen').style.display = 'block';
+  document.getElementById('cat-rank-title').innerText = `[${tierId}] 부문별 세부 순위`;
+
+  ['art', 'story', 'scene'].forEach(cat => {
+    const container = document.getElementById(`cat-${cat}-list`);
+    container.innerHTML = '';
+    
+    // 저장된 순서가 있으면 그대로 가져오기
+    let savedOrder = (projects[currentId].categoryRanks && projects[currentId].categoryRanks[tierId] && projects[currentId].categoryRanks[tierId][cat]) || [];
+    
+    let sortedItems = [...tierItems].sort((a, b) => {
+      let idxA = savedOrder.indexOf(a.itemId); let idxB = savedOrder.indexOf(b.itemId);
+      return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+    });
+
+    sortedItems.forEach(item => {
+      const el = document.createElement('div');
+      el.className = `item ${item.color || ''} cat-sort-item`;
+      el.draggable = true; el.dataset.itemId = item.itemId; el.dataset.cat = cat;
+      el.innerHTML = `<div class="name-tag">${item.name}</div>`;
+      
+      el.ondragstart = (e) => { draggedCatItem = el; el.classList.add('dragging'); isDragging = true; };
+      el.ondragend = () => { el.classList.remove('dragging'); isDragging = false; saveCategoryRanks(tierId); };
+      
+      container.appendChild(el);
+    });
+  });
+}
+
+// 💡 세부 순서 저장
+function saveCategoryRanks(tierId) {
+  if(!projects[currentId].categoryRanks) projects[currentId].categoryRanks = {};
+  if(!projects[currentId].categoryRanks[tierId]) projects[currentId].categoryRanks[tierId] = {};
+  
+  ['art', 'story', 'scene'].forEach(cat => {
+    const zone = document.getElementById(`cat-${cat}-list`);
+    const items = [...zone.querySelectorAll('.cat-sort-item')];
+    projects[currentId].categoryRanks[tierId][cat] = items.map(el => el.dataset.itemId);
+  });
+  saveData();
+}
+
+// 세부 순위 칸 안에서의 드래그 앤 드롭 인식
+['art', 'story', 'scene'].forEach(cat => {
+  const zone = document.getElementById(`cat-${cat}-list`);
+  zone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if(!draggedCatItem || draggedCatItem.dataset.cat !== cat) return; // 다른 줄로 침범 금지!
+    const afterElement = getDragAfterElement(zone, e.clientX, e.clientY, '.cat-sort-item');
+    if (afterElement == null) { zone.appendChild(draggedCatItem); } 
+    else { zone.insertBefore(draggedCatItem, afterElement); }
+  });
+});
+
+/* ====================================================================
+   💡 이상형 월드컵 로직
+==================================================================== */
+let wcCurrentRound = []; let wcNextRound = []; let wcMatchIndex = 0; let wcRankings = []; let wcLosersThisRound = [];
+document.getElementById('btn-worldcup').addEventListener('click', () => {
+  hideAllScreens(); document.getElementById('worldcup-screen').style.display = 'block'; document.getElementById('wc-play-area').style.display = 'flex'; document.getElementById('wc-result-area').style.display = 'none';
+  let activeList = cleanWebtoonList.filter(name => !deletedCands.includes(name));
+  wcCurrentRound = [...activeList].sort(() => Math.random() - 0.5);
+  wcNextRound = []; wcMatchIndex = 0; wcRankings = []; wcLosersThisRound = [];
+  updateWcUI();
+});
+
+function updateWcUI() {
+  if (wcCurrentRound.length === 1) {
+    document.getElementById('wc-play-area').style.display = 'none'; document.getElementById('wc-result-area').style.display = 'block'; document.getElementById('wc-round-text').innerText = "결과 발표";
+    const rankList = document.getElementById('wc-ranking-list'); rankList.innerHTML = `<div class="wc-rank-item"><span class="wc-medal">🥇</span> <span style="color:#E11D48;">${wcCurrentRound[0]}</span></div>`;
+    let rankCounter = 2;
+    wcRankings.forEach(losers => {
+      losers.forEach(loser => {
+        let medal = rankCounter === 2 ? '🥈' : (rankCounter === 3 ? '🥉' : `${rankCounter}위`);
+        rankList.innerHTML += `<div class="wc-rank-item"><span class="wc-medal" style="font-size:16px;">${medal}</span> ${loser}</div>`;
+        rankCounter++;
+      });
+    }); return;
+  }
+  if (wcMatchIndex >= wcCurrentRound.length - 1) { wcNextRound.push(wcCurrentRound[wcMatchIndex]); wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = []; wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0; return updateWcUI(); }
+  const roundName = wcCurrentRound.length === 2 ? "결승전" : (wcCurrentRound.length === 4 ? "준결승" : `${wcCurrentRound.length}강`);
+  const matchNum = (wcMatchIndex / 2) + 1; const totalMatches = Math.floor(wcCurrentRound.length / 2);
+  document.getElementById('wc-round-text').innerText = `${roundName} (${matchNum}/${totalMatches})`;
+  document.getElementById('wc-left').innerText = wcCurrentRound[wcMatchIndex]; document.getElementById('wc-right').innerText = wcCurrentRound[wcMatchIndex + 1];
+}
+
+window.selectWcItem = function(side) {
+  if(wcCurrentRound.length <= 1) return; 
+  let winner = side === 'left' ? wcCurrentRound[wcMatchIndex] : wcCurrentRound[wcMatchIndex + 1];
+  let loser = side === 'left' ? wcCurrentRound[wcMatchIndex + 1] : wcCurrentRound[wcMatchIndex];
+  wcNextRound.push(winner); wcLosersThisRound.push(loser); wcMatchIndex += 2; 
+  if (wcMatchIndex >= wcCurrentRound.length) { wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = []; wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0; }
+  updateWcUI();
+}
+
+/* ====================================================================
+   💡 1:1 비교소 & 🧠 엘로 레이팅(Elo Rating) 기반 랭킹
+==================================================================== */
 window.openTierCompare = function(tierId) {
   const tierItems = projects[currentId].items.filter(i => i.zone === tierId).map(i => i.name);
   if(tierItems.length < 2) return alert("비교할 작품이 2개 이상 없습니다!");
-  currentCompareTier = tierId;
-  document.getElementById('btn-apply-rank').style.display = 'block';
-  document.getElementById('comp-title').innerText = `[${tierId}] 부문별 정밀 비교`;
+  currentCompareTier = tierId; 
+  document.getElementById('btn-apply-rank').style.display = 'block'; 
+  document.getElementById('comp-title').innerText = `[${tierId}] 티어 내부 집중 비교소`;
   compareLogs = []; saveLogs(); 
   openCompareMode(tierItems.sort());
 }
 
 document.getElementById('btn-compare').addEventListener('click', () => {
-  currentCompareTier = null; document.getElementById('btn-apply-rank').style.display = 'none';
+  currentCompareTier = null; document.getElementById('btn-apply-rank').style.display = 'none'; 
   document.getElementById('comp-title').innerText = "전체 1:1 집중 비교소";
   openCompareMode([...cleanWebtoonList].sort());
 });
@@ -140,74 +253,77 @@ function openCompareMode(itemList) {
   hideAllScreens(); document.getElementById('compare-screen').style.display = 'block';
   document.getElementById('comp-fixed').innerHTML = '우클릭 하세요'; document.getElementById('comp-fixed').classList.add('empty');
   document.getElementById('comp-target').innerHTML = '좌클릭 하세요'; document.getElementById('comp-target').classList.add('empty');
-  renderLogs();
+  renderLogs(); 
   const listArea = document.getElementById('comp-list'); listArea.innerHTML = '';
   itemList.forEach(name => {
-    if(deletedCands.includes(name)) return;
+    if(deletedCands.includes(name)) return; 
     const wrapper = document.createElement('div'); wrapper.className = 'cand-wrapper';
     const btn = document.createElement('button'); btn.className = 'comp-item-btn'; btn.innerText = name;
     btn.onclick = () => { document.getElementById('comp-target').innerText = name; document.getElementById('comp-target').classList.remove('empty'); };
     btn.oncontextmenu = (e) => { e.preventDefault(); document.getElementById('comp-fixed').innerText = name; document.getElementById('comp-fixed').classList.remove('empty'); };
     const delBtn = document.createElement('button'); delBtn.className = 'cand-del-btn'; delBtn.innerText = '×';
-    delBtn.onclick = () => { if(confirm(`${name}을 삭제할까요?`)) { deletedCands.push(name); saveDeletedCands(); wrapper.remove(); } }
+    delBtn.onclick = () => { if(confirm(`영구 삭제할까요?`)) { deletedCands.push(name); saveDeletedCands(); wrapper.remove(); } }
     wrapper.appendChild(btn); wrapper.appendChild(delBtn); listArea.appendChild(wrapper);
   });
 }
 
-// 💡 부문별 승리 기록
-window.recordCategoryWin = function(category, side) {
-  const fixed = document.getElementById('comp-fixed').innerText;
-  const target = document.getElementById('comp-target').innerText;
-  if(fixed.includes('클릭') || target.includes('클릭')) return alert("작품을 선택해주세요!");
-  const winner = (side === 'fixed') ? fixed : target;
-  const loser = (side === 'fixed') ? target : fixed;
-  const catNames = { art: '🎨작화', story: '📖스토리', scene: '🔥씬' };
-  compareLogs.unshift({ id: Date.now(), html: `[${catNames[category]}] <b>${winner}</b> 승`, winner, loser, category });
-  saveLogs(); renderLogs();
-}
-
-// 💡 종합 승리 기록
 window.recordCompare = function(side) {
   const fixed = document.getElementById('comp-fixed').innerText;
   const target = document.getElementById('comp-target').innerText;
   if(fixed.includes('클릭') || target.includes('클릭')) return alert("작품을 선택해주세요!");
-  const winner = (side === 'fixed') ? fixed : target;
-  const loser = (side === 'fixed') ? target : fixed;
-  compareLogs.unshift({ id: Date.now(), html: `<span style="color:#4F46E5">[종합]</span> <b>${winner}</b> 승`, winner, loser, category: 'total' });
+  let winner = (side === 'fixed') ? fixed : target; let loser = (side === 'fixed') ? target : fixed;
+  compareLogs.unshift({ id: Date.now(), html: `<span style="color:#4F46E5; font-weight:800;">[종합]</span> ${winner} 🏆 vs ${loser}`, winner: winner, loser: loser }); 
   saveLogs(); renderLogs();
 }
 
 function renderLogs() {
-  const area = document.getElementById('comp-log'); area.innerHTML = compareLogs.length ? '' : '기록이 없습니다.';
-  compareLogs.forEach(l => {
-    area.innerHTML += `<div style="padding:8px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><div>${l.html}</div><button onclick="deleteLog(${l.id})" style="border:none; background:none; color:red; cursor:pointer;">×</button></div>`;
-  });
-  renderAnalysis();
+  const logArea = document.getElementById('comp-log');
+  if (compareLogs.length === 0) { logArea.innerHTML = '<span style="color:#999;">기록이 없습니다.</span>'; } 
+  else {
+    logArea.innerHTML = '';
+    compareLogs.forEach(log => {
+      const p = document.createElement('div'); p.style.padding = "8px 0"; p.style.borderBottom = "1px solid #f0f0f0"; p.style.display = "flex"; p.style.justifyContent = "space-between"; p.style.alignItems = "center";
+      p.innerHTML = `<div>${log.html}</div><button onclick="deleteLog(${log.id})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:16px;">×</button>`;
+      logArea.appendChild(p);
+    });
+  }
+  renderAnalysis(); 
 }
-window.deleteLog = (id) => { compareLogs = compareLogs.filter(l => l.id !== id); saveLogs(); renderLogs(); };
-window.clearLogs = () => { if(confirm("초기화할까요?")) { compareLogs = []; saveLogs(); renderLogs(); } };
 
-// 💡 부문별 엘로 레이팅 분석 엔진
 function renderAnalysis() {
-  const area = document.getElementById('comp-analysis');
-  const filtered = compareLogs.filter(l => l.category === currentRankTab);
-  if(!filtered.length) { area.innerHTML = "해당 부문 데이터가 부족합니다."; return; }
-  let elo = {}; const K = 32;
-  [...filtered].reverse().forEach(l => {
-    if(!elo[l.winner]) elo[l.winner] = 1000; if(!elo[l.loser]) elo[l.loser] = 1000;
-    let expW = 1 / (1 + Math.pow(10, (elo[l.loser] - elo[l.winner]) / 400));
-    elo[l.winner] += K * (1 - expW); elo[l.loser] += K * (0 - (1-expW));
+  const analysisArea = document.getElementById('comp-analysis');
+  if (compareLogs.length === 0) { analysisArea.innerHTML = '<span style="color:#999;">분석 데이터가 부족합니다.</span>'; currentRankArr = []; return; }
+
+  let eloStats = {}; const K = 32;
+  function getElo(name) { if (!eloStats[name]) eloStats[name] = { rating: 1000, wins: 0, losses: 0 }; return eloStats[name]; }
+
+  [...compareLogs].reverse().forEach(log => {
+    if(log.winner && log.loser) {
+      let pWinner = getElo(log.winner); let pLoser = getElo(log.loser);
+      let expectedWinRateWinner = 1 / (1 + Math.pow(10, (pLoser.rating - pWinner.rating) / 400));
+      let expectedWinRateLoser = 1 / (1 + Math.pow(10, (pWinner.rating - pLoser.rating) / 400));
+      pWinner.rating = pWinner.rating + K * (1 - expectedWinRateWinner); pLoser.rating = pLoser.rating + K * (0 - expectedWinRateLoser);
+      pWinner.wins++; pLoser.losses++;
+    }
   });
-  let arr = Object.keys(elo).map(k => ({ name: k, score: Math.round(elo[k]) })).sort((a,b) => b.score - a.score);
-  currentRankArr = arr; area.innerHTML = '';
-  arr.forEach((item, i) => {
-    area.innerHTML += `<div class="rank-bar"><div class="rank-name-box"><span class="rank-medal">${i+1}위</span><span>${item.name}</span></div><div class="rank-stats" style="color:#4F46E5;">${item.score}점</div></div>`;
+
+  let rankArr = Object.keys(eloStats).map(name => { return { name: name, rating: Math.round(eloStats[name].rating), wins: eloStats[name].wins, losses: eloStats[name].losses }; });
+  rankArr.sort((a, b) => b.rating - a.rating); currentRankArr = rankArr; 
+
+  analysisArea.innerHTML = '';
+  rankArr.forEach((item, idx) => {
+    let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx+1}위`));
+    analysisArea.innerHTML += `<div class="rank-bar"><div class="rank-name-box"><span class="rank-medal">${medal}</span> <span>${item.name}</span></div><div class="rank-stats" style="color:#4F46E5; font-weight:700;">${item.rating}점 <span style="font-weight:normal; color:#888; font-size:12px;">(${item.wins}승 ${item.losses}패)</span></div></div>`;
   });
 }
 
+window.deleteLog = function(id) { compareLogs = compareLogs.filter(l => l.id !== id); saveLogs(); renderLogs(); }
+window.clearLogs = function() { if(confirm("삭제하시겠습니까?")) { compareLogs = []; saveLogs(); renderLogs(); } }
+
+// 💡 [버그 수정 완료] 티어 적용 시 바로 화면에 뿌려줌!
 window.applyRankingToTier = function() {
-  if(currentRankTab !== 'total') return alert("종합 탭의 순위로만 적용 가능합니다!");
-  if(!currentRankArr.length) return alert("데이터가 없습니다!");
+  if(!currentCompareTier) return;
+  if(currentRankArr.length === 0) return alert("승리 버튼을 눌러 순위를 결정지어 주세요!");
   let sortedNames = currentRankArr.map(r => r.name);
   let tierItems = projects[currentId].items.filter(i => i.zone === currentCompareTier);
   let otherItems = projects[currentId].items.filter(i => i.zone !== currentCompareTier);
@@ -215,103 +331,79 @@ window.applyRankingToTier = function() {
     let idxA = sortedNames.indexOf(a.name); let idxB = sortedNames.indexOf(b.name);
     return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
   });
-  projects[currentId].items = [...otherItems, ...tierItems]; saveData(); 
-  alert("티어 내 순위가 적용되었습니다!"); document.getElementById('comp-back-btn').click();
+  projects[currentId].items = [...otherItems, ...tierItems]; 
+  saveData();
+  
+  // 💡 여기서 렌더링을 호출해야 바로 화면이 바뀝니다!
+  renderItems(); 
+  
+  alert(`${currentCompareTier} 티어 박스 안에 1위부터 자동 정렬되었습니다!`);
+  document.getElementById('comp-back-btn').click(); 
 }
 
 /* ====================================================================
-   💡 기존 드래그 앤 드롭 & 월드컵 로직 (유지)
+   💡 기존 드래그 앤 드롭 아이템 로직 (전체 유지)
 ==================================================================== */
+document.getElementById('add-item-btn').addEventListener('click', () => {
+  const name = document.getElementById('item-name').value; const memo = document.getElementById('item-memo').value;
+  if (!name) return alert("이름을 입력하세요!");
+  projects[currentId].items.push({ itemId: Date.now().toString(), name: name, memo: memo, img: null, zone: 'pool-skyblue' });
+  saveData(); renderItems(); document.getElementById('item-name').value = ''; document.getElementById('item-memo').value = '';
+});
+
+// 💡 1:1 비교소든, 티어표든, 세부순위든 다 쓸 수 있는 만능 함수
+function getDragAfterElement(container, x, y, itemClass = '.item') {
+  const draggableElements = [...container.querySelectorAll(`${itemClass}:not(.dragging)`)];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = container.classList.contains('ranking-list') ? y - box.top - box.height / 2 : x - box.left - box.width / 2;
+    if (offset < 0 && offset > closest.offset) { return { offset: offset, element: child }; } else { return closest; }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
 function renderItems() {
-  document.querySelectorAll('.tier-items, .pool').forEach(el => el.innerHTML = '');
+  document.querySelectorAll('.tier-items, .pool, .ranking-list').forEach(el => {
+    if(!el.classList.contains('cat-list')) el.innerHTML = ''; // 세부 순위 페이지는 건드리지 않음
+  });
+  
   projects[currentId].items.forEach(item => {
-    const itemEl = document.createElement('div'); itemEl.className = `item ${item.color || ''}`;
+    const itemEl = document.createElement('div'); itemEl.className = 'item';
+    if (item.color) { itemEl.classList.add(item.color); }
     itemEl.draggable = true; itemEl.id = item.itemId;
-    itemEl.innerHTML = `<div class="name-tag">${item.name}</div>${item.memo ? `<div class="item-memo-tooltip">${item.memo}</div>`:''}<button class="item-del-btn">×</button>`;
-    itemEl.querySelector('.item-del-btn').onclick = (e) => { e.stopPropagation(); if(confirm('삭제?')) { projects[currentId].items = projects[currentId].items.filter(i=>i.itemId !== item.itemId); saveData(); renderItems(); } };
-    itemEl.ondragstart = (e) => { draggedItem = item; itemEl.classList.add('dragging'); isDragging = true; };
-    itemEl.ondragend = () => { 
-      itemEl.classList.remove('dragging'); isDragging = false;
+    itemEl.innerHTML = `<div class="name-tag">${item.name}</div>${item.memo ? `<div class="item-memo-tooltip">${item.memo}</div>` : ''}<button class="item-del-btn">×</button>`;
+    itemEl.querySelector('.item-del-btn').addEventListener('click', (e) => {
+      e.stopPropagation(); if(confirm(`'${item.name}' 후보를 삭제할까요?`)) { projects[currentId].items = projects[currentId].items.filter(i => i.itemId !== item.itemId); saveData(); renderItems(); }
+    });
+    itemEl.addEventListener('dragstart', function(e) { draggedItem = item; itemEl.classList.add('dragging'); isDragging = true; usagi.src = 'usagi2.gif'; });
+    itemEl.addEventListener('dragend', function() {
+      itemEl.classList.remove('dragging'); isDragging = false; usagi.src = 'usagi1.gif';
       const newItems = [];
-      document.querySelectorAll('.item').forEach(el => {
+      document.querySelectorAll('#workspace-screen .item').forEach(el => {
         const found = projects[currentId].items.find(i => i.itemId === el.id);
         if (found) { found.zone = el.parentElement.getAttribute('data-zone'); newItems.push(found); }
       });
-      projects[currentId].items = newItems; saveData(); renderItems();
-    };
-    const dropZone = document.querySelector(`[data-zone="${item.zone}"]`); if(dropZone) dropZone.appendChild(itemEl);
+      projects[currentId].items = newItems; saveData(); renderItems(); 
+    });
+    const dropZone = document.querySelector(`#workspace-screen [data-zone="${item.zone}"]`); 
+    if(dropZone) dropZone.appendChild(itemEl);
   });
   updateRanking();
 }
 
-function getDragAfterElement(container, x, y) {
-  const elements = [...container.querySelectorAll('.item:not(.dragging)')];
-  return elements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = container.classList.contains('ranking-list') ? y - box.top - box.height/2 : x - box.left - box.width/2;
-    if (offset < 0 && offset > closest.offset) return { offset, element: child }; else return closest;
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
 document.querySelectorAll('.tier-items, .pool, .ranking-list').forEach(zone => {
-  zone.ondragover = (e) => {
-    e.preventDefault(); const after = getDragAfterElement(zone, e.clientX, e.clientY);
-    const dragging = document.querySelector('.dragging');
-    if (after == null) zone.appendChild(dragging); else zone.insertBefore(dragging, after);
-  };
+  if(zone.classList.contains('cat-list')) return; // 세부 순위는 위에서 따로 이벤트 걸어둠
+  zone.addEventListener('dragover', (e) => {
+    e.preventDefault(); const afterElement = getDragAfterElement(zone, e.clientX, e.clientY); const dragging = document.querySelector('.dragging');
+    if (dragging) { if (afterElement == null) { zone.appendChild(dragging); } else { zone.insertBefore(dragging, afterElement); } }
+  });
 });
 
 function updateRanking() {
-  const items = document.querySelectorAll('#ranking-list .item');
-  items.forEach((item, i) => {
-    let num = item.querySelector('.ranking-number') || document.createElement('div');
-    num.className = 'ranking-number'; num.innerText = i + 1;
-    if(!item.querySelector('.ranking-number')) item.prepend(num);
+  const rankingList = document.getElementById('ranking-list'); const items = rankingList.querySelectorAll('.item');
+  items.forEach((item, index) => {
+    let numSpan = item.querySelector('.ranking-number');
+    if (!numSpan) { numSpan = document.createElement('div'); numSpan.className = 'ranking-number'; item.prepend(numSpan); }
+    numSpan.innerText = (index + 1);
   });
 }
-
-/* 월드컵 로직 */
-let wcCurrentRound = []; let wcNextRound = []; let wcMatchIndex = 0; let wcRankings = []; let wcLosersThisRound = [];
-document.getElementById('btn-worldcup').onclick = () => {
-  hideAllScreens(); document.getElementById('worldcup-screen').style.display = 'block';
-  document.getElementById('wc-play-area').style.display = 'flex'; document.getElementById('wc-result-area').style.display = 'none';
-  let active = cleanWebtoonList.filter(n => !deletedCands.includes(n));
-  wcCurrentRound = [...active].sort(() => Math.random() - 0.5);
-  wcNextRound = []; wcMatchIndex = 0; wcRankings = []; wcLosersThisRound = [];
-  updateWcUI();
-};
-function updateWcUI() {
-  if (wcCurrentRound.length === 1) {
-    document.getElementById('wc-play-area').style.display = 'none'; document.getElementById('wc-result-area').style.display = 'block';
-    const rankList = document.getElementById('wc-ranking-list'); rankList.innerHTML = `<div class="wc-rank-item">🥇 ${wcCurrentRound[0]}</div>`;
-    let count = 2; wcRankings.forEach(losers => { losers.forEach(l => { rankList.innerHTML += `<div class="wc-rank-item">${count++}위: ${l}</div>`; }); });
-    return;
-  }
-  if (wcMatchIndex >= wcCurrentRound.length - 1) {
-    wcNextRound.push(wcCurrentRound[wcMatchIndex]); wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = [];
-    wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0; return updateWcUI();
-  }
-  document.getElementById('wc-round-text').innerText = `${wcCurrentRound.length}강 (${wcMatchIndex/2 + 1}/${wcCurrentRound.length/2})`;
-  document.getElementById('wc-left').innerText = wcCurrentRound[wcMatchIndex];
-  document.getElementById('wc-right').innerText = wcCurrentRound[wcMatchIndex+1];
-}
-window.selectWcItem = (side) => {
-  let win = (side==='left') ? wcCurrentRound[wcMatchIndex] : wcCurrentRound[wcMatchIndex+1];
-  let lose = (side==='left') ? wcCurrentRound[wcMatchIndex+1] : wcCurrentRound[wcMatchIndex];
-  wcNextRound.push(win); wcLosersThisRound.push(lose); wcMatchIndex += 2;
-  if(wcMatchIndex >= wcCurrentRound.length) { wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound=[]; wcCurrentRound=wcNextRound; wcNextRound=[]; wcMatchIndex=0; }
-  updateWcUI();
-};
-
-document.getElementById('add-item-btn').onclick = () => {
-  const name = document.getElementById('item-name').value;
-  if (!name) return alert("이름!");
-  const newItem = { itemId: Date.now().toString(), name, memo: document.getElementById('item-memo').value, img: null, zone: 'pool-skyblue' };
-  const file = document.getElementById('item-image').files[0];
-  if(file) {
-    const r = new FileReader(); r.onload = (e) => { newItem.img = e.target.result; projects[currentId].items.push(newItem); saveData(); renderItems(); }; r.readAsDataURL(file);
-  } else { projects[currentId].items.push(newItem); saveData(); renderItems(); }
-  document.getElementById('item-name').value=''; document.getElementById('item-memo').value='';
-};
-
 renderHome();
