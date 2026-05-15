@@ -196,6 +196,16 @@ window.openProject = function(id) {
   document.getElementById('current-project-title').innerText = p.title;
   document.getElementById('tier-mode').style.display = p.type === 'tier' ? 'block' : 'none';
   document.getElementById('ranking-mode').style.display = p.type === 'ranking' ? 'block' : 'none';
+  
+  // 💡 여기서 키워드 모드인지 웹툰 모드인지 판별해서 대기실 박스를 바꿉니다!
+  if (p.subType === 'keyword') {
+    document.getElementById('webtoon-pools').style.display = 'none';
+    document.getElementById('keyword-pools').style.display = 'block';
+  } else {
+    document.getElementById('webtoon-pools').style.display = 'block';
+    document.getElementById('keyword-pools').style.display = 'none';
+  }
+
   hideAllScreens(); document.getElementById('workspace-screen').style.display = 'block';
   renderItems();
 }
@@ -725,3 +735,33 @@ function updateRanking() {
     numSpan.innerText = (index + 1);
   });
 }
+
+/* ====================================================================
+   💡 취향 키워드 티어 로직 추가
+==================================================================== */
+// 주신 데이터 정리 (색상도 구분해 두었습니다: 공은 파랑, 수는 빨강)
+const keywordCategories = [
+  { label: "장르/배경", zoneId: "pool-genre", color: "bg-white", list: ["현대물", "시대물", "동양풍", "서양풍", "판타지", "SF", "아포칼립스", "디스토피아", "오메가버스", "가이드버스", "네임버스", "컬러버스", "피스틸버스", "캠퍼스물", "청춘물", "오피스물(리만물)", "연예계물", "스포츠물", "게임물", "인방물", "궁정로맨스", "조직/암흑가", "전문직물", "스릴러", "추리/미스터리", "회귀물", "빙의물", "환생물", "차원이동물"] },
+  { label: "공 키워드", zoneId: "pool-top", color: "bg-skyblue", list: ["다정공", "집착공", "광공", "통제공", "후회공", "능글공", "무심공", "헌신공", "까칠공", "츤데레공", "냉혈공", "무뚝뚝공", "복흑/계략공", "짝사랑공", "상처공", "천재공", "순정공", "대형견공", "여우공", "또라이공", "초딩공", "울보공", "귀염공", "연하공", "연상공", "동갑공", "존댓말공", "반말공", "미남공", "미인공", "떡대공", "평범공", "재벌공", "황제공", "왕족/귀족공", "스폰서공", "조폭공", "연예인공", "일반인공"] },
+  { label: "수 키워드", zoneId: "pool-bottom", color: "bg-red", list: ["다정수", "단정수", "지랄수", "까칠수", "햇살수", "처연수", "굴림수", "무심수", "도망수", "헌신수", "츤데레수", "외유내강수", "강수", "잔망수", "명랑수", "적극수", "유혹수", "계략수", "순진수", "허당수", "호구수", "강단수", "짝사랑수", "상처수", "천재수", "얼빠수", "병약수", "임신수", "연상수", "연하수", "동갑수", "존댓말수", "반말수", "미인수", "미남수", "평범수", "떡대수", "재벌수", "가난수", "황족/귀족수", "스폰서수", "연예인수", "일반인수"] },
+  { label: "관계성/전개", zoneId: "pool-plot", color: "bg-white", list: ["배틀연애", "애증", "구원물", "하극상", "역키잡", "키잡", "소꿉친구", "친구>연인", "원수>연인", "첫사랑", "재회물", "계약연애", "정략결혼", "동거", "신분차이", "사건물", "일상물", "잔잔물", "피폐물", "달달물", "개그물", "찌통물", "힐링물", "쌍방삽질", "쌍방구원", "원나잇", "선섹후사", "일공일수", "다공일수", "일공다수", "서브공있음", "서브수있음", "메인공찾기"] }
+];
+
+// 🔑 키워드 티어 생성 버튼 이벤트
+document.getElementById('btn-auto-keyword-tier').addEventListener('click', () => {
+  const id = Date.now().toString();
+  // subType: 'keyword'를 추가해서 웹툰 티어와 구분합니다.
+  projects[id] = { id, title: getNextTitle('🔑 내 취향 키워드 랭킹'), type: 'tier', subType: 'keyword', items: [] };
+  
+  let itemIndex = 0;
+  keywordCategories.forEach(category => {
+    category.list.forEach(name => {
+      projects[id].items.push({
+        itemId: id + '-kw-' + (itemIndex++),
+        name: name,
+        memo: '', img: null, zone: category.zoneId, color: category.color 
+      });
+    });
+  });
+  saveData(); renderHome(); openProject(id);
+});
