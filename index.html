@@ -40,6 +40,7 @@
       <button id="btn-worldcup" class="create-btn auto-btn" style="background:#8B5CF6; border-color:#7C3AED;">⚔️ 웹툰 월드컵 (전체)</button>
       <button id="btn-compare" class="create-btn auto-btn" style="background:#10B981; border-color:#059669;">⚖️ 전체 1:1 비교소</button>
     </div>
+    
     <div class="auto-buttons" style="margin-top: -20px;">
       <button id="btn-auto-keyword-tier" class="create-btn auto-btn" style="background:#F59E0B; border-color:#D97706;">🔑 취향 키워드 티어</button>
     </div>
@@ -118,7 +119,28 @@
           <div class="tier-row"><div class="tier-label C">C<button class="tier-comp-btn" onclick="openTierCompare('C')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('C')">📊 세부 순위</button></div><div class="tier-items" data-zone="C"></div></div>
           <div class="tier-row"><div class="tier-label D">D<button class="tier-comp-btn" onclick="openTierCompare('D')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('D')">📊 세부 순위</button></div><div class="tier-items" data-zone="D"></div></div>
         </div>
+        
         <div id="ranking-mode" class="mode-area" style="display: none;"><div class="ranking-list" id="ranking-list" data-zone="ranking"></div></div>
+
+        <div id="keyword-mode" class="mode-area" style="display: none; flex-direction: column; gap: 15px;">
+          <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="tier-label" style="background:#F3F4F6; color:#374151; font-size:14px; line-height:1.4; flex-direction: column; justify-content: center;">📖 장르/배경<br>순위<button class="tier-comp-btn" style="margin-top:10px; background:#4B5563; color:white; border:none; padding:5px 8px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-genre', 'pool-genre', '장르/배경')">⚖️ 1:1 비교</button></div>
+            <div class="ranking-list tier-items" data-zone="rank-genre" style="flex:1; display:flex; flex-wrap:wrap; align-content:flex-start; padding:10px; gap:8px; background:white;"></div>
+          </div>
+          <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="tier-label" style="background:#E0F2FE; color:#0284C7; font-size:14px; line-height:1.4; flex-direction: column; justify-content: center;">👑 공 키워드<br>순위<button class="tier-comp-btn" style="margin-top:10px; background:#0284C7; color:white; border:none; padding:5px 8px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-top', 'pool-top', '공 키워드')">⚖️ 1:1 비교</button></div>
+            <div class="ranking-list tier-items" data-zone="rank-top" style="flex:1; display:flex; flex-wrap:wrap; align-content:flex-start; padding:10px; gap:8px; background:white;"></div>
+          </div>
+          <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="tier-label" style="background:#FFE4E6; color:#E11D48; font-size:14px; line-height:1.4; flex-direction: column; justify-content: center;">🌸 수 키워드<br>순위<button class="tier-comp-btn" style="margin-top:10px; background:#E11D48; color:white; border:none; padding:5px 8px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-bottom', 'pool-bottom', '수 키워드')">⚖️ 1:1 비교</button></div>
+            <div class="ranking-list tier-items" data-zone="rank-bottom" style="flex:1; display:flex; flex-wrap:wrap; align-content:flex-start; padding:10px; gap:8px; background:white;"></div>
+          </div>
+          <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="tier-label" style="background:#FEF3C7; color:#D97706; font-size:14px; line-height:1.4; flex-direction: column; justify-content: center;">🔗 관계/전개<br>순위<button class="tier-comp-btn" style="margin-top:10px; background:#D97706; color:white; border:none; padding:5px 8px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-plot', 'pool-plot', '관계/전개')">⚖️ 1:1 비교</button></div>
+            <div class="ranking-list tier-items" data-zone="rank-plot" style="flex:1; display:flex; flex-wrap:wrap; align-content:flex-start; padding:10px; gap:8px; background:white;"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -179,19 +201,19 @@
       <div class="comp-half">
         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: flex-end;">
           <h3 style="color:#555; margin:0;">📊 실시간 데이터 랭킹</h3>
-          <button id="btn-apply-rank" onclick="applyRankingToTier()" style="display:none; padding: 6px 12px; font-size:12px; background:#10B981; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">✅ 티어 순위로 적용</button>
+          <button id="btn-apply-rank" onclick="applyRankingToTier()" style="display:none; padding: 6px 12px; font-size:12px; background:#10B981; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">✅ 결과 박스로 자동 정렬 적용</button>
         </div>
         <div id="comp-analysis" class="comp-analysis-area"></div>
       </div>
     </div>
 
     <div style="margin-top: 40px; text-align: left;">
-      <h3 style="margin-bottom: 15px;">비교할 작품 목록</h3>
+      <h3 style="margin-bottom: 15px;">비교할 후보 목록</h3>
       <div id="comp-list" class="comp-list-area"></div>
     </div>
   </div>
 
-  <script src="script.js?v=23"></script>
+  <script src="script.js?v=25"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
