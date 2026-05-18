@@ -212,12 +212,40 @@
 
   <div id="tagging-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
-    <div class="wc-title" style="text-align: left;">🏷️ 작품 키워드 태깅 시스템</div>
-    <p style="color:#666; margin-bottom: 20px; text-align: left;">오른쪽 키워드를 꾹 눌러서 작품의 알맞은 칸에 드래그&드롭 해보세요!</p>
+    <div class="wc-title" style="text-align: left;">🏷️ 작품 키워드 서재</div>
+    <p style="color:#666; margin-bottom: 20px; text-align: left;">작품을 클릭해서 키워드를 드래그해 정리해 보세요! (오른쪽 풀에서 키워드 추가/삭제 가능)</p>
 
     <div class="tagging-layout">
-      <div class="tagging-left" id="work-list-container">
+      <div class="tagging-left">
+        
+        <div id="work-grid-view" class="work-grid">
+          </div>
+
+        <div id="work-detail-view" style="display: none;">
+          <div class="work-detail-box">
+            <div class="detail-header">
+              <h3 class="detail-title" id="detail-work-title">작품명</h3>
+              <button class="btn-back-grid" onclick="closeWorkDetail()">⬅ 전체 목록</button>
+            </div>
+            
+            <div class="tag-row">
+              <div class="tag-label" style="color:#374151;">장르/전개</div>
+              <div class="tag-drop-zone" id="dz-title" data-target="title"></div>
+            </div>
+            
+            <div class="tag-row">
+              <div class="tag-label" style="color:#0284C7; background:#E0F2FE;" id="detail-top-name">공</div>
+              <div class="tag-drop-zone" id="dz-top" data-target="top"></div>
+            </div>
+            
+            <div class="tag-row">
+              <div class="tag-label" style="color:#E11D48; background:#FFE4E6;" id="detail-bottom-name">수</div>
+              <div class="tag-drop-zone" id="dz-bottom" data-target="bottom"></div>
+            </div>
+          </div>
         </div>
+        
+      </div>
       
       <div class="tagging-right" id="keyword-pool-container">
         </div>

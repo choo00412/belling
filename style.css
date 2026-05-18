@@ -181,27 +181,44 @@ h2 { font-size: 24px; font-weight: 700; }
 }
 
 /* =========================================
-   🏷️ 작품 키워드 태깅 시스템 전용 CSS
+   🏷️ 작품 키워드 태깅 시스템 전용 CSS (수정본)
 ========================================= */
 .tagging-layout { display: flex; gap: 20px; align-items: flex-start; margin-top: 20px; }
 .tagging-left { flex: 2; display: flex; flex-direction: column; gap: 15px; }
 .tagging-right { flex: 1; position: sticky; top: 20px; background: #f9fafb; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 85vh; overflow-y: auto; }
 
-.work-tag-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border: 1px solid #eee; }
-.work-tag-title { font-size: 18px; font-weight: 800; color: #111; margin: 0; padding-bottom: 8px; border-bottom: 2px solid #f3f4f6; }
+/* 1) 갤러리 뷰 (사각형 박스들) */
+.work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+.work-square { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 10px; text-align: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; justify-content: center; aspect-ratio: 1; }
+.work-square:hover { transform: translateY(-3px); border-color: #EC4899; box-shadow: 0 6px 12px rgba(236, 72, 153, 0.15); }
+.work-square-title { font-weight: 800; font-size: 15px; color: #111; margin-bottom: 8px; word-break: keep-all; }
+.work-square-desc { font-size: 12px; color: #6b7280; }
 
-.tag-row { display: flex; gap: 10px; align-items: stretch; }
-.tag-label { width: 70px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 8px; flex-shrink: 0; }
-.tag-drop-zone { flex: 1; min-height: 44px; border: 2px dashed #d1d5db; border-radius: 8px; padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: #fafafa; transition: all 0.2s ease; }
+/* 2) 상세 태깅 뷰 */
+.work-detail-box { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid #f3f4f6; }
+.detail-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f3f4f6; padding-bottom: 15px; margin-bottom: 15px; }
+.detail-title { font-size: 22px; font-weight: 800; margin: 0; color: #111; }
+.btn-back-grid { background: #f3f4f6; color: #374151; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+.btn-back-grid:hover { background: #e5e7eb; }
+
+/* 태그 드롭존 영역 */
+.tag-row { display: flex; gap: 10px; align-items: stretch; margin-bottom: 12px; }
+.tag-label { width: 80px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 8px; flex-shrink: 0; text-align: center; }
+.tag-drop-zone { flex: 1; min-height: 50px; border: 2px dashed #d1d5db; border-radius: 8px; padding: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: #fafafa; transition: all 0.2s ease; }
 .tag-drop-zone.dragover { background: #e0f2fe; border-color: #38bdf8; transform: scale(1.01); }
 
+/* 키워드 뱃지 */
 .tag-badge { padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: grab; box-shadow: 0 2px 4px rgba(0,0,0,0.05); user-select: none; }
 .tag-badge:active { cursor: grabbing; }
-.tag-badge .del-tag { background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: inherit; padding: 0; margin-left: 2px; font-size: 10px; font-weight: bold; }
-.tag-badge .del-tag:hover { background: rgba(0,0,0,0.2); }
+.del-tag { background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: inherit; padding: 0; margin-left: 2px; font-size: 10px; font-weight: bold; }
+.del-tag:hover { background: rgba(0,0,0,0.3); }
 
+/* 오른쪽 풀 영역 */
 .pool-section { margin-bottom: 20px; }
-.pool-section h4 { margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #374151; padding-bottom: 6px; border-bottom: 2px solid #e5e7eb; }
+.pool-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; }
+.pool-header h4 { margin: 0; font-size: 15px; color: #374151; }
+.btn-add-kw { background: none; border: none; font-size: 16px; cursor: pointer; color: #10B981; font-weight: bold; padding: 0 5px; }
+.btn-add-kw:hover { transform: scale(1.2); }
 .pool-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* 키워드 컬러 프리셋 */
@@ -211,6 +228,6 @@ h2 { font-size: 24px; font-weight: 700; }
 .kw-plot { background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; }
 
 @media (max-width: 768px) {
-  .tagging-layout { flex-direction: column-reverse; }
+  .tagging-layout { flex-direction: column; }
   .tagging-right { position: static; max-height: 40vh; }
 }

@@ -534,60 +534,86 @@ function updateRanking() {
   });
 }
 
-
 /* ====================================================================
-   🚀🚀🚀 새로운 기능: 작품 키워드 태깅 시스템 🚀🚀🚀
+   🚀🚀🚀 새로운 기능: 작품 키워드 태깅 시스템 (그리드 & 키워드 관리) 🚀🚀🚀
 ==================================================================== */
+
+// 현재 열려있는 태깅 작품 ID 저장
+let currentTaggingWorkId = null;
+
 // 태깅 화면 열기
 document.getElementById('btn-open-tagging').addEventListener('click', () => {
   hideAllScreens();
   document.getElementById('tagging-screen').style.display = 'block';
-  renderTaggingWorks();
+  closeWorkDetail(); // 무조건 그리드 뷰로 시작
   renderKeywordPool();
 });
 
-// 1. 왼쪽 작품 리스트 렌더링
-function renderTaggingWorks() {
-  const container = document.getElementById('work-list-container');
+// 1. 갤러리 그리드 뷰 렌더링
+function renderTaggingGrid() {
+  const container = document.getElementById('work-grid-view');
   container.innerHTML = '';
 
   taggedWorksData.forEach(work => {
-    const card = document.createElement('div');
-    card.className = 'work-tag-card';
+    const square = document.createElement('div');
+    square.className = 'work-square';
     
-    // 작품 이름, 공, 수에 맞게 각각 드롭존을 구성
-    card.innerHTML = `
-      <h3 class="work-tag-title">📖 ${work.title}</h3>
-      
-      <div class="tag-row">
-        <div class="tag-label" style="color:#374151;">장르/전개</div>
-        <div class="tag-drop-zone" data-work-id="${work.id}" data-target="title">
-          ${renderTags(work.tags.title, work.id, 'title')}
-        </div>
-      </div>
-      
-      <div class="tag-row">
-        <div class="tag-label" style="color:#0284C7; background:#E0F2FE;">공: ${work.top}</div>
-        <div class="tag-drop-zone" data-work-id="${work.id}" data-target="top">
-          ${renderTags(work.tags.top, work.id, 'top')}
-        </div>
-      </div>
-      
-      <div class="tag-row">
-        <div class="tag-label" style="color:#E11D48; background:#FFE4E6;">수: ${work.bottom}</div>
-        <div class="tag-drop-zone" data-work-id="${work.id}" data-target="bottom">
-          ${renderTags(work.tags.bottom, work.id, 'bottom')}
-        </div>
-      </div>
+    // 태그가 몇 개 달려있는지 카운트
+    const totalTags = work.tags.title.length + work.tags.top.length + work.tags.bottom.length;
+    
+    square.innerHTML = `
+      <div class="work-square-title">${work.title}</div>
+      <div class="work-square-desc">${work.top} x ${work.bottom}</div>
+      <div style="margin-top: 10px; font-size: 11px; color:#EC4899; background:#FCE7F3; padding:2px 8px; border-radius:10px;">태그 ${totalTags}개</div>
     `;
-    container.appendChild(card);
+    
+    // 클릭하면 상세 태깅 화면 열기
+    square.onclick = () => openWorkDetail(work.id);
+    container.appendChild(square);
   });
-
-  setupDropZones();
 }
 
-// 2. 그려진 태그들 (삭제 버튼 포함) HTML 반환 함수
-function renderTags(tagsArray, workId, target) {
+// 2. 상세 태깅 화면 열기 & 닫기 로직
+window.openWorkDetail = function(workId) {
+  currentTaggingWorkId = workId;
+  const work = taggedWorksData.find(w => w.id === workId);
+  
+  if(work) {
+    document.getElementById('work-grid-view').style.display = 'none';
+    document.getElementById('work-detail-view').style.display = 'block';
+    
+    document.getElementById('detail-work-title').innerText = `📖 ${work.title}`;
+    document.getElementById('detail-top-name').innerText = `공: ${work.top}`;
+    document.getElementById('detail-bottom-name').innerText = `수: ${work.bottom}`;
+    
+    // 드롭존에 데이터 주입
+    document.getElementById('dz-title').setAttribute('data-work-id', work.id);
+    document.getElementById('dz-top').setAttribute('data-work-id', work.id);
+    document.getElementById('dz-bottom').setAttribute('data-work-id', work.id);
+    
+    renderDetailTags();
+    setupDropZones();
+  }
+}
+
+window.closeWorkDetail = function() {
+  currentTaggingWorkId = null;
+  document.getElementById('work-detail-view').style.display = 'none';
+  document.getElementById('work-grid-view').style.display = 'grid';
+  renderTaggingGrid(); // 목록으로 갈 때 태그 갯수 갱신
+}
+
+// 3. 디테일 뷰 내부 태그 렌더링
+function renderDetailTags() {
+  const work = taggedWorksData.find(w => w.id === currentTaggingWorkId);
+  if(!work) return;
+  
+  document.getElementById('dz-title').innerHTML = renderTagsHTML(work.tags.title, work.id, 'title');
+  document.getElementById('dz-top').innerHTML = renderTagsHTML(work.tags.top, work.id, 'top');
+  document.getElementById('dz-bottom').innerHTML = renderTagsHTML(work.tags.bottom, work.id, 'bottom');
+}
+
+function renderTagsHTML(tagsArray, workId, target) {
   return tagsArray.map((tag, index) => `
     <div class="tag-badge ${tag.colorClass}">
       ${tag.name}
@@ -596,36 +622,49 @@ function renderTags(tagsArray, workId, target) {
   `).join('');
 }
 
-// 3. 태그 삭제 기능
+// 4. 작품 내 태그 삭제
 window.removeTag = function(workId, target, index) {
   const work = taggedWorksData.find(w => w.id === workId);
   if (work) {
     work.tags[target].splice(index, 1);
     saveTaggingData();
-    renderTaggingWorks();
+    renderDetailTags(); // 디테일 뷰만 리렌더링
   }
 }
 
-// 4. 오른쪽 키워드 풀 렌더링
+// ==========================================
+// 💡 키워드 풀 동적 추가/삭제 로직 
+// ==========================================
+
+// 5. 키워드 풀 렌더링 (추가/삭제 버튼 포함)
 function renderKeywordPool() {
   const container = document.getElementById('keyword-pool-container');
   container.innerHTML = '';
 
-  tagCategories.forEach(cat => {
+  tagCategories.forEach((cat, catIndex) => {
     const section = document.createElement('div');
     section.className = 'pool-section';
-    section.innerHTML = `<h4>${cat.name}</h4>`;
+    
+    // 카테고리 헤더 (+ 버튼 추가)
+    section.innerHTML = `
+      <div class="pool-header">
+        <h4>${cat.name}</h4>
+        <button class="btn-add-kw" onclick="addNewKeyword(${catIndex})">＋</button>
+      </div>
+    `;
     
     const tagsContainer = document.createElement('div');
     tagsContainer.className = 'pool-tags';
     
-    cat.items.forEach(keyword => {
+    cat.items.forEach((keyword, kwIndex) => {
       const badge = document.createElement('div');
       badge.className = `tag-badge ${cat.colorClass}`;
-      badge.innerText = keyword;
       badge.draggable = true;
       
-      // 드래그 시작 시 전달할 데이터 세팅
+      // 풀 안의 태그 X 버튼 (풀에서 아예 영구 삭제)
+      badge.innerHTML = `${keyword} <button class="del-tag" onclick="deleteKeywordFromPool(${catIndex}, ${kwIndex})" title="풀에서 삭제">✕</button>`;
+      
+      // 드래그 시작 시 전달할 데이터
       badge.addEventListener('dragstart', (e) => {
         const payload = { name: keyword, colorClass: cat.colorClass };
         e.dataTransfer.setData('text/plain', JSON.stringify(payload));
@@ -639,45 +678,64 @@ function renderKeywordPool() {
   });
 }
 
-// 5. 드래그 앤 드롭 존 설정
+// 6. 커스텀 키워드 추가 함수
+window.addNewKeyword = function(catIndex) {
+  const newWord = prompt("새롭게 추가할 키워드를 입력하세요!");
+  if (newWord && newWord.trim() !== "") {
+    // 중복 검사
+    if(tagCategories[catIndex].items.includes(newWord.trim())) {
+      return alert("이미 존재하는 키워드입니다!");
+    }
+    tagCategories[catIndex].items.push(newWord.trim());
+    saveTaggingData(); // 파이어베이스 저장!
+    renderKeywordPool(); // 리렌더링
+  }
+}
+
+// 7. 커스텀 키워드 풀에서 삭제 함수
+window.deleteKeywordFromPool = function(catIndex, kwIndex) {
+  const targetWord = tagCategories[catIndex].items[kwIndex];
+  if(confirm(`'${targetWord}' 키워드를 목록에서 완전히 지울까요? (이미 작품에 등록된 태그는 지워지지 않습니다)`)) {
+    tagCategories[catIndex].items.splice(kwIndex, 1);
+    saveTaggingData(); // 파이어베이스 저장!
+    renderKeywordPool(); // 리렌더링
+  }
+}
+
+// 8. 드래그 앤 드롭 존 설정 (디테일 뷰 내부)
 function setupDropZones() {
   const dropZones = document.querySelectorAll('.tag-drop-zone');
   
   dropZones.forEach(zone => {
-    zone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      zone.classList.add('dragover');
-    });
+    // 이벤트가 중복 등록되지 않게 기존 리스너 덮어쓰기 위해 복제
+    const newZone = zone.cloneNode(true);
+    zone.parentNode.replaceChild(newZone, zone);
     
-    zone.addEventListener('dragleave', () => {
-      zone.classList.remove('dragover');
-    });
+    newZone.addEventListener('dragover', (e) => { e.preventDefault(); newZone.classList.add('dragover'); });
+    newZone.addEventListener('dragleave', () => { newZone.classList.remove('dragover'); });
     
-    zone.addEventListener('drop', (e) => {
+    newZone.addEventListener('drop', (e) => {
       e.preventDefault();
-      zone.classList.remove('dragover');
+      newZone.classList.remove('dragover');
       
       const payloadStr = e.dataTransfer.getData('text/plain');
       if (!payloadStr) return;
       
       try {
         const payload = JSON.parse(payloadStr);
-        const workId = zone.getAttribute('data-work-id');
-        const target = zone.getAttribute('data-target'); // 'title', 'top', 'bottom'
+        const workId = newZone.getAttribute('data-work-id');
+        const target = newZone.getAttribute('data-target'); 
         
-        // 데이터 배열에 추가
         const work = taggedWorksData.find(w => w.id === workId);
         if (work) {
-          // 중복 방지 로직 (선택 사항)
+          // 중복 태그 방지
           if (!work.tags[target].find(t => t.name === payload.name)) {
             work.tags[target].push(payload);
-            saveTaggingData(); // 파이어베이스에 저장
-            renderTaggingWorks(); // 화면 다시 그리기
+            saveTaggingData(); 
+            renderDetailTags(); // 화면 갱신
           }
         }
-      } catch (err) {
-        console.error("드래그 데이터 처리 오류", err);
-      }
+      } catch (err) { console.error(err); }
     });
   });
 }
