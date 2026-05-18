@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=26">
+  <link rel="stylesheet" href="style.css?v=28">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -42,8 +42,8 @@
     </div>
     
     <div class="auto-buttons" style="margin-top: -20px; display: flex; gap: 10px;">
-      <button id="btn-auto-keyword-tier" class="create-btn auto-btn" style="flex:1; background:#F59E0B; border-color:#D97706;">🔑 취향 키워드 티어</button>
-      <button id="btn-open-tagging" class="create-btn auto-btn" style="flex:1; background:#EC4899; border-color:#DB2777;">🏷️ 작품 키워드 태깅</button>
+      <button id="btn-auto-keyword-tier" class="create-btn auto-btn" style="flex:1; background:#F59E0B; border-color:#D97706;">🔑 취향 키워드 랭킹</button>
+      <button id="btn-open-tagging" class="create-btn auto-btn" style="flex:1; background:#EC4899; border-color:#DB2777;">🏷️ 작품 키워드 서재</button>
     </div>
     
     <div class="project-list" id="project-list"></div>
@@ -217,7 +217,6 @@
 
     <div class="tagging-layout">
       <div class="tagging-left">
-        
         <div id="work-grid-view" class="work-grid">
           </div>
 
@@ -244,7 +243,6 @@
             </div>
           </div>
         </div>
-        
       </div>
       
       <div class="tagging-right" id="keyword-pool-container">
@@ -252,7 +250,7 @@
     </div>
   </div>
 
-  <script src="script.js?v=26"></script>
+  <script src="script.js?v=28"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
