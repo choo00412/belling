@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=28">
+  <link rel="stylesheet" href="style.css?v=29">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -53,7 +53,6 @@
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📝 보고 싶은 작품 모음</div>
     <p style="color:#666; margin-bottom: 30px; text-align: left;">나중에 볼 작품들을 큼지막하게 메모해두세요!</p>
-
     <div class="wishlist-section">
       <div class="wish-input-box">
         <input type="text" id="wish-input" placeholder="새로운 작품 이름을 입력하세요">
@@ -67,7 +66,6 @@
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📌 나만의 스크랩 보드</div>
     <p style="color:#666; margin-bottom: 30px; text-align: left;">좋아하는 링크, 이미지, 그리고 주접글을 게시글 형태로 남겨보세요!</p>
-
     <div class="scrap-input-section">
       <input type="text" id="scrap-url" placeholder="복사한 링크(URL)를 붙여넣으세요">
       <textarea id="scrap-comment" placeholder="여기에 주접을 마음껏 떨으세요 (감상평 등)"></textarea>
@@ -77,7 +75,6 @@
       </div>
       <button id="btn-add-scrap" onclick="addScrapItem()">스크랩 게시하기</button>
     </div>
-
     <div id="scrap-list" class="scrap-container"></div>
   </div>
 
@@ -120,7 +117,6 @@
           <div class="tier-row"><div class="tier-label C">C<button class="tier-comp-btn" onclick="openTierCompare('C')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('C')">📊 세부 순위</button></div><div class="tier-items" data-zone="C"></div></div>
           <div class="tier-row"><div class="tier-label D">D<button class="tier-comp-btn" onclick="openTierCompare('D')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('D')">📊 세부 순위</button></div><div class="tier-items" data-zone="D"></div></div>
         </div>
-        
         <div id="ranking-mode" class="mode-area" style="display: none;"><div class="ranking-list" id="ranking-list" data-zone="ranking"></div></div>
 
         <div id="keyword-mode" class="mode-area" style="display: none; flex-direction: column; gap: 15px;">
@@ -217,6 +213,24 @@
 
     <div class="tagging-layout">
       <div class="tagging-left">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f3f4f6;">
+          <h3 style="margin:0; font-size:18px; color:#374151;">내 서재 목록</h3>
+          <button id="btn-show-add-work" style="background:#10B981; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">➕ 새 작품 추가</button>
+        </div>
+
+        <div id="add-work-form" style="display: none; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="text" id="new-work-title" placeholder="작품명 (필수)" style="flex: 2; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+            <input type="text" id="new-work-top" placeholder="공 이름 (선택)" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+            <input type="text" id="new-work-bottom" placeholder="수 이름 (선택)" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button onclick="document.getElementById('add-work-form').style.display='none'" style="padding: 8px 16px; background:#f3f4f6; color:#374151; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">취소</button>
+            <button id="btn-confirm-add-work" style="background:#3B82F6; color:white; padding: 8px 16px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">완료</button>
+          </div>
+        </div>
+
         <div id="work-grid-view" class="work-grid">
           </div>
 
@@ -224,7 +238,10 @@
           <div class="work-detail-box">
             <div class="detail-header">
               <h3 class="detail-title" id="detail-work-title">작품명</h3>
-              <button class="btn-back-grid" onclick="closeWorkDetail()">⬅ 전체 목록</button>
+              <div>
+                <button class="btn-delete-work" onclick="deleteTaggingWork()" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:bold; margin-right: 8px;">🗑️ 삭제</button>
+                <button class="btn-back-grid" onclick="closeWorkDetail()">⬅ 전체 목록</button>
+              </div>
             </div>
             
             <div class="tag-row">
@@ -250,7 +267,7 @@
     </div>
   </div>
 
-  <script src="script.js?v=28"></script>
+  <script src="script.js?v=29"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";

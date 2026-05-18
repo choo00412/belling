@@ -496,13 +496,56 @@ function updateRanking() {
 }
 
 // ====================================================================
-// 🚀🚀🚀 작품 키워드 서재 (태깅 및 드래그, 추가/삭제 완벽판) 🚀🚀🚀
+// 🚀🚀🚀 작품 키워드 서재 (작품 추가/삭제 & 태깅 완벽판) 🚀🚀🚀
 // ====================================================================
 let currentTaggingWorkId = null;
 
 document.getElementById('btn-open-tagging').addEventListener('click', () => {
   hideAllScreens(); document.getElementById('tagging-screen').style.display = 'block'; closeWorkDetail(); renderKeywordPool();
 });
+
+// 💡 새 작품 추가 폼 보이기/숨기기
+document.getElementById('btn-show-add-work').addEventListener('click', () => {
+  document.getElementById('add-work-form').style.display = 'block';
+});
+
+// 💡 새 작품 등록 완료 버튼
+document.getElementById('btn-confirm-add-work').addEventListener('click', () => {
+  const title = document.getElementById('new-work-title').value.trim();
+  const top = document.getElementById('new-work-top').value.trim();
+  const bottom = document.getElementById('new-work-bottom').value.trim();
+
+  if(!title) return alert("작품명은 꼭 입력해주세요!");
+
+  const newWork = {
+    id: "w_custom_" + Date.now(),
+    title: title,
+    top: top || "미정",
+    bottom: bottom || "미정",
+    tags: { title: [], top: [], bottom: [] }
+  };
+
+  taggedWorksData.unshift(newWork); // 맨 앞에 새로 등록!
+  saveTaggingData(); // 파이어베이스에 저장
+  renderTaggingGrid(); // 화면 새로고침
+  
+  // 폼 비우고 숨기기
+  document.getElementById('new-work-title').value = '';
+  document.getElementById('new-work-top').value = '';
+  document.getElementById('new-work-bottom').value = '';
+  document.getElementById('add-work-form').style.display = 'none';
+});
+
+// 💡 현재 열려있는 작품 삭제 기능
+window.deleteTaggingWork = function() {
+  if(!currentTaggingWorkId) return;
+  const work = taggedWorksData.find(w => w.id === currentTaggingWorkId);
+  if(confirm(`'${work.title}' 작품을 내 서재에서 완전히 삭제할까요?`)) {
+    taggedWorksData = taggedWorksData.filter(w => w.id !== currentTaggingWorkId);
+    saveTaggingData();
+    closeWorkDetail(); // 리스트 화면으로 나가면서 렌더링 됨
+  }
+}
 
 function renderTaggingGrid() {
   const container = document.getElementById('work-grid-view'); container.innerHTML = '';
