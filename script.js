@@ -1,10 +1,11 @@
-// 1. 초기 변수 세팅
+// ====================================================================
+// 1. 초기 변수 세팅 (파이어베이스와 연동될 데이터들)
+// ====================================================================
 let projects = {};
 let wishList = [];
 let scrapList = [];
 let compareLogs = [];
 let deletedCands = [];
-let taggedWorksData = []; // 🚀 새로운 태깅 데이터를 저장할 변수
 
 let currentId = null;
 let draggedItem = null;
@@ -14,7 +15,7 @@ let pendingProjectType = '';
 let currentCompareTier = null; 
 let currentRankArr = [];
 
-// 💡 새로운 기능: 초기 태깅 작품 리스트 데이터
+// 💡 태깅용 초기 작품 데이터
 const initialWorksData = [
   {id: "w1", title: "징크스", top: "주재경", bottom: "김단", tags: { title: [], top: [], bottom: [] }},
   {id: "w2", title: "홍실 퀘스트", top: "이연", bottom: "홍기훈", tags: { title: [], top: [], bottom: [] }},
@@ -42,16 +43,18 @@ const initialWorksData = [
   {id: "w24", title: "백라이트", top: "한서인", bottom: "백영운", tags: { title: [], top: [], bottom: [] }}
 ];
 
-// 💡 새로운 기능: 드래그용 전체 키워드 풀 데이터
-const tagCategories = [
+// 💡 커스텀 키워드 추가를 위해 'let'으로 변경된 데이터
+let taggedWorksData = JSON.parse(JSON.stringify(initialWorksData));
+let tagCategories = [
   { type: 'genre', name: '장르/배경/세계관', colorClass: 'kw-genre', items: ["현대물", "시대물", "동양풍", "서양풍", "판타지", "SF", "아포칼립스", "디스토피아", "오메가버스", "가이드버스", "네임버스", "컬러버스", "피스틸버스", "캠퍼스물", "청춘물", "오피스물(리만물)", "연예계물", "스포츠물", "게임물", "인방물", "궁정로맨스", "조직/암흑가", "전문직물", "스릴러", "추리/미스터리", "회귀물", "빙의물", "환생물", "차원이동물"] },
   { type: 'top', name: '공 키워드', colorClass: 'kw-top', items: ["다정공", "순정공", "연하공", "대형견공", "집착공", "통제공", "후회공", "능글공", "재벌공", "광공", "무심공", "헌신공", "까칠공", "츤데레공", "냉혈공", "무뚝뚝공", "복흑/계략공", "짝사랑공", "상처공", "천재공", "여우공", "또라이공", "초딩공", "울보공", "귀염공", "연상공", "동갑공", "존댓말공", "반말공", "미남공", "미인공", "떡대공", "평범공", "황제공", "왕족/귀족공", "스폰서공", "조폭공", "연예인공", "일반인공"] },
   { type: 'bottom', name: '수 키워드', colorClass: 'kw-bottom', items: ["다정수", "단정수", "지랄수", "까칠수", "햇살수", "처연수", "굴림수", "무심수", "도망수", "헌신수", "츤데레수", "외유내강수", "강수", "잔망수", "명랑수", "적극수", "유혹수", "계략수", "순진수", "허당수", "호구수", "강단수", "짝사랑수", "상처수", "천재수", "얼빠수", "병약수", "임신수", "연상수", "연하수", "동갑수", "존댓말수", "반말수", "미인수", "미남수", "평범수", "떡대수", "재벌수", "가난수", "왕족/귀족수", "스폰서수", "연예인수", "일반인수"] },
   { type: 'plot', name: '관계성/전개', colorClass: 'kw-plot', items: ["배틀연애", "애증", "구원물", "하극상", "역키잡", "키잡", "소꿉친구", "친구>연인", "원수>연인", "첫사랑", "재회물", "계약연애", "정략결혼", "동거", "신분차이", "사건물", "일상물", "잔잔물", "피폐물", "달달물", "개그물", "찌통물", "힐링물", "쌍방삽질", "쌍방구원", "원나잇", "선섹후사", "일공일수", "다공일수", "일공다수", "서브공있음", "서브수있음", "메인공찾기"] }
 ];
 
-
-// 2. 파이어베이스 연동 및 데이터 불러오기 로직 (수정됨: 태깅 데이터 포함)
+// ====================================================================
+// 2. 파이어베이스 연동 로직
+// ====================================================================
 let dbRef = null;
 
 const checkFirebase = setInterval(async () => {
@@ -68,14 +71,16 @@ const checkFirebase = setInterval(async () => {
         scrapList = data.scrapList || [];
         compareLogs = data.compareLogs || [];
         deletedCands = data.deletedCands || [];
-        taggedWorksData = data.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData)); // 🚀
+        // 태깅 데이터 불러오기
+        if (data.taggedWorksData) taggedWorksData = data.taggedWorksData;
+        if (data.tagCategories) tagCategories = data.tagCategories;
       } else {
+        // 기존 로컬스토리지 백업
         projects = JSON.parse(localStorage.getItem('ti-me-data')) || {};
         wishList = JSON.parse(localStorage.getItem('ti-me-wish')) || [];
         scrapList = JSON.parse(localStorage.getItem('ti-me-scraps')) || [];
         compareLogs = JSON.parse(localStorage.getItem('ti-me-logs')) || [];
         deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
-        taggedWorksData = JSON.parse(JSON.stringify(initialWorksData)); // 🚀
         saveToFirebase(); 
       }
       renderHome(); 
@@ -89,8 +94,7 @@ async function saveToFirebase() {
   if (!dbRef) return;
   try {
     const { setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
-    // 🚀 taggedWorksData 서버에 함께 저장
-    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData });
+    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories });
   } catch (error) {
     console.error("데이터 저장 실패:", error);
   }
@@ -101,11 +105,11 @@ function saveWish() { saveToFirebase(); }
 function saveScraps() { saveToFirebase(); }
 function saveLogs() { saveToFirebase(); }
 function saveDeletedCands() { saveToFirebase(); }
-function saveTaggingData() { saveToFirebase(); } // 🚀 태그 저장용
+function saveTaggingData() { saveToFirebase(); }
 
-/* ====================================================================
-   💡 우사기 & 모달 기본 로직
-==================================================================== */
+// ====================================================================
+// 💡 기본 UI 로직 (모달, 홈 화면)
+// ====================================================================
 const usagi = document.getElementById('usagi');
 setInterval(() => {
   if (!isDragging) { usagi.src = `usagi${Math.floor(Math.random() * 4) + 1}.gif`; }
@@ -117,10 +121,7 @@ document.getElementById('btn-new-tier').addEventListener('click', () => openModa
 document.getElementById('btn-new-ranking').addEventListener('click', () => openModal('ranking'));
 
 function openModal(type) {
-  pendingProjectType = type;
-  modalInput.value = '';
-  modal.style.display = 'flex';
-  modalInput.focus();
+  pendingProjectType = type; modalInput.value = ''; modal.style.display = 'flex'; modalInput.focus();
 }
 document.getElementById('modal-cancel').addEventListener('click', () => { modal.style.display = 'none'; });
 document.getElementById('modal-confirm').addEventListener('click', () => {
@@ -136,15 +137,14 @@ function getNextTitle(baseTitle) {
   return `${baseTitle} ${count}`;
 }
 
-/* ====================================================================
-   💡 기존 웹툰 및 취향 키워드 생성 로직 (유지)
-==================================================================== */
+// ====================================================================
+// 💡 웹툰 티어 및 키워드 티어 자동 생성 로직
+// ====================================================================
 const webtoonCategories = [
   { color: "bg-skyblue", zoneId: "pool-skyblue", list: ["일간알바", "코드네임 아나스타샤", "소꿉친구와 감금당했다", "공과 사는 구분해!", "그 가이드가 집착광공의 품에서 벗어나는 방법", "더 뮤즈", "쉬운 선배", "노 모럴", "러브 오더", "솔트 소사이어티", "녹색전상", "고양이 테라피", "텐(TEN)", "반칙", "죽어 마땅한 것들", "결혼하는 남자", "별주부전", " 그 공작가 노예의 음란한 속사정", "망종(亡種)", "비밀이 많은 XX", "아우토반 로맨스", "아늑한 집착", "모두에게 친절한 너는 왜", "갱생의 여지", "그림자의 영역", "늑대 신랑 ", "과수원의 사정", "알파 트라우마", "오메가 콤플렉스", "서킷 브레이커", "롤플레잉-경찰❤️파일럿", "친구새끼들한테 따먹혔습니다", "실연 중독", "성실한 채무자?", "형제애", "위험한 편의점", "럽미닥터!", "상극", "피자배달부와 골드팰리스", "패션(PASSION)", "실수로 잘못 고백했는데", "더러운 욕망", "XX하면 알 수 있지 않을까?", "테라노 군과 쿠마자키 군", "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "페이크 팩트 립스", "소꿉친구로는 참을 수 없어", " 운명의 짝이 너라니", "오프 스테이지 러브 사이드", "테라피 게임", "나츠메 씨는 개발당하고 싶다", "가슴 지명", "드래그리스·섹스", "반하는 약을 먹은 완벽남이 위험합니다! 2권", "너무 야한 후카미군", "40까지 하고 싶은 10가지 일", "힐링 패러독스", "30살까지 동정이면 마법사가 될 수 있대", "독점! 마이 히어로", "개구리 삶기", "시맨틱 에러", "해피투게더"] },
   { color: "bg-red", zoneId: "pool-red", list: ["호식이 이야기", "강아지는 건드리지 마라", "슬립 업(Slip Up)", "가장 깊은 고백", "소꿉친구와 감금당했다", "키스 미 이프 유 캔(Kiss Me If You Can)", "드라이버스 하이 (Driver's high)", "해빙곡선", "장미와 샴페인", "리미티드 런", "FlashLight (플래시라이트)", "외사랑", "이리 사랑스러운 너", "스미르나 앤 카프리", "뱀 굴", "야화첩", "하이스쿨 솔티 하트", "조개소년 : 발화 / 조개소년", "징크스", "향의 경계", "선 넘는 사이", "언슬립", "알페가(Alphega)", "풀북", "멍멍한 관계", "백라이트", "내가 네 운명의 가이드는 아니지만", "녹색전상 : 몽리 / 녹색전상", "유원불변", "해와 달의 공생관계", "너드프로젝트", "시시포스의 개들", "뼈와 꽃잎", "박하사탕", "더블다운", "캐시 오어 크레딧", "남보다 못한 사이", "바라메 강림하여 주소서", "제물 남편", "시거나 떫거나", "은총의 밤", "가장 완벽한 도형", "백련이 피는 온도", "논제로섬", "아이돌 보러 간다며!"] },
   { color: "bg-white", zoneId: "pool-white", list: ["등쳐먹는 연애", "홍실퀘스트", "필 마이 베네핏", "작전명 마레오", "망돌 콤플렉스", "인 마이 배드(In My Bad)", "너는 나의 세상", "하절기", "짝사랑 필승법", "솔직하고 대담하게", "넌 내게 수치심을 줬어❤️", "환장의 가이딩", "신을 품는 방법", "꽃이 지는 연못", "원룸 조교님", "엎질러진 피", "코티지 가든(Cottage garden)", "럭키 다이스", "러브 올 플레이(LOVE ALL PLAY)", "구른 김에 왕까지", "월요일의 구원자", "엑시덴탈 베이비(Accidental baby)", "피앙세는 토마토", "유성이 내리는 우주", "스테이지 비하인드", "방문 판매 왔습니다!", "백야의 꽃길", "당신이 방심한 사이", "미혹의 경계", "아기 삶을 낳아줘, 나 미치는 꼴 보기 싫으면!", "그래서 누가 깔린건데?", "스쿠프", "해 뜨는 집", "물가의 밤", "파도의 해안", "누군가 정해둔 것처럼", "자두를 누르지 마시오", "감금당해 주세요!"] }
 ];
-
 const cleanWebtoonList = [];
 webtoonCategories.forEach(c => c.list.forEach(name => {
   const cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim();
@@ -166,7 +166,7 @@ function createAutoProject(type) {
   saveData(); renderHome(); openProject(id);
 }
 
-const keywordCategories = [
+const keywordTierCategories = [
   { label: "장르/배경", zoneId: "pool-genre", color: "bg-white", list: ["현대물", "시대물", "동양풍", "서양풍", "판타지", "SF", "아포칼립스", "디스토피아", "오메가버스", "가이드버스", "네임버스", "컬러버스", "피스틸버스", "캠퍼스물", "청춘물", "오피스물(리만물)", "연예계물", "스포츠물", "게임물", "인방물", "궁정로맨스", "조직/암흑가", "전문직물", "스릴러", "추리/미스터리", "회귀물", "빙의물", "환생물", "차원이동물"] },
   { label: "공 키워드", zoneId: "pool-top", color: "bg-skyblue", list: ["다정공", "집착공", "광공", "통제공", "후회공", "능글공", "무심공", "헌신공", "까칠공", "츤데레공", "냉혈공", "무뚝뚝공", "복흑/계략공", "짝사랑공", "상처공", "천재공", "순정공", "대형견공", "여우공", "또라이공", "초딩공", "울보공", "귀염공", "연하공", "연상공", "동갑공", "존댓말공", "반말공", "미남공", "미인공", "떡대공", "평범공", "재벌공", "황제공", "왕족/귀족공", "스폰서공", "조폭공", "연예인공", "일반인공"] },
   { label: "수 키워드", zoneId: "pool-bottom", color: "bg-red", list: ["다정수", "단정수", "지랄수", "까칠수", "햇살수", "처연수", "굴림수", "무심수", "도망수", "헌신수", "츤데레수", "외유내강수", "강수", "잔망수", "명랑수", "적극수", "유혹수", "계략수", "순진수", "허당수", "호구수", "강단수", "짝사랑수", "상처수", "천재수", "얼빠수", "병약수", "임신수", "연상수", "연하수", "동갑수", "존댓말수", "반말수", "미인수", "미남수", "평범수", "떡대수", "재벌수", "가난수", "황족/귀족수", "스폰서수", "연예인수", "일반인수"] },
@@ -177,7 +177,7 @@ document.getElementById('btn-auto-keyword-tier').addEventListener('click', () =>
   const id = Date.now().toString();
   projects[id] = { id, title: getNextTitle('🔑 내 취향 키워드 랭킹'), type: 'tier', subType: 'keyword', items: [] };
   let itemIndex = 0;
-  keywordCategories.forEach(category => {
+  keywordTierCategories.forEach(category => {
     category.list.forEach(name => {
       projects[id].items.push({ itemId: id + '-kw-' + (itemIndex++), name: name, memo: '', img: null, zone: category.zoneId, color: category.color });
     });
@@ -185,9 +185,9 @@ document.getElementById('btn-auto-keyword-tier').addEventListener('click', () =>
   saveData(); renderHome(); openProject(id);
 });
 
-/* ====================================================================
-   💡 공통 프로젝트 관리 로직
-==================================================================== */
+// ====================================================================
+// 💡 프로젝트 리스트 렌더링 및 화면 전환
+// ====================================================================
 function createProject(type, title) {
   const id = Date.now().toString();
   projects[id] = { id, title, type, subType: 'custom', items: [] };
@@ -226,12 +226,13 @@ function hideAllScreens() {
   document.getElementById('wishlist-screen').style.display = 'none';
   document.getElementById('scrap-screen').style.display = 'none';
   document.getElementById('category-rank-screen').style.display = 'none';
-  document.getElementById('tagging-screen').style.display = 'none'; // 🚀 태깅 스크린 숨김 추가
+  document.getElementById('tagging-screen').style.display = 'none';
 }
 
 window.openProject = function(id) {
   currentId = id; const p = projects[id];
   document.getElementById('current-project-title').innerText = p.title;
+  
   document.getElementById('tier-mode').style.display = 'none';
   document.getElementById('ranking-mode').style.display = 'none';
   if(document.getElementById('keyword-mode')) document.getElementById('keyword-mode').style.display = 'none';
@@ -263,24 +264,20 @@ document.querySelectorAll('.go-home-btn').forEach(btn => {
     }
   });
 });
-
 document.querySelectorAll('.go-workspace-btn').forEach(btn => {
   btn.addEventListener('click', () => { hideAllScreens(); document.getElementById('workspace-screen').style.display = 'block'; });
 });
 
-/* ====================================================================
-   💡 스크랩 보드 및 위시리스트 로직 (유지)
-==================================================================== */
-document.getElementById('btn-open-scrap').addEventListener('click', () => {
-  hideAllScreens(); document.getElementById('scrap-screen').style.display = 'block'; renderScrapList();
-});
+// ====================================================================
+// 💡 스크랩 보드 및 위시리스트
+// ====================================================================
+document.getElementById('btn-open-scrap').addEventListener('click', () => { hideAllScreens(); document.getElementById('scrap-screen').style.display = 'block'; renderScrapList(); });
 window.addScrapItem = function() {
   const url = document.getElementById('scrap-url').value.trim(); const comment = document.getElementById('scrap-comment').value.trim(); const file = document.getElementById('scrap-image').files[0];
   if(!url && !comment && !file) return alert("링크나 내용, 이미지를 입력해주세요!");
   const newScrap = { id: Date.now(), url, comment, img: null };
   if(file) {
-    const reader = new FileReader();
-    reader.onload = (e) => { newScrap.img = e.target.result; scrapList.unshift(newScrap); saveScraps(); renderScrapList(); }; reader.readAsDataURL(file);
+    const reader = new FileReader(); reader.onload = (e) => { newScrap.img = e.target.result; scrapList.unshift(newScrap); saveScraps(); renderScrapList(); }; reader.readAsDataURL(file);
   } else { scrapList.unshift(newScrap); saveScraps(); renderScrapList(); }
   document.getElementById('scrap-url').value = ''; document.getElementById('scrap-comment').value = ''; document.getElementById('scrap-image').value = '';
 }
@@ -294,9 +291,7 @@ function renderScrapList() {
 }
 window.deleteScrap = function(id) { if(confirm("이 스크랩을 지울까요?")) { scrapList = scrapList.filter(s => s.id !== id); saveScraps(); renderScrapList(); } }
 
-document.getElementById('btn-open-wishlist').addEventListener('click', () => {
-  hideAllScreens(); document.getElementById('wishlist-screen').style.display = 'block'; renderWishList();
-});
+document.getElementById('btn-open-wishlist').addEventListener('click', () => { hideAllScreens(); document.getElementById('wishlist-screen').style.display = 'block'; renderWishList(); });
 window.addWishItem = function() {
   const input = document.getElementById('wish-input'); if (!input.value.trim()) return;
   wishList.push({ id: Date.now(), name: input.value.trim() }); input.value = ''; saveWish(); renderWishList();
@@ -307,21 +302,17 @@ function renderWishList() {
   wishList.forEach(item => { container.innerHTML += `<div class="wish-item"><span>${item.name}</span> <button onclick="deleteWishItem(${item.id})">×</button></div>`; });
 }
 
-/* ====================================================================
-   💡 세부 순위 (작화/스토리/씬 드래그) 및 이상형 월드컵 로직
-==================================================================== */
+// ====================================================================
+// 💡 세부 순위 (작화/스토리/씬) 드래그 및 월드컵
+// ====================================================================
 window.openCategoryRank = function(tierId) {
   const tierItems = projects[currentId].items.filter(i => i.zone === tierId);
   if(tierItems.length < 2) return alert("작품이 2개 이상 있어야 줄을 세울 수 있어요!");
   hideAllScreens(); document.getElementById('category-rank-screen').style.display = 'block'; document.getElementById('cat-rank-title').innerText = `[${tierId}] 세부 순위 (드래그 정렬)`;
-
   ['art', 'story', 'scene'].forEach(cat => {
     const container = document.getElementById(`cat-${cat}-list`); container.innerHTML = '';
     let savedOrder = (projects[currentId].categoryRanks && projects[currentId].categoryRanks[tierId] && projects[currentId].categoryRanks[tierId][cat]) || [];
-    let sortedItems = [...tierItems].sort((a, b) => {
-      let idxA = savedOrder.indexOf(a.itemId); let idxB = savedOrder.indexOf(b.itemId);
-      return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
-    });
+    let sortedItems = [...tierItems].sort((a, b) => { let idxA = savedOrder.indexOf(a.itemId); let idxB = savedOrder.indexOf(b.itemId); return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB); });
     sortedItems.forEach(item => {
       const el = document.createElement('div'); el.className = `item ${item.color || ''} cat-sort-item`; el.draggable = true; el.dataset.itemId = item.itemId; el.dataset.cat = cat;
       el.innerHTML = `<div class="name-tag">${item.name}</div>`;
@@ -334,10 +325,8 @@ window.openCategoryRank = function(tierId) {
 function saveCategoryRanks(tierId) {
   if(!projects[currentId].categoryRanks) projects[currentId].categoryRanks = {}; if(!projects[currentId].categoryRanks[tierId]) projects[currentId].categoryRanks[tierId] = {};
   ['art', 'story', 'scene'].forEach(cat => {
-    const zone = document.getElementById(`cat-${cat}-list`); const items = [...zone.querySelectorAll('.cat-sort-item')];
-    projects[currentId].categoryRanks[tierId][cat] = items.map(el => el.dataset.itemId);
-  });
-  saveData();
+    const zone = document.getElementById(`cat-${cat}-list`); const items = [...zone.querySelectorAll('.cat-sort-item')]; projects[currentId].categoryRanks[tierId][cat] = items.map(el => el.dataset.itemId);
+  }); saveData();
 }
 ['art', 'story', 'scene'].forEach(cat => {
   const zone = document.getElementById(`cat-${cat}-list`);
@@ -358,17 +347,14 @@ function updateWcUI() {
   if (wcCurrentRound.length === 1) {
     document.getElementById('wc-play-area').style.display = 'none'; document.getElementById('wc-result-area').style.display = 'block'; document.getElementById('wc-round-text').innerText = "결과 발표";
     const rankList = document.getElementById('wc-ranking-list'); rankList.innerHTML = `<div class="wc-rank-item"><span class="wc-medal">🥇</span> <span style="color:#E11D48;">${wcCurrentRound[0]}</span></div>`;
-    let rankCounter = 2;
-    wcRankings.forEach(losers => { losers.forEach(loser => { let medal = rankCounter === 2 ? '🥈' : (rankCounter === 3 ? '🥉' : `${rankCounter}위`); rankList.innerHTML += `<div class="wc-rank-item"><span class="wc-medal" style="font-size:16px;">${medal}</span> ${loser}</div>`; rankCounter++; }); });
-    return;
+    let rankCounter = 2; wcRankings.forEach(losers => { losers.forEach(loser => { let medal = rankCounter === 2 ? '🥈' : (rankCounter === 3 ? '🥉' : `${rankCounter}위`); rankList.innerHTML += `<div class="wc-rank-item"><span class="wc-medal" style="font-size:16px;">${medal}</span> ${loser}</div>`; rankCounter++; }); }); return;
   }
   if (wcMatchIndex >= wcCurrentRound.length - 1) {
     wcNextRound.push(wcCurrentRound[wcMatchIndex]); wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = []; wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0; return updateWcUI();
   }
   const roundName = wcCurrentRound.length === 2 ? "결승전" : (wcCurrentRound.length === 4 ? "준결승" : `${wcCurrentRound.length}강`);
   const matchNum = (wcMatchIndex / 2) + 1; const totalMatches = Math.floor(wcCurrentRound.length / 2);
-  document.getElementById('wc-round-text').innerText = `${roundName} (${matchNum}/${totalMatches})`;
-  document.getElementById('wc-left').innerText = wcCurrentRound[wcMatchIndex]; document.getElementById('wc-right').innerText = wcCurrentRound[wcMatchIndex + 1];
+  document.getElementById('wc-round-text').innerText = `${roundName} (${matchNum}/${totalMatches})`; document.getElementById('wc-left').innerText = wcCurrentRound[wcMatchIndex]; document.getElementById('wc-right').innerText = wcCurrentRound[wcMatchIndex + 1];
 }
 window.selectWcItem = function(side) {
   if(wcCurrentRound.length <= 1) return; 
@@ -378,9 +364,9 @@ window.selectWcItem = function(side) {
   updateWcUI();
 }
 
-/* ====================================================================
-   💡 1:1 비교소 & 엘로 랭킹 
-==================================================================== */
+// ====================================================================
+// 💡 1:1 비교소 & 엘로 랭킹
+// ====================================================================
 window.openTierCompare = function(tierId) {
   const tierItems = projects[currentId].items.filter(i => i.zone === tierId).map(i => i.name);
   if(tierItems.length < 2) return alert("비교할 작품이 2개 이상 없습니다!");
@@ -393,7 +379,6 @@ window.openKeywordCompare = function(targetZone, poolZone, titleLabel) {
   currentCompareTier = targetZone; document.getElementById('btn-apply-rank').style.display = 'block'; document.getElementById('comp-title').innerText = `[${titleLabel}] 1:1 집중 비교소`;
   compareLogs = []; saveLogs(); openCompareMode(items.sort());
 }
-
 document.getElementById('btn-compare').addEventListener('click', () => {
   currentCompareTier = null; document.getElementById('btn-apply-rank').style.display = 'none'; document.getElementById('comp-title').innerText = "전체 1:1 집중 비교소";
   openCompareMode([...cleanWebtoonList].sort());
@@ -403,8 +388,7 @@ function openCompareMode(itemList) {
   hideAllScreens(); document.getElementById('compare-screen').style.display = 'block';
   document.getElementById('comp-fixed').innerHTML = '우클릭 하세요'; document.getElementById('comp-fixed').classList.add('empty');
   document.getElementById('comp-target').innerHTML = '좌클릭 하세요'; document.getElementById('comp-target').classList.add('empty');
-  renderLogs(); 
-  const listArea = document.getElementById('comp-list'); listArea.innerHTML = '';
+  renderLogs(); const listArea = document.getElementById('comp-list'); listArea.innerHTML = '';
   itemList.forEach(name => {
     if(deletedCands.includes(name)) return; 
     const wrapper = document.createElement('div'); wrapper.className = 'cand-wrapper';
@@ -416,15 +400,12 @@ function openCompareMode(itemList) {
     wrapper.appendChild(btn); wrapper.appendChild(delBtn); listArea.appendChild(wrapper);
   });
 }
-
 window.recordCompare = function(side) {
   const fixed = document.getElementById('comp-fixed').innerText; const target = document.getElementById('comp-target').innerText;
   if(fixed.includes('클릭') || target.includes('클릭')) return alert("작품을 선택해주세요!");
   let winner = (side === 'fixed') ? fixed : target; let loser = (side === 'fixed') ? target : fixed;
-  compareLogs.unshift({ id: Date.now(), html: `<span style="color:#4F46E5; font-weight:800;">[승리]</span> ${winner} 🏆 vs ${loser}`, winner: winner, loser: loser }); 
-  saveLogs(); renderLogs();
+  compareLogs.unshift({ id: Date.now(), html: `<span style="color:#4F46E5; font-weight:800;">[승리]</span> ${winner} 🏆 vs ${loser}`, winner: winner, loser: loser }); saveLogs(); renderLogs();
 }
-
 function renderLogs() {
   const logArea = document.getElementById('comp-log');
   if (compareLogs.length === 0) { logArea.innerHTML = '<span style="color:#999;">기록이 없습니다.</span>'; } 
@@ -432,30 +413,23 @@ function renderLogs() {
     logArea.innerHTML = '';
     compareLogs.forEach(log => {
       const p = document.createElement('div'); p.style.padding = "8px 0"; p.style.borderBottom = "1px solid #f0f0f0"; p.style.display = "flex"; p.style.justifyContent = "space-between"; p.style.alignItems = "center";
-      p.innerHTML = `<div>${log.html}</div><button onclick="deleteLog(${log.id})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:16px;">×</button>`;
-      logArea.appendChild(p);
+      p.innerHTML = `<div>${log.html}</div><button onclick="deleteLog(${log.id})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:16px;">×</button>`; logArea.appendChild(p);
     });
-  }
-  renderAnalysis(); 
+  } renderAnalysis(); 
 }
-
 function renderAnalysis() {
   const analysisArea = document.getElementById('comp-analysis');
   if (compareLogs.length === 0) { analysisArea.innerHTML = '<span style="color:#999;">기록을 쌓으면 엘로(Elo) 랭킹이 분석됩니다.</span>'; currentRankArr = []; return; }
-  let eloStats = {}; const K = 32;
-  function getElo(name) { if (!eloStats[name]) eloStats[name] = { rating: 1000, wins: 0, losses: 0 }; return eloStats[name]; }
+  let eloStats = {}; const K = 32; function getElo(name) { if (!eloStats[name]) eloStats[name] = { rating: 1000, wins: 0, losses: 0 }; return eloStats[name]; }
   [...compareLogs].reverse().forEach(log => {
     if(log.winner && log.loser) {
       let pWinner = getElo(log.winner); let pLoser = getElo(log.loser);
-      let expectedWinRateWinner = 1 / (1 + Math.pow(10, (pLoser.rating - pWinner.rating) / 400));
-      let expectedWinRateLoser = 1 / (1 + Math.pow(10, (pWinner.rating - pLoser.rating) / 400));
-      pWinner.rating = pWinner.rating + K * (1 - expectedWinRateWinner); pLoser.rating = pLoser.rating + K * (0 - expectedWinRateLoser);
-      pWinner.wins++; pLoser.losses++;
+      let expectedWinRateWinner = 1 / (1 + Math.pow(10, (pLoser.rating - pWinner.rating) / 400)); let expectedWinRateLoser = 1 / (1 + Math.pow(10, (pWinner.rating - pLoser.rating) / 400));
+      pWinner.rating = pWinner.rating + K * (1 - expectedWinRateWinner); pLoser.rating = pLoser.rating + K * (0 - expectedWinRateLoser); pWinner.wins++; pLoser.losses++;
     }
   });
   let rankArr = Object.keys(eloStats).map(name => { return { name: name, rating: Math.round(eloStats[name].rating), wins: eloStats[name].wins, losses: eloStats[name].losses }; });
-  rankArr.sort((a, b) => b.rating - a.rating); currentRankArr = rankArr; 
-  analysisArea.innerHTML = '';
+  rankArr.sort((a, b) => b.rating - a.rating); currentRankArr = rankArr; analysisArea.innerHTML = '';
   rankArr.forEach((item, idx) => {
     let medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `${idx+1}위`));
     analysisArea.innerHTML += `<div class="rank-bar"><div class="rank-name-box"><span class="rank-medal">${medal}</span> <span>${item.name}</span></div><div class="rank-stats" style="color:#4F46E5; font-weight:700;">${item.rating}점 <span style="font-weight:normal; color:#888; font-size:12px;">(${item.wins}승 ${item.losses}패)</span></div></div>`;
@@ -471,18 +445,16 @@ window.applyRankingToTier = function() {
   let tierItems = projects[currentId].items.filter(i => i.zone === currentCompareTier); 
   let otherItems = projects[currentId].items.filter(i => i.zone !== currentCompareTier);
   tierItems.sort((a, b) => { let idxA = sortedNames.indexOf(a.name); let idxB = sortedNames.indexOf(b.name); return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB); });
-  projects[currentId].items = [...otherItems, ...tierItems]; saveData(); renderItems(); 
-  alert(`결과 박스 안에 1위부터 자동 정렬되었습니다!`); document.getElementById('comp-back-btn').click(); 
+  projects[currentId].items = [...otherItems, ...tierItems]; saveData(); renderItems(); alert(`결과 박스 안에 1위부터 자동 정렬되었습니다!`); document.getElementById('comp-back-btn').click(); 
 }
 
-/* ====================================================================
-   💡 기존 드래그 앤 드롭 로직
-==================================================================== */
+// ====================================================================
+// 💡 메인 드래그 앤 드롭 아이템 렌더링
+// ====================================================================
 document.getElementById('add-item-btn').addEventListener('click', () => {
   const name = document.getElementById('item-name').value; const memo = document.getElementById('item-memo').value;
   if (!name) return alert("이름을 입력하세요!");
-  const newItem = { itemId: Date.now().toString(), name: name, memo: memo, img: null, zone: 'pool-skyblue' };
-  const fileInput = document.getElementById('item-image');
+  const newItem = { itemId: Date.now().toString(), name: name, memo: memo, img: null, zone: 'pool-skyblue' }; const fileInput = document.getElementById('item-image');
   if (fileInput.files && fileInput.files[0]) {
     const reader = new FileReader(); reader.onload = function(e) { newItem.img = e.target.result; projects[currentId].items.push(newItem); saveData(); renderItems(); }; reader.readAsDataURL(fileInput.files[0]);
   } else { projects[currentId].items.push(newItem); saveData(); renderItems(); }
@@ -534,206 +506,102 @@ function updateRanking() {
   });
 }
 
-/* ====================================================================
-   🚀🚀🚀 새로운 기능: 작품 키워드 태깅 시스템 (그리드 & 키워드 관리) 🚀🚀🚀
-==================================================================== */
-
-// 현재 열려있는 태깅 작품 ID 저장
+// ====================================================================
+// 🚀🚀🚀 작품 키워드 서재 (태깅 및 드래그, 추가/삭제 완벽판) 🚀🚀🚀
+// ====================================================================
 let currentTaggingWorkId = null;
 
-// 태깅 화면 열기
 document.getElementById('btn-open-tagging').addEventListener('click', () => {
-  hideAllScreens();
-  document.getElementById('tagging-screen').style.display = 'block';
-  closeWorkDetail(); // 무조건 그리드 뷰로 시작
-  renderKeywordPool();
+  hideAllScreens(); document.getElementById('tagging-screen').style.display = 'block'; closeWorkDetail(); renderKeywordPool();
 });
 
-// 1. 갤러리 그리드 뷰 렌더링
 function renderTaggingGrid() {
-  const container = document.getElementById('work-grid-view');
-  container.innerHTML = '';
-
+  const container = document.getElementById('work-grid-view'); container.innerHTML = '';
   taggedWorksData.forEach(work => {
-    const square = document.createElement('div');
-    square.className = 'work-square';
-    
-    // 태그가 몇 개 달려있는지 카운트
+    const square = document.createElement('div'); square.className = 'work-square';
     const totalTags = work.tags.title.length + work.tags.top.length + work.tags.bottom.length;
-    
     square.innerHTML = `
       <div class="work-square-title">${work.title}</div>
       <div class="work-square-desc">${work.top} x ${work.bottom}</div>
       <div style="margin-top: 10px; font-size: 11px; color:#EC4899; background:#FCE7F3; padding:2px 8px; border-radius:10px;">태그 ${totalTags}개</div>
     `;
-    
-    // 클릭하면 상세 태깅 화면 열기
-    square.onclick = () => openWorkDetail(work.id);
-    container.appendChild(square);
+    square.onclick = () => openWorkDetail(work.id); container.appendChild(square);
   });
 }
 
-// 2. 상세 태깅 화면 열기 & 닫기 로직
 window.openWorkDetail = function(workId) {
-  currentTaggingWorkId = workId;
-  const work = taggedWorksData.find(w => w.id === workId);
-  
+  currentTaggingWorkId = workId; const work = taggedWorksData.find(w => w.id === workId);
   if(work) {
-    document.getElementById('work-grid-view').style.display = 'none';
-    document.getElementById('work-detail-view').style.display = 'block';
-    
-    document.getElementById('detail-work-title').innerText = `📖 ${work.title}`;
-    document.getElementById('detail-top-name').innerText = `공: ${work.top}`;
-    document.getElementById('detail-bottom-name').innerText = `수: ${work.bottom}`;
-    
-    // 드롭존에 데이터 주입
-    document.getElementById('dz-title').setAttribute('data-work-id', work.id);
-    document.getElementById('dz-top').setAttribute('data-work-id', work.id);
-    document.getElementById('dz-bottom').setAttribute('data-work-id', work.id);
-    
-    renderDetailTags();
-    setupDropZones();
+    document.getElementById('work-grid-view').style.display = 'none'; document.getElementById('work-detail-view').style.display = 'block';
+    document.getElementById('detail-work-title').innerText = `📖 ${work.title}`; document.getElementById('detail-top-name').innerText = `공: ${work.top}`; document.getElementById('detail-bottom-name').innerText = `수: ${work.bottom}`;
+    document.getElementById('dz-title').setAttribute('data-work-id', work.id); document.getElementById('dz-top').setAttribute('data-work-id', work.id); document.getElementById('dz-bottom').setAttribute('data-work-id', work.id);
+    renderDetailTags(); setupDropZones();
   }
 }
 
 window.closeWorkDetail = function() {
-  currentTaggingWorkId = null;
-  document.getElementById('work-detail-view').style.display = 'none';
-  document.getElementById('work-grid-view').style.display = 'grid';
-  renderTaggingGrid(); // 목록으로 갈 때 태그 갯수 갱신
+  currentTaggingWorkId = null; document.getElementById('work-detail-view').style.display = 'none'; document.getElementById('work-grid-view').style.display = 'grid'; renderTaggingGrid(); 
 }
 
-// 3. 디테일 뷰 내부 태그 렌더링
 function renderDetailTags() {
-  const work = taggedWorksData.find(w => w.id === currentTaggingWorkId);
-  if(!work) return;
-  
+  const work = taggedWorksData.find(w => w.id === currentTaggingWorkId); if(!work) return;
   document.getElementById('dz-title').innerHTML = renderTagsHTML(work.tags.title, work.id, 'title');
   document.getElementById('dz-top').innerHTML = renderTagsHTML(work.tags.top, work.id, 'top');
   document.getElementById('dz-bottom').innerHTML = renderTagsHTML(work.tags.bottom, work.id, 'bottom');
 }
 
 function renderTagsHTML(tagsArray, workId, target) {
-  return tagsArray.map((tag, index) => `
-    <div class="tag-badge ${tag.colorClass}">
-      ${tag.name}
-      <button class="del-tag" onclick="removeTag('${workId}', '${target}', ${index})">✕</button>
-    </div>
-  `).join('');
+  return tagsArray.map((tag, index) => `<div class="tag-badge ${tag.colorClass}">${tag.name} <button class="del-tag" onclick="removeTag('${workId}', '${target}', ${index})">✕</button></div>`).join('');
 }
 
-// 4. 작품 내 태그 삭제
 window.removeTag = function(workId, target, index) {
   const work = taggedWorksData.find(w => w.id === workId);
-  if (work) {
-    work.tags[target].splice(index, 1);
-    saveTaggingData();
-    renderDetailTags(); // 디테일 뷰만 리렌더링
-  }
+  if (work) { work.tags[target].splice(index, 1); saveTaggingData(); renderDetailTags(); }
 }
 
-// ==========================================
-// 💡 키워드 풀 동적 추가/삭제 로직 
-// ==========================================
-
-// 5. 키워드 풀 렌더링 (추가/삭제 버튼 포함)
 function renderKeywordPool() {
-  const container = document.getElementById('keyword-pool-container');
-  container.innerHTML = '';
-
+  const container = document.getElementById('keyword-pool-container'); container.innerHTML = '';
   tagCategories.forEach((cat, catIndex) => {
-    const section = document.createElement('div');
-    section.className = 'pool-section';
-    
-    // 카테고리 헤더 (+ 버튼 추가)
-    section.innerHTML = `
-      <div class="pool-header">
-        <h4>${cat.name}</h4>
-        <button class="btn-add-kw" onclick="addNewKeyword(${catIndex})">＋</button>
-      </div>
-    `;
-    
-    const tagsContainer = document.createElement('div');
-    tagsContainer.className = 'pool-tags';
-    
+    const section = document.createElement('div'); section.className = 'pool-section';
+    section.innerHTML = `<div class="pool-header"><h4>${cat.name}</h4><button class="btn-add-kw" onclick="addNewKeyword(${catIndex})">＋</button></div>`;
+    const tagsContainer = document.createElement('div'); tagsContainer.className = 'pool-tags';
     cat.items.forEach((keyword, kwIndex) => {
-      const badge = document.createElement('div');
-      badge.className = `tag-badge ${cat.colorClass}`;
-      badge.draggable = true;
-      
-      // 풀 안의 태그 X 버튼 (풀에서 아예 영구 삭제)
+      const badge = document.createElement('div'); badge.className = `tag-badge ${cat.colorClass}`; badge.draggable = true;
       badge.innerHTML = `${keyword} <button class="del-tag" onclick="deleteKeywordFromPool(${catIndex}, ${kwIndex})" title="풀에서 삭제">✕</button>`;
-      
-      // 드래그 시작 시 전달할 데이터
-      badge.addEventListener('dragstart', (e) => {
-        const payload = { name: keyword, colorClass: cat.colorClass };
-        e.dataTransfer.setData('text/plain', JSON.stringify(payload));
-      });
-      
+      badge.addEventListener('dragstart', (e) => { const payload = { name: keyword, colorClass: cat.colorClass }; e.dataTransfer.setData('text/plain', JSON.stringify(payload)); });
       tagsContainer.appendChild(badge);
     });
-    
-    section.appendChild(tagsContainer);
-    container.appendChild(section);
+    section.appendChild(tagsContainer); container.appendChild(section);
   });
 }
 
-// 6. 커스텀 키워드 추가 함수
 window.addNewKeyword = function(catIndex) {
   const newWord = prompt("새롭게 추가할 키워드를 입력하세요!");
   if (newWord && newWord.trim() !== "") {
-    // 중복 검사
-    if(tagCategories[catIndex].items.includes(newWord.trim())) {
-      return alert("이미 존재하는 키워드입니다!");
-    }
-    tagCategories[catIndex].items.push(newWord.trim());
-    saveTaggingData(); // 파이어베이스 저장!
-    renderKeywordPool(); // 리렌더링
+    if(tagCategories[catIndex].items.includes(newWord.trim())) { return alert("이미 존재하는 키워드입니다!"); }
+    tagCategories[catIndex].items.push(newWord.trim()); saveTaggingData(); renderKeywordPool(); 
   }
 }
 
-// 7. 커스텀 키워드 풀에서 삭제 함수
 window.deleteKeywordFromPool = function(catIndex, kwIndex) {
   const targetWord = tagCategories[catIndex].items[kwIndex];
-  if(confirm(`'${targetWord}' 키워드를 목록에서 완전히 지울까요? (이미 작품에 등록된 태그는 지워지지 않습니다)`)) {
-    tagCategories[catIndex].items.splice(kwIndex, 1);
-    saveTaggingData(); // 파이어베이스 저장!
-    renderKeywordPool(); // 리렌더링
-  }
+  if(confirm(`'${targetWord}' 키워드를 목록에서 완전히 지울까요?`)) { tagCategories[catIndex].items.splice(kwIndex, 1); saveTaggingData(); renderKeywordPool(); }
 }
 
-// 8. 드래그 앤 드롭 존 설정 (디테일 뷰 내부)
 function setupDropZones() {
   const dropZones = document.querySelectorAll('.tag-drop-zone');
-  
   dropZones.forEach(zone => {
-    // 이벤트가 중복 등록되지 않게 기존 리스너 덮어쓰기 위해 복제
-    const newZone = zone.cloneNode(true);
-    zone.parentNode.replaceChild(newZone, zone);
-    
+    const newZone = zone.cloneNode(true); zone.parentNode.replaceChild(newZone, zone);
     newZone.addEventListener('dragover', (e) => { e.preventDefault(); newZone.classList.add('dragover'); });
     newZone.addEventListener('dragleave', () => { newZone.classList.remove('dragover'); });
-    
     newZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      newZone.classList.remove('dragover');
-      
-      const payloadStr = e.dataTransfer.getData('text/plain');
-      if (!payloadStr) return;
-      
+      e.preventDefault(); newZone.classList.remove('dragover');
+      const payloadStr = e.dataTransfer.getData('text/plain'); if (!payloadStr) return;
       try {
-        const payload = JSON.parse(payloadStr);
-        const workId = newZone.getAttribute('data-work-id');
-        const target = newZone.getAttribute('data-target'); 
-        
+        const payload = JSON.parse(payloadStr); const workId = newZone.getAttribute('data-work-id'); const target = newZone.getAttribute('data-target'); 
         const work = taggedWorksData.find(w => w.id === workId);
         if (work) {
-          // 중복 태그 방지
-          if (!work.tags[target].find(t => t.name === payload.name)) {
-            work.tags[target].push(payload);
-            saveTaggingData(); 
-            renderDetailTags(); // 화면 갱신
-          }
+          if (!work.tags[target].find(t => t.name === payload.name)) { work.tags[target].push(payload); saveTaggingData(); renderDetailTags(); }
         }
       } catch (err) { console.error(err); }
     });
