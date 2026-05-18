@@ -4,6 +4,7 @@ let wishList = [];
 let scrapList = [];
 let compareLogs = [];
 let deletedCands = [];
+let taggedWorksData = []; // 🚀 새로운 태깅 데이터를 저장할 변수
 
 let currentId = null;
 let draggedItem = null;
@@ -13,7 +14,44 @@ let pendingProjectType = '';
 let currentCompareTier = null; 
 let currentRankArr = [];
 
-// 2. 파이어베이스 연동 및 데이터 불러오기 로직
+// 💡 새로운 기능: 초기 태깅 작품 리스트 데이터
+const initialWorksData = [
+  {id: "w1", title: "징크스", top: "주재경", bottom: "김단", tags: { title: [], top: [], bottom: [] }},
+  {id: "w2", title: "홍실 퀘스트", top: "이연", bottom: "홍기훈", tags: { title: [], top: [], bottom: [] }},
+  {id: "w3", title: "물가의 밤", top: "여태주", bottom: "김의현", tags: { title: [], top: [], bottom: [] }},
+  {id: "w4", title: "FlashLight", top: "애런", bottom: "유진 하트", tags: { title: [], top: [], bottom: [] }},
+  {id: "w5", title: "일간 알바", top: "연태서", bottom: "주여민", tags: { title: [], top: [], bottom: [] }},
+  {id: "w6", title: "야화첩", top: "윤승호", bottom: "백나겸", tags: { title: [], top: [], bottom: [] }},
+  {id: "w7", title: "힐링 패러독스", top: "키시베", bottom: "나오토", tags: { title: [], top: [], bottom: [] }},
+  {id: "w8", title: "미혹의 경계", top: "목연", bottom: "난조", tags: { title: [], top: [], bottom: [] }},
+  {id: "w9", title: "스테이지 비하인드", top: "권태영", bottom: "이진우", tags: { title: [], top: [], bottom: [] }},
+  {id: "w10", title: "개구리 삶기", top: "제일로", bottom: "곽창혁", tags: { title: [], top: [], bottom: [] }},
+  {id: "w11", title: "해피투게더", top: "재영", bottom: "승민", tags: { title: [], top: [], bottom: [] }},
+  {id: "w12", title: "테라노 군과 쿠마자키 군", top: "테라노", bottom: "쿠마자키", tags: { title: [], top: [], bottom: [] }},
+  {id: "w13", title: "상극", top: "이도재", bottom: "권은탁", tags: { title: [], top: [], bottom: [] }},
+  {id: "w14", title: "제물 남편", top: "자헌", bottom: "무고", tags: { title: [], top: [], bottom: [] }},
+  {id: "w15", title: "언슬립", top: "서채준", bottom: "이승현", tags: { title: [], top: [], bottom: [] }},
+  {id: "w16", title: "소꿉친구와 감금당했다", top: "우태윤", bottom: "주도현", tags: { title: [], top: [], bottom: [] }},
+  {id: "w17", title: "장미와 샴페인", top: "카이사르", bottom: "정이원", tags: { title: [], top: [], bottom: [] }},
+  {id: "w18", title: "너는 나의 세상", top: "수아", bottom: "주혁", tags: { title: [], top: [], bottom: [] }},
+  {id: "w19", title: "드라이버스 하이", top: "J.J", bottom: "리오", tags: { title: [], top: [], bottom: [] }},
+  {id: "w20", title: "뱀굴", top: "에드윈", bottom: "레이", tags: { title: [], top: [], bottom: [] }},
+  {id: "w21", title: "노 모럴", top: "강세헌", bottom: "도윤신", tags: { title: [], top: [], bottom: [] }},
+  {id: "w22", title: "호식이 이야기", top: "이성연", bottom: "김호식", tags: { title: [], top: [], bottom: [] }},
+  {id: "w23", title: "리미티드 런", top: "권제혁", bottom: "서연오", tags: { title: [], top: [], bottom: [] }},
+  {id: "w24", title: "백라이트", top: "한서인", bottom: "백영운", tags: { title: [], top: [], bottom: [] }}
+];
+
+// 💡 새로운 기능: 드래그용 전체 키워드 풀 데이터
+const tagCategories = [
+  { type: 'genre', name: '장르/배경/세계관', colorClass: 'kw-genre', items: ["현대물", "시대물", "동양풍", "서양풍", "판타지", "SF", "아포칼립스", "디스토피아", "오메가버스", "가이드버스", "네임버스", "컬러버스", "피스틸버스", "캠퍼스물", "청춘물", "오피스물(리만물)", "연예계물", "스포츠물", "게임물", "인방물", "궁정로맨스", "조직/암흑가", "전문직물", "스릴러", "추리/미스터리", "회귀물", "빙의물", "환생물", "차원이동물"] },
+  { type: 'top', name: '공 키워드', colorClass: 'kw-top', items: ["다정공", "순정공", "연하공", "대형견공", "집착공", "통제공", "후회공", "능글공", "재벌공", "광공", "무심공", "헌신공", "까칠공", "츤데레공", "냉혈공", "무뚝뚝공", "복흑/계략공", "짝사랑공", "상처공", "천재공", "여우공", "또라이공", "초딩공", "울보공", "귀염공", "연상공", "동갑공", "존댓말공", "반말공", "미남공", "미인공", "떡대공", "평범공", "황제공", "왕족/귀족공", "스폰서공", "조폭공", "연예인공", "일반인공"] },
+  { type: 'bottom', name: '수 키워드', colorClass: 'kw-bottom', items: ["다정수", "단정수", "지랄수", "까칠수", "햇살수", "처연수", "굴림수", "무심수", "도망수", "헌신수", "츤데레수", "외유내강수", "강수", "잔망수", "명랑수", "적극수", "유혹수", "계략수", "순진수", "허당수", "호구수", "강단수", "짝사랑수", "상처수", "천재수", "얼빠수", "병약수", "임신수", "연상수", "연하수", "동갑수", "존댓말수", "반말수", "미인수", "미남수", "평범수", "떡대수", "재벌수", "가난수", "왕족/귀족수", "스폰서수", "연예인수", "일반인수"] },
+  { type: 'plot', name: '관계성/전개', colorClass: 'kw-plot', items: ["배틀연애", "애증", "구원물", "하극상", "역키잡", "키잡", "소꿉친구", "친구>연인", "원수>연인", "첫사랑", "재회물", "계약연애", "정략결혼", "동거", "신분차이", "사건물", "일상물", "잔잔물", "피폐물", "달달물", "개그물", "찌통물", "힐링물", "쌍방삽질", "쌍방구원", "원나잇", "선섹후사", "일공일수", "다공일수", "일공다수", "서브공있음", "서브수있음", "메인공찾기"] }
+];
+
+
+// 2. 파이어베이스 연동 및 데이터 불러오기 로직 (수정됨: 태깅 데이터 포함)
 let dbRef = null;
 
 const checkFirebase = setInterval(async () => {
@@ -30,12 +68,14 @@ const checkFirebase = setInterval(async () => {
         scrapList = data.scrapList || [];
         compareLogs = data.compareLogs || [];
         deletedCands = data.deletedCands || [];
+        taggedWorksData = data.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData)); // 🚀
       } else {
         projects = JSON.parse(localStorage.getItem('ti-me-data')) || {};
         wishList = JSON.parse(localStorage.getItem('ti-me-wish')) || [];
         scrapList = JSON.parse(localStorage.getItem('ti-me-scraps')) || [];
         compareLogs = JSON.parse(localStorage.getItem('ti-me-logs')) || [];
         deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
+        taggedWorksData = JSON.parse(JSON.stringify(initialWorksData)); // 🚀
         saveToFirebase(); 
       }
       renderHome(); 
@@ -49,7 +89,8 @@ async function saveToFirebase() {
   if (!dbRef) return;
   try {
     const { setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
-    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands });
+    // 🚀 taggedWorksData 서버에 함께 저장
+    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData });
   } catch (error) {
     console.error("데이터 저장 실패:", error);
   }
@@ -60,6 +101,7 @@ function saveWish() { saveToFirebase(); }
 function saveScraps() { saveToFirebase(); }
 function saveLogs() { saveToFirebase(); }
 function saveDeletedCands() { saveToFirebase(); }
+function saveTaggingData() { saveToFirebase(); } // 🚀 태그 저장용
 
 /* ====================================================================
    💡 우사기 & 모달 기본 로직
@@ -95,7 +137,7 @@ function getNextTitle(baseTitle) {
 }
 
 /* ====================================================================
-   💡 웹툰 데이터 및 자동 생성 로직
+   💡 기존 웹툰 및 취향 키워드 생성 로직 (유지)
 ==================================================================== */
 const webtoonCategories = [
   { color: "bg-skyblue", zoneId: "pool-skyblue", list: ["일간알바", "코드네임 아나스타샤", "소꿉친구와 감금당했다", "공과 사는 구분해!", "그 가이드가 집착광공의 품에서 벗어나는 방법", "더 뮤즈", "쉬운 선배", "노 모럴", "러브 오더", "솔트 소사이어티", "녹색전상", "고양이 테라피", "텐(TEN)", "반칙", "죽어 마땅한 것들", "결혼하는 남자", "별주부전", " 그 공작가 노예의 음란한 속사정", "망종(亡種)", "비밀이 많은 XX", "아우토반 로맨스", "아늑한 집착", "모두에게 친절한 너는 왜", "갱생의 여지", "그림자의 영역", "늑대 신랑 ", "과수원의 사정", "알파 트라우마", "오메가 콤플렉스", "서킷 브레이커", "롤플레잉-경찰❤️파일럿", "친구새끼들한테 따먹혔습니다", "실연 중독", "성실한 채무자?", "형제애", "위험한 편의점", "럽미닥터!", "상극", "피자배달부와 골드팰리스", "패션(PASSION)", "실수로 잘못 고백했는데", "더러운 욕망", "XX하면 알 수 있지 않을까?", "테라노 군과 쿠마자키 군", "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "페이크 팩트 립스", "소꿉친구로는 참을 수 없어", " 운명의 짝이 너라니", "오프 스테이지 러브 사이드", "테라피 게임", "나츠메 씨는 개발당하고 싶다", "가슴 지명", "드래그리스·섹스", "반하는 약을 먹은 완벽남이 위험합니다! 2권", "너무 야한 후카미군", "40까지 하고 싶은 10가지 일", "힐링 패러독스", "30살까지 동정이면 마법사가 될 수 있대", "독점! 마이 히어로", "개구리 삶기", "시맨틱 에러", "해피투게더"] },
@@ -118,19 +160,12 @@ function createAutoProject(type) {
   let itemIndex = 0;
   webtoonCategories.forEach(category => {
     category.list.forEach(name => {
-      projects[id].items.push({
-        itemId: id + '-' + (itemIndex++),
-        name: name.replace(/\[.*?\]|\(.*?\)/g, '').trim(),
-        memo: '', img: null, zone: category.zoneId, color: category.color 
-      });
+      projects[id].items.push({ itemId: id + '-' + (itemIndex++), name: name.replace(/\[.*?\]|\(.*?\)/g, '').trim(), memo: '', img: null, zone: category.zoneId, color: category.color });
     });
   });
   saveData(); renderHome(); openProject(id);
 }
 
-/* ====================================================================
-   💡 🔑 취향 키워드 데이터 및 자동 생성 로직 (수정됨)
-==================================================================== */
 const keywordCategories = [
   { label: "장르/배경", zoneId: "pool-genre", color: "bg-white", list: ["현대물", "시대물", "동양풍", "서양풍", "판타지", "SF", "아포칼립스", "디스토피아", "오메가버스", "가이드버스", "네임버스", "컬러버스", "피스틸버스", "캠퍼스물", "청춘물", "오피스물(리만물)", "연예계물", "스포츠물", "게임물", "인방물", "궁정로맨스", "조직/암흑가", "전문직물", "스릴러", "추리/미스터리", "회귀물", "빙의물", "환생물", "차원이동물"] },
   { label: "공 키워드", zoneId: "pool-top", color: "bg-skyblue", list: ["다정공", "집착공", "광공", "통제공", "후회공", "능글공", "무심공", "헌신공", "까칠공", "츤데레공", "냉혈공", "무뚝뚝공", "복흑/계략공", "짝사랑공", "상처공", "천재공", "순정공", "대형견공", "여우공", "또라이공", "초딩공", "울보공", "귀염공", "연하공", "연상공", "동갑공", "존댓말공", "반말공", "미남공", "미인공", "떡대공", "평범공", "재벌공", "황제공", "왕족/귀족공", "스폰서공", "조폭공", "연예인공", "일반인공"] },
@@ -141,15 +176,10 @@ const keywordCategories = [
 document.getElementById('btn-auto-keyword-tier').addEventListener('click', () => {
   const id = Date.now().toString();
   projects[id] = { id, title: getNextTitle('🔑 내 취향 키워드 랭킹'), type: 'tier', subType: 'keyword', items: [] };
-  
   let itemIndex = 0;
   keywordCategories.forEach(category => {
     category.list.forEach(name => {
-      projects[id].items.push({
-        itemId: id + '-kw-' + (itemIndex++),
-        name: name,
-        memo: '', img: null, zone: category.zoneId, color: category.color 
-      });
+      projects[id].items.push({ itemId: id + '-kw-' + (itemIndex++), name: name, memo: '', img: null, zone: category.zoneId, color: category.color });
     });
   });
   saveData(); renderHome(); openProject(id);
@@ -196,18 +226,16 @@ function hideAllScreens() {
   document.getElementById('wishlist-screen').style.display = 'none';
   document.getElementById('scrap-screen').style.display = 'none';
   document.getElementById('category-rank-screen').style.display = 'none';
+  document.getElementById('tagging-screen').style.display = 'none'; // 🚀 태깅 스크린 숨김 추가
 }
 
 window.openProject = function(id) {
   currentId = id; const p = projects[id];
   document.getElementById('current-project-title').innerText = p.title;
-  
-  // 모든 모드 일단 숨기기
   document.getElementById('tier-mode').style.display = 'none';
   document.getElementById('ranking-mode').style.display = 'none';
   if(document.getElementById('keyword-mode')) document.getElementById('keyword-mode').style.display = 'none';
   
-  // 키워드 모드일 때와 일반 웹툰 모드일 때 레이아웃 교체
   if (p.subType === 'keyword') {
     document.getElementById('webtoon-pools').style.display = 'none';
     document.getElementById('keyword-pools').style.display = 'block';
@@ -241,7 +269,7 @@ document.querySelectorAll('.go-workspace-btn').forEach(btn => {
 });
 
 /* ====================================================================
-   💡 스크랩 보드 및 위시리스트 로직 (생략 없이 유지)
+   💡 스크랩 보드 및 위시리스트 로직 (유지)
 ==================================================================== */
 document.getElementById('btn-open-scrap').addEventListener('click', () => {
   hideAllScreens(); document.getElementById('scrap-screen').style.display = 'block'; renderScrapList();
@@ -252,8 +280,7 @@ window.addScrapItem = function() {
   const newScrap = { id: Date.now(), url, comment, img: null };
   if(file) {
     const reader = new FileReader();
-    reader.onload = (e) => { newScrap.img = e.target.result; scrapList.unshift(newScrap); saveScraps(); renderScrapList(); };
-    reader.readAsDataURL(file);
+    reader.onload = (e) => { newScrap.img = e.target.result; scrapList.unshift(newScrap); saveScraps(); renderScrapList(); }; reader.readAsDataURL(file);
   } else { scrapList.unshift(newScrap); saveScraps(); renderScrapList(); }
   document.getElementById('scrap-url').value = ''; document.getElementById('scrap-comment').value = ''; document.getElementById('scrap-image').value = '';
 }
@@ -352,28 +379,19 @@ window.selectWcItem = function(side) {
 }
 
 /* ====================================================================
-   💡 1:1 비교소 & 엘로 랭킹 (키워드 비교 로직 포함)
+   💡 1:1 비교소 & 엘로 랭킹 
 ==================================================================== */
-// 일반 웹툰 1:1 비교 버튼
 window.openTierCompare = function(tierId) {
   const tierItems = projects[currentId].items.filter(i => i.zone === tierId).map(i => i.name);
   if(tierItems.length < 2) return alert("비교할 작품이 2개 이상 없습니다!");
   currentCompareTier = tierId; document.getElementById('btn-apply-rank').style.display = 'block'; document.getElementById('comp-title').innerText = `[${tierId}] 티어 1:1 비교소`;
   compareLogs = []; saveLogs(); openCompareMode(tierItems.sort());
 }
-
-// 🚀 키워드 전용 1:1 비교 버튼
 window.openKeywordCompare = function(targetZone, poolZone, titleLabel) {
-  // 대기실에 남아있는 키워드와 랭킹 박스에 있는 키워드를 모두 모아서 비교합니다.
   const items = projects[currentId].items.filter(i => i.zone === targetZone || i.zone === poolZone).map(i => i.name);
   if(items.length < 2) return alert("비교할 키워드가 2개 이상 없습니다!");
-  
-  currentCompareTier = targetZone; // 비교 결과를 어느 박스에 적용할지 저장
-  document.getElementById('btn-apply-rank').style.display = 'block'; 
-  document.getElementById('comp-title').innerText = `[${titleLabel}] 1:1 집중 비교소`;
-  
-  compareLogs = []; saveLogs(); 
-  openCompareMode(items.sort());
+  currentCompareTier = targetZone; document.getElementById('btn-apply-rank').style.display = 'block'; document.getElementById('comp-title').innerText = `[${titleLabel}] 1:1 집중 비교소`;
+  compareLogs = []; saveLogs(); openCompareMode(items.sort());
 }
 
 document.getElementById('btn-compare').addEventListener('click', () => {
@@ -449,20 +467,10 @@ window.clearLogs = function() { if(confirm("삭제하시겠습니까?")) { compa
 window.applyRankingToTier = function() {
   if(!currentCompareTier) return; if(currentRankArr.length === 0) return alert("승리 버튼을 눌러 순위를 정해주세요!");
   let sortedNames = currentRankArr.map(r => r.name); 
-  
-  // 🚀 핵심: 대기실에 있던 키워드들도 랭킹 박스로 쏙 이동시켜줍니다.
-  projects[currentId].items.forEach(i => {
-    if(sortedNames.includes(i.name)) i.zone = currentCompareTier;
-  });
-
+  projects[currentId].items.forEach(i => { if(sortedNames.includes(i.name)) i.zone = currentCompareTier; });
   let tierItems = projects[currentId].items.filter(i => i.zone === currentCompareTier); 
   let otherItems = projects[currentId].items.filter(i => i.zone !== currentCompareTier);
-  
-  tierItems.sort((a, b) => { 
-    let idxA = sortedNames.indexOf(a.name); let idxB = sortedNames.indexOf(b.name); 
-    return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB); 
-  });
-  
+  tierItems.sort((a, b) => { let idxA = sortedNames.indexOf(a.name); let idxB = sortedNames.indexOf(b.name); return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB); });
   projects[currentId].items = [...otherItems, ...tierItems]; saveData(); renderItems(); 
   alert(`결과 박스 안에 1위부터 자동 정렬되었습니다!`); document.getElementById('comp-back-btn').click(); 
 }
@@ -476,8 +484,7 @@ document.getElementById('add-item-btn').addEventListener('click', () => {
   const newItem = { itemId: Date.now().toString(), name: name, memo: memo, img: null, zone: 'pool-skyblue' };
   const fileInput = document.getElementById('item-image');
   if (fileInput.files && fileInput.files[0]) {
-    const reader = new FileReader();
-    reader.onload = function(e) { newItem.img = e.target.result; projects[currentId].items.push(newItem); saveData(); renderItems(); }; reader.readAsDataURL(fileInput.files[0]);
+    const reader = new FileReader(); reader.onload = function(e) { newItem.img = e.target.result; projects[currentId].items.push(newItem); saveData(); renderItems(); }; reader.readAsDataURL(fileInput.files[0]);
   } else { projects[currentId].items.push(newItem); saveData(); renderItems(); }
   document.getElementById('item-name').value = ''; document.getElementById('item-memo').value = ''; fileInput.value = '';
 });
@@ -517,18 +524,160 @@ document.querySelectorAll('.tier-items, .pool, .ranking-list').forEach(zone => {
 });
 
 function updateRanking() {
-  const rankingList = document.getElementById('ranking-list');
-  // 키워드 모드의 랭킹 존들도 자동으로 번호를 매기도록 선택자 확장
   const items = document.querySelectorAll('#ranking-list .item, .kw-rank-zone .item, .tier-row .ranking-list .item');
-  items.forEach((item, index) => { 
-    // 개별 존마다 번호를 초기화하기 위해 zone 안에서의 index를 따로 구합니다.
-    let parentZone = item.closest('.ranking-list');
-    if (!parentZone) return;
-    let zoneItems = Array.from(parentZone.querySelectorAll('.item'));
-    let localIndex = zoneItems.indexOf(item);
-    
+  items.forEach((item) => { 
+    let parentZone = item.closest('.ranking-list'); if (!parentZone) return;
+    let zoneItems = Array.from(parentZone.querySelectorAll('.item')); let localIndex = zoneItems.indexOf(item);
     let numSpan = item.querySelector('.ranking-number'); 
     if (!numSpan) { numSpan = document.createElement('div'); numSpan.className = 'ranking-number'; item.prepend(numSpan); } 
     numSpan.innerText = (localIndex + 1); 
+  });
+}
+
+
+/* ====================================================================
+   🚀🚀🚀 새로운 기능: 작품 키워드 태깅 시스템 🚀🚀🚀
+==================================================================== */
+// 태깅 화면 열기
+document.getElementById('btn-open-tagging').addEventListener('click', () => {
+  hideAllScreens();
+  document.getElementById('tagging-screen').style.display = 'block';
+  renderTaggingWorks();
+  renderKeywordPool();
+});
+
+// 1. 왼쪽 작품 리스트 렌더링
+function renderTaggingWorks() {
+  const container = document.getElementById('work-list-container');
+  container.innerHTML = '';
+
+  taggedWorksData.forEach(work => {
+    const card = document.createElement('div');
+    card.className = 'work-tag-card';
+    
+    // 작품 이름, 공, 수에 맞게 각각 드롭존을 구성
+    card.innerHTML = `
+      <h3 class="work-tag-title">📖 ${work.title}</h3>
+      
+      <div class="tag-row">
+        <div class="tag-label" style="color:#374151;">장르/전개</div>
+        <div class="tag-drop-zone" data-work-id="${work.id}" data-target="title">
+          ${renderTags(work.tags.title, work.id, 'title')}
+        </div>
+      </div>
+      
+      <div class="tag-row">
+        <div class="tag-label" style="color:#0284C7; background:#E0F2FE;">공: ${work.top}</div>
+        <div class="tag-drop-zone" data-work-id="${work.id}" data-target="top">
+          ${renderTags(work.tags.top, work.id, 'top')}
+        </div>
+      </div>
+      
+      <div class="tag-row">
+        <div class="tag-label" style="color:#E11D48; background:#FFE4E6;">수: ${work.bottom}</div>
+        <div class="tag-drop-zone" data-work-id="${work.id}" data-target="bottom">
+          ${renderTags(work.tags.bottom, work.id, 'bottom')}
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  setupDropZones();
+}
+
+// 2. 그려진 태그들 (삭제 버튼 포함) HTML 반환 함수
+function renderTags(tagsArray, workId, target) {
+  return tagsArray.map((tag, index) => `
+    <div class="tag-badge ${tag.colorClass}">
+      ${tag.name}
+      <button class="del-tag" onclick="removeTag('${workId}', '${target}', ${index})">✕</button>
+    </div>
+  `).join('');
+}
+
+// 3. 태그 삭제 기능
+window.removeTag = function(workId, target, index) {
+  const work = taggedWorksData.find(w => w.id === workId);
+  if (work) {
+    work.tags[target].splice(index, 1);
+    saveTaggingData();
+    renderTaggingWorks();
+  }
+}
+
+// 4. 오른쪽 키워드 풀 렌더링
+function renderKeywordPool() {
+  const container = document.getElementById('keyword-pool-container');
+  container.innerHTML = '';
+
+  tagCategories.forEach(cat => {
+    const section = document.createElement('div');
+    section.className = 'pool-section';
+    section.innerHTML = `<h4>${cat.name}</h4>`;
+    
+    const tagsContainer = document.createElement('div');
+    tagsContainer.className = 'pool-tags';
+    
+    cat.items.forEach(keyword => {
+      const badge = document.createElement('div');
+      badge.className = `tag-badge ${cat.colorClass}`;
+      badge.innerText = keyword;
+      badge.draggable = true;
+      
+      // 드래그 시작 시 전달할 데이터 세팅
+      badge.addEventListener('dragstart', (e) => {
+        const payload = { name: keyword, colorClass: cat.colorClass };
+        e.dataTransfer.setData('text/plain', JSON.stringify(payload));
+      });
+      
+      tagsContainer.appendChild(badge);
+    });
+    
+    section.appendChild(tagsContainer);
+    container.appendChild(section);
+  });
+}
+
+// 5. 드래그 앤 드롭 존 설정
+function setupDropZones() {
+  const dropZones = document.querySelectorAll('.tag-drop-zone');
+  
+  dropZones.forEach(zone => {
+    zone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+    
+    zone.addEventListener('dragleave', () => {
+      zone.classList.remove('dragover');
+    });
+    
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      
+      const payloadStr = e.dataTransfer.getData('text/plain');
+      if (!payloadStr) return;
+      
+      try {
+        const payload = JSON.parse(payloadStr);
+        const workId = zone.getAttribute('data-work-id');
+        const target = zone.getAttribute('data-target'); // 'title', 'top', 'bottom'
+        
+        // 데이터 배열에 추가
+        const work = taggedWorksData.find(w => w.id === workId);
+        if (work) {
+          // 중복 방지 로직 (선택 사항)
+          if (!work.tags[target].find(t => t.name === payload.name)) {
+            work.tags[target].push(payload);
+            saveTaggingData(); // 파이어베이스에 저장
+            renderTaggingWorks(); // 화면 다시 그리기
+          }
+        }
+      } catch (err) {
+        console.error("드래그 데이터 처리 오류", err);
+      }
+    });
   });
 }

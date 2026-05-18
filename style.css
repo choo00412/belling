@@ -179,3 +179,38 @@ h2 { font-size: 24px; font-weight: 700; }
   .workspace-layout { flex-direction: column; }
   .sidebar-pool { width: 100%; position: static; flex: none; margin-bottom: 20px;}
 }
+
+/* =========================================
+   🏷️ 작품 키워드 태깅 시스템 전용 CSS
+========================================= */
+.tagging-layout { display: flex; gap: 20px; align-items: flex-start; margin-top: 20px; }
+.tagging-left { flex: 2; display: flex; flex-direction: column; gap: 15px; }
+.tagging-right { flex: 1; position: sticky; top: 20px; background: #f9fafb; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); max-height: 85vh; overflow-y: auto; }
+
+.work-tag-card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; border: 1px solid #eee; }
+.work-tag-title { font-size: 18px; font-weight: 800; color: #111; margin: 0; padding-bottom: 8px; border-bottom: 2px solid #f3f4f6; }
+
+.tag-row { display: flex; gap: 10px; align-items: stretch; }
+.tag-label { width: 70px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 8px; flex-shrink: 0; }
+.tag-drop-zone { flex: 1; min-height: 44px; border: 2px dashed #d1d5db; border-radius: 8px; padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: #fafafa; transition: all 0.2s ease; }
+.tag-drop-zone.dragover { background: #e0f2fe; border-color: #38bdf8; transform: scale(1.01); }
+
+.tag-badge { padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: grab; box-shadow: 0 2px 4px rgba(0,0,0,0.05); user-select: none; }
+.tag-badge:active { cursor: grabbing; }
+.tag-badge .del-tag { background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: inherit; padding: 0; margin-left: 2px; font-size: 10px; font-weight: bold; }
+.tag-badge .del-tag:hover { background: rgba(0,0,0,0.2); }
+
+.pool-section { margin-bottom: 20px; }
+.pool-section h4 { margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #374151; padding-bottom: 6px; border-bottom: 2px solid #e5e7eb; }
+.pool-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* 키워드 컬러 프리셋 */
+.kw-genre { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; }
+.kw-top { background: #E0F2FE; color: #0284C7; border: 1px solid #BAE6FD; }
+.kw-bottom { background: #FFE4E6; color: #E11D48; border: 1px solid #FECDD3; }
+.kw-plot { background: #FEF3C7; color: #D97706; border: 1px solid #FDE68A; }
+
+@media (max-width: 768px) {
+  .tagging-layout { flex-direction: column-reverse; }
+  .tagging-right { position: static; max-height: 40vh; }
+}

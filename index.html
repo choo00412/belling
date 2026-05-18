@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=23">
+  <link rel="stylesheet" href="style.css?v=26">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -41,8 +41,9 @@
       <button id="btn-compare" class="create-btn auto-btn" style="background:#10B981; border-color:#059669;">⚖️ 전체 1:1 비교소</button>
     </div>
     
-    <div class="auto-buttons" style="margin-top: -20px;">
-      <button id="btn-auto-keyword-tier" class="create-btn auto-btn" style="background:#F59E0B; border-color:#D97706;">🔑 취향 키워드 티어</button>
+    <div class="auto-buttons" style="margin-top: -20px; display: flex; gap: 10px;">
+      <button id="btn-auto-keyword-tier" class="create-btn auto-btn" style="flex:1; background:#F59E0B; border-color:#D97706;">🔑 취향 키워드 티어</button>
+      <button id="btn-open-tagging" class="create-btn auto-btn" style="flex:1; background:#EC4899; border-color:#DB2777;">🏷️ 작품 키워드 태깅</button>
     </div>
     
     <div class="project-list" id="project-list"></div>
@@ -140,7 +141,6 @@
             <div class="ranking-list tier-items" data-zone="rank-plot" style="flex:1; display:flex; flex-wrap:wrap; align-content:flex-start; padding:10px; gap:8px; background:white;"></div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -175,7 +175,6 @@
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn" id="comp-back-btn">⬅</button></div>
     <div class="wc-title" id="comp-title">1:1 집중 비교소</div>
     <p style="color:#666; margin-bottom: 30px;"><b>우클릭:기준(고정)</b> / <b>좌클릭:대상</b></p>
-
     <div class="compare-container">
       <div class="compare-slot">
         <div class="compare-label" style="background:#4F46E5;">📌 기준 작품</div>
@@ -189,7 +188,6 @@
         <button class="win-btn win-red" onclick="recordCompare('target')">🏆 이 작품 승리!</button>
       </div>
     </div>
-
     <div class="compare-bottom-layout">
       <div class="comp-half">
         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: flex-end;">
@@ -206,14 +204,27 @@
         <div id="comp-analysis" class="comp-analysis-area"></div>
       </div>
     </div>
-
     <div style="margin-top: 40px; text-align: left;">
       <h3 style="margin-bottom: 15px;">비교할 후보 목록</h3>
       <div id="comp-list" class="comp-list-area"></div>
     </div>
   </div>
 
-  <script src="script.js?v=25"></script>
+  <div id="tagging-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
+    <div class="wc-title" style="text-align: left;">🏷️ 작품 키워드 태깅 시스템</div>
+    <p style="color:#666; margin-bottom: 20px; text-align: left;">오른쪽 키워드를 꾹 눌러서 작품의 알맞은 칸에 드래그&드롭 해보세요!</p>
+
+    <div class="tagging-layout">
+      <div class="tagging-left" id="work-list-container">
+        </div>
+      
+      <div class="tagging-right" id="keyword-pool-container">
+        </div>
+    </div>
+  </div>
+
+  <script src="script.js?v=26"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -233,8 +244,6 @@
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
-
-    // script.js에서 db에 접근할 수 있도록 전역 변수로 설정
     window.db = db;
   </script>
 </body>
