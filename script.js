@@ -600,36 +600,64 @@ window.sortReadWorksList = function(type) {
 }
 
 function renderReadWorks() {
-  const container = document.getElementById('read-works-grid'); container.innerHTML = '';
+  const container = document.getElementById('read-works-grid'); 
+  container.innerHTML = '';
+  
   readWorksList.forEach((work, index) => {
     const el = document.createElement('div');
     el.className = `work-square ${work.colorClass}`; 
-    el.draggable = true; el.dataset.index = index;
+    el.draggable = true; // 드래그 가능!
+    el.dataset.index = index;
     
+    // 💡 삭제 버튼에 stopPropagation 추가해서 드래그랑 클릭 분리
     el.innerHTML = `
-      <button class="del-tag" onclick="deleteReadWork(${index})" title="삭제">✕</button>
+      <button class="del-tag" onclick="event.stopPropagation(); deleteReadWork(${index})" title="삭제">✕</button>
       <div style="font-size:11px; font-weight:bold; margin-bottom:3px; opacity:0.7;">${work.platform}</div>
       <div class="work-square-title">${work.name}</div>
     `;
     
+    // 드래그 시작
     el.addEventListener('dragstart', (e) => { 
-      draggedReadWorkIndex = index; el.classList.add('dragging'); 
-      // 드래그를 시작하면 자동으로 '내맘대로 순서' 모드로 바뀜
+      draggedReadWorkIndex = index; 
+      el.classList.add('dragging'); 
+      // 드래그 시작 시 정렬 옵션을 자동으로 바꿈
       document.getElementById('sort-read-works').value = 'custom';
     });
-    el.addEventListener('dragend', () => { el.classList.remove('dragging'); });
-    el.addEventListener('dragover', (e) => { e.preventDefault(); });
+    
+    el.addEventListener('dragend', () => { 
+      el.classList.remove('dragging'); 
+      draggedReadWorkIndex = null; // 인덱스 초기화
+    });
+    
+    // 드래그 중 hover 효과 (drop 대상)
+    el.addEventListener('dragover', (e) => { 
+      e.preventDefault(); 
+      el.style.border = "2px solid #6366F1"; // 드래그 중인 위치 표시
+    });
+    
+    el.addEventListener('dragleave', () => {
+      el.style.border = ""; // 기본 테두리로 복귀
+    });
+    
+    // 드롭 시 순서 변경 및 저장
     el.addEventListener('drop', (e) => {
-      e.preventDefault(); const targetIndex = index; if(draggedReadWorkIndex === targetIndex) return;
+      e.preventDefault(); 
+      el.style.border = "";
+      const targetIndex = index;
+      if(draggedReadWorkIndex === targetIndex) return;
+      
+      // 배열 순서 바꾸기
       const item = readWorksList.splice(draggedReadWorkIndex, 1)[0];
       readWorksList.splice(targetIndex, 0, item);
-      saveReadWorks(); renderReadWorks();
+      
+      // 💡 저장 후 화면 갱신
+      saveReadWorks(); 
+      renderReadWorks();
     });
     
     container.appendChild(el);
   });
 }
-
 window.addReadWork = function() {
   const name = document.getElementById('new-read-work-title').value.trim();
   const colorClass = document.getElementById('new-read-work-platform').value;
