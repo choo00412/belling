@@ -594,7 +594,7 @@ window.sortReadWorksList = function(type) {
     });
   }
   // 정렬 후엔 다시 드래그 모드로 표시
-  document.getElementById('sort-read-works').value = 'custom'; 
+  
   saveReadWorks();
   renderReadWorks();
 }
