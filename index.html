@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="style.css?v=30">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -45,6 +45,10 @@
       <button id="btn-auto-keyword-tier" class="create-btn auto-btn" style="flex:1; background:#F59E0B; border-color:#D97706;">🔑 취향 키워드 랭킹</button>
       <button id="btn-open-tagging" class="create-btn auto-btn" style="flex:1; background:#EC4899; border-color:#DB2777;">🏷️ 작품 키워드 서재</button>
     </div>
+
+    <div class="auto-buttons" style="margin-top: -20px;">
+      <button id="btn-open-read-works" class="create-btn auto-btn" style="background:#6366F1; border-color:#4F46E5;">📖 내가 본 웹툰 컬렉션 (플랫폼별)</button>
+    </div>
     
     <div class="project-list" id="project-list"></div>
   </div>
@@ -52,7 +56,7 @@
   <div id="wishlist-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📝 보고 싶은 작품 모음</div>
-    <p style="color:#666; margin-bottom: 30px; text-align: left;">나중에 볼 작품들을 큼지막하게 메모해두세요!</p>
+    <p style="color:#666; margin-bottom: 30px; text-align: left;">나중에 볼 작품들을 메모하고, 다 읽으면 체크하세요!</p>
     <div class="wishlist-section">
       <div class="wish-input-box">
         <input type="text" id="wish-input" placeholder="새로운 작품 이름을 입력하세요">
@@ -213,7 +217,6 @@
 
     <div class="tagging-layout">
       <div class="tagging-left">
-        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f3f4f6;">
           <h3 style="margin:0; font-size:18px; color:#374151;">내 서재 목록</h3>
           <button id="btn-show-add-work" style="background:#10B981; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">➕ 새 작품 추가</button>
@@ -231,8 +234,7 @@
           </div>
         </div>
 
-        <div id="work-grid-view" class="work-grid">
-          </div>
+        <div id="work-grid-view" class="work-grid"></div>
 
         <div id="work-detail-view" style="display: none;">
           <div class="work-detail-box">
@@ -262,12 +264,30 @@
         </div>
       </div>
       
-      <div class="tagging-right" id="keyword-pool-container">
-        </div>
+      <div class="tagging-right" id="keyword-pool-container"></div>
     </div>
   </div>
 
-  <script src="script.js?v=29"></script>
+  <div id="read-works-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
+    <div class="wc-title" style="text-align: left;">📖 내가 본 웹툰 컬렉션</div>
+    <p style="color:#666; margin-bottom: 20px; text-align: left;">기본 등록된 웹툰들의 리스트입니다. 네모 박스를 드래그 앤 드롭해서 나만의 순서대로 마음껏 배치해 보세요!</p>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+      <input type="text" id="new-read-work-title" placeholder="새로운 작품명 추가" style="flex:1; padding:10px; border-radius:8px; border:1px solid #d1d5db;">
+      <select id="new-read-work-platform" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; outline:none;">
+        <option value="bg-skyblue">리디 (하늘색)</option>
+        <option value="bg-red">레진 (빨간색)</option>
+        <option value="bg-white">봄툰 등 (흰색)</option>
+      </select>
+      <button onclick="addReadWork()" style="background:#6366F1; color:white; border:none; padding:0 20px; border-radius:8px; cursor:pointer; font-weight:bold;">추가</button>
+    </div>
+
+    <div id="read-works-grid" class="work-grid" style="padding-bottom: 50px;">
+      </div>
+  </div>
+
+  <script src="script.js?v=30"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";

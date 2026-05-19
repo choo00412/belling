@@ -50,6 +50,9 @@ let tagCategories = [
   { type: 'plot', name: '관계성/전개', colorClass: 'kw-plot', items: ["배틀연애", "애증", "구원물", "하극상", "역키잡", "키잡", "소꿉친구", "친구>연인", "원수>연인", "첫사랑", "재회물", "계약연애", "정략결혼", "동거", "신분차이", "사건물", "일상물", "잔잔물", "피폐물", "달달물", "개그물", "찌통물", "힐링물", "쌍방삽질", "쌍방구원", "원나잇", "선섹후사", "일공일수", "다공일수", "일공다수", "서브공있음", "서브수있음", "메인공찾기"] }
 ];
 
+// 🚀 새로운 변수: 내가 본 작품 리스트 배열
+let readWorksList = [];
+
 // ====================================================================
 // 2. 파이어베이스 연동 로직
 // ====================================================================
@@ -71,6 +74,7 @@ const checkFirebase = setInterval(async () => {
         deletedCands = data.deletedCands || [];
         if (data.taggedWorksData) taggedWorksData = data.taggedWorksData;
         if (data.tagCategories) tagCategories = data.tagCategories;
+        if (data.readWorksList) readWorksList = data.readWorksList;
       } else {
         projects = JSON.parse(localStorage.getItem('ti-me-data')) || {};
         wishList = JSON.parse(localStorage.getItem('ti-me-wish')) || [];
@@ -79,6 +83,7 @@ const checkFirebase = setInterval(async () => {
         deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
         saveToFirebase(); 
       }
+      initReadWorksList(); // 내가 본 작품 초기화 함수 호출
       renderHome(); 
     } catch (error) {
       console.error("Firebase 로딩 에러:", error);
@@ -90,7 +95,7 @@ async function saveToFirebase() {
   if (!dbRef) return;
   try {
     const { setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
-    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories });
+    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList });
   } catch (error) {
     console.error("데이터 저장 실패:", error);
   }
@@ -102,6 +107,7 @@ function saveScraps() { saveToFirebase(); }
 function saveLogs() { saveToFirebase(); }
 function saveDeletedCands() { saveToFirebase(); }
 function saveTaggingData() { saveToFirebase(); }
+function saveReadWorks() { saveToFirebase(); }
 
 // ====================================================================
 // 💡 기본 UI 로직 (모달, 홈 화면)
@@ -216,6 +222,7 @@ function hideAllScreens() {
   document.getElementById('scrap-screen').style.display = 'none';
   document.getElementById('category-rank-screen').style.display = 'none';
   document.getElementById('tagging-screen').style.display = 'none';
+  document.getElementById('read-works-screen').style.display = 'none';
 }
 
 window.openProject = function(id) {
@@ -258,7 +265,7 @@ document.querySelectorAll('.go-workspace-btn').forEach(btn => {
 });
 
 // ====================================================================
-// 💡 스크랩 보드 및 위시리스트
+// 💡 스크랩 보드 및 위시리스트 (🚀 체크 표시 기능 추가)
 // ====================================================================
 document.getElementById('btn-open-scrap').addEventListener('click', () => { hideAllScreens(); document.getElementById('scrap-screen').style.display = 'block'; renderScrapList(); });
 window.addScrapItem = function() {
@@ -283,12 +290,36 @@ window.deleteScrap = function(id) { if(confirm("이 스크랩을 지울까요?")
 document.getElementById('btn-open-wishlist').addEventListener('click', () => { hideAllScreens(); document.getElementById('wishlist-screen').style.display = 'block'; renderWishList(); });
 window.addWishItem = function() {
   const input = document.getElementById('wish-input'); if (!input.value.trim()) return;
-  wishList.push({ id: Date.now(), name: input.value.trim() }); input.value = ''; saveWish(); renderWishList();
+  wishList.push({ id: Date.now(), name: input.value.trim(), checked: false }); // checked 속성 추가
+  input.value = ''; saveWish(); renderWishList();
 }
 window.deleteWishItem = function(id) { wishList = wishList.filter(i => i.id !== id); saveWish(); renderWishList(); }
+
+// 🚀 위시리스트 체크 기능 🚀
+window.toggleWishItem = function(id) {
+  const item = wishList.find(i => i.id === id);
+  if(item) {
+    item.checked = !item.checked;
+    saveWish();
+    renderWishList();
+  }
+}
+
 function renderWishList() {
   const container = document.getElementById('wish-list'); container.innerHTML = '';
-  wishList.forEach(item => { container.innerHTML += `<div class="wish-item"><span>${item.name}</span> <button onclick="deleteWishItem(${item.id})">×</button></div>`; });
+  wishList.forEach(item => { 
+    // 하위 호환성을 위해 checked가 없으면 false로 처리
+    const isChecked = item.checked ? 'checked' : '';
+    const lineThrough = item.checked ? 'text-decoration: line-through; color: #999;' : '';
+    container.innerHTML += `
+      <div class="wish-item">
+        <label>
+          <input type="checkbox" onchange="toggleWishItem(${item.id})" ${isChecked}>
+          <span style="${lineThrough}">${item.name}</span>
+        </label>
+        <button onclick="deleteWishItem(${item.id})">×</button>
+      </div>`; 
+  });
 }
 
 // ====================================================================
@@ -496,55 +527,25 @@ function updateRanking() {
 }
 
 // ====================================================================
-// 🚀🚀🚀 작품 키워드 서재 (작품 추가/삭제 & 태깅 완벽판) 🚀🚀🚀
+// 🚀 작품 키워드 서재 (작품 추가/삭제 & 태깅)
 // ====================================================================
 let currentTaggingWorkId = null;
 
 document.getElementById('btn-open-tagging').addEventListener('click', () => {
   hideAllScreens(); document.getElementById('tagging-screen').style.display = 'block'; closeWorkDetail(); renderKeywordPool();
 });
-
-// 💡 새 작품 추가 폼 보이기/숨기기
-document.getElementById('btn-show-add-work').addEventListener('click', () => {
-  document.getElementById('add-work-form').style.display = 'block';
-});
-
-// 💡 새 작품 등록 완료 버튼
+document.getElementById('btn-show-add-work').addEventListener('click', () => { document.getElementById('add-work-form').style.display = 'block'; });
 document.getElementById('btn-confirm-add-work').addEventListener('click', () => {
-  const title = document.getElementById('new-work-title').value.trim();
-  const top = document.getElementById('new-work-top').value.trim();
-  const bottom = document.getElementById('new-work-bottom').value.trim();
-
+  const title = document.getElementById('new-work-title').value.trim(); const top = document.getElementById('new-work-top').value.trim(); const bottom = document.getElementById('new-work-bottom').value.trim();
   if(!title) return alert("작품명은 꼭 입력해주세요!");
-
-  const newWork = {
-    id: "w_custom_" + Date.now(),
-    title: title,
-    top: top || "미정",
-    bottom: bottom || "미정",
-    tags: { title: [], top: [], bottom: [] }
-  };
-
-  taggedWorksData.unshift(newWork); // 맨 앞에 새로 등록!
-  saveTaggingData(); // 파이어베이스에 저장
-  renderTaggingGrid(); // 화면 새로고침
-  
-  // 폼 비우고 숨기기
-  document.getElementById('new-work-title').value = '';
-  document.getElementById('new-work-top').value = '';
-  document.getElementById('new-work-bottom').value = '';
-  document.getElementById('add-work-form').style.display = 'none';
+  const newWork = { id: "w_custom_" + Date.now(), title: title, top: top || "미정", bottom: bottom || "미정", tags: { title: [], top: [], bottom: [] } };
+  taggedWorksData.unshift(newWork); saveTaggingData(); renderTaggingGrid(); 
+  document.getElementById('new-work-title').value = ''; document.getElementById('new-work-top').value = ''; document.getElementById('new-work-bottom').value = ''; document.getElementById('add-work-form').style.display = 'none';
 });
 
-// 💡 현재 열려있는 작품 삭제 기능
 window.deleteTaggingWork = function() {
-  if(!currentTaggingWorkId) return;
-  const work = taggedWorksData.find(w => w.id === currentTaggingWorkId);
-  if(confirm(`'${work.title}' 작품을 내 서재에서 완전히 삭제할까요?`)) {
-    taggedWorksData = taggedWorksData.filter(w => w.id !== currentTaggingWorkId);
-    saveTaggingData();
-    closeWorkDetail(); // 리스트 화면으로 나가면서 렌더링 됨
-  }
+  if(!currentTaggingWorkId) return; const work = taggedWorksData.find(w => w.id === currentTaggingWorkId);
+  if(confirm(`'${work.title}' 작품을 서재에서 완전히 삭제할까요?`)) { taggedWorksData = taggedWorksData.filter(w => w.id !== currentTaggingWorkId); saveTaggingData(); closeWorkDetail(); }
 }
 
 function renderTaggingGrid() {
@@ -552,11 +553,7 @@ function renderTaggingGrid() {
   taggedWorksData.forEach(work => {
     const square = document.createElement('div'); square.className = 'work-square';
     const totalTags = work.tags.title.length + work.tags.top.length + work.tags.bottom.length;
-    square.innerHTML = `
-      <div class="work-square-title">${work.title}</div>
-      <div class="work-square-desc">${work.top} x ${work.bottom}</div>
-      <div style="margin-top: 10px; font-size: 11px; color:#EC4899; background:#FCE7F3; padding:2px 8px; border-radius:10px;">태그 ${totalTags}개</div>
-    `;
+    square.innerHTML = `<div class="work-square-title">${work.title}</div><div class="work-square-desc">${work.top} x ${work.bottom}</div><div style="margin-top: 10px; font-size: 11px; color:#EC4899; background:#FCE7F3; padding:2px 8px; border-radius:10px;">태그 ${totalTags}개</div>`;
     square.onclick = () => openWorkDetail(work.id); container.appendChild(square);
   });
 }
@@ -570,10 +567,7 @@ window.openWorkDetail = function(workId) {
     renderDetailTags(); setupDropZones();
   }
 }
-
-window.closeWorkDetail = function() {
-  currentTaggingWorkId = null; document.getElementById('work-detail-view').style.display = 'none'; document.getElementById('work-grid-view').style.display = 'grid'; renderTaggingGrid(); 
-}
+window.closeWorkDetail = function() { currentTaggingWorkId = null; document.getElementById('work-detail-view').style.display = 'none'; document.getElementById('work-grid-view').style.display = 'grid'; renderTaggingGrid(); }
 
 function renderDetailTags() {
   const work = taggedWorksData.find(w => w.id === currentTaggingWorkId); if(!work) return;
@@ -582,13 +576,10 @@ function renderDetailTags() {
   document.getElementById('dz-bottom').innerHTML = renderTagsHTML(work.tags.bottom, work.id, 'bottom');
 }
 
-function renderTagsHTML(tagsArray, workId, target) {
-  return tagsArray.map((tag, index) => `<div class="tag-badge ${tag.colorClass}">${tag.name} <button class="del-tag" onclick="removeTag('${workId}', '${target}', ${index})">✕</button></div>`).join('');
-}
+function renderTagsHTML(tagsArray, workId, target) { return tagsArray.map((tag, index) => `<div class="tag-badge ${tag.colorClass}">${tag.name} <button class="del-tag" onclick="removeTag('${workId}', '${target}', ${index})">✕</button></div>`).join(''); }
 
 window.removeTag = function(workId, target, index) {
-  const work = taggedWorksData.find(w => w.id === workId);
-  if (work) { work.tags[target].splice(index, 1); saveTaggingData(); renderDetailTags(); }
+  const work = taggedWorksData.find(w => w.id === workId); if (work) { work.tags[target].splice(index, 1); saveTaggingData(); renderDetailTags(); }
 }
 
 function renderKeywordPool() {
@@ -609,15 +600,10 @@ function renderKeywordPool() {
 
 window.addNewKeyword = function(catIndex) {
   const newWord = prompt("새롭게 추가할 키워드를 입력하세요!");
-  if (newWord && newWord.trim() !== "") {
-    if(tagCategories[catIndex].items.includes(newWord.trim())) { return alert("이미 존재하는 키워드입니다!"); }
-    tagCategories[catIndex].items.push(newWord.trim()); saveTaggingData(); renderKeywordPool(); 
-  }
+  if (newWord && newWord.trim() !== "") { if(tagCategories[catIndex].items.includes(newWord.trim())) { return alert("이미 존재하는 키워드입니다!"); } tagCategories[catIndex].items.push(newWord.trim()); saveTaggingData(); renderKeywordPool(); }
 }
-
 window.deleteKeywordFromPool = function(catIndex, kwIndex) {
-  const targetWord = tagCategories[catIndex].items[kwIndex];
-  if(confirm(`'${targetWord}' 키워드를 목록에서 완전히 지울까요?`)) { tagCategories[catIndex].items.splice(kwIndex, 1); saveTaggingData(); renderKeywordPool(); }
+  const targetWord = tagCategories[catIndex].items[kwIndex]; if(confirm(`'${targetWord}' 키워드를 목록에서 완전히 지울까요?`)) { tagCategories[catIndex].items.splice(kwIndex, 1); saveTaggingData(); renderKeywordPool(); }
 }
 
 function setupDropZones() {
@@ -632,10 +618,109 @@ function setupDropZones() {
       try {
         const payload = JSON.parse(payloadStr); const workId = newZone.getAttribute('data-work-id'); const target = newZone.getAttribute('data-target'); 
         const work = taggedWorksData.find(w => w.id === workId);
-        if (work) {
-          if (!work.tags[target].find(t => t.name === payload.name)) { work.tags[target].push(payload); saveTaggingData(); renderDetailTags(); }
-        }
+        if (work) { if (!work.tags[target].find(t => t.name === payload.name)) { work.tags[target].push(payload); saveTaggingData(); renderDetailTags(); } }
       } catch (err) { console.error(err); }
     });
   });
+}
+
+// ====================================================================
+// 🚀🚀🚀 내가 본 작품 컬렉션 (플랫폼별, 드래그 재정렬) 🚀🚀🚀
+// ====================================================================
+
+// 1. 초기 데이터 가져오기 (처음 파이어베이스 접속 시)
+function initReadWorksList() {
+  if (readWorksList && readWorksList.length > 0) return;
+  
+  // 기존 웹툰 카테고리에서 쭉 뽑아서 초기 세팅해줍니다.
+  let rId = 0;
+  webtoonCategories.forEach(cat => {
+    let platform = cat.color === 'bg-skyblue' ? '리디' : (cat.color === 'bg-red' ? '레진' : '봄툰');
+    cat.list.forEach(name => {
+      let cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim();
+      if(!readWorksList.find(w => w.name === cleanName)) {
+        readWorksList.push({ id: 'rw_'+(rId++), name: cleanName, platform: platform, colorClass: cat.color });
+      }
+    });
+  });
+  saveReadWorks();
+}
+
+document.getElementById('btn-open-read-works').addEventListener('click', () => {
+  hideAllScreens();
+  document.getElementById('read-works-screen').style.display = 'block';
+  renderReadWorks();
+});
+
+// 2. 화면에 사각형 박스 그리기
+let draggedReadWorkIndex = null;
+
+function renderReadWorks() {
+  const container = document.getElementById('read-works-grid');
+  container.innerHTML = '';
+  
+  readWorksList.forEach((work, index) => {
+    const el = document.createElement('div');
+    el.className = `work-square ${work.colorClass}`; // 플랫폼 컬러 적용
+    el.draggable = true;
+    el.dataset.index = index;
+    
+    el.innerHTML = `
+      <div style="font-size:11px; font-weight:bold; margin-bottom:5px; opacity:0.7;">${work.platform}</div>
+      <div class="work-square-title">${work.name}</div>
+      <button class="del-tag" style="margin-top:10px;" onclick="deleteReadWork(${index})">✕</button>
+    `;
+    
+    // 3. 드래그 앤 드롭으로 위치 바꾸기 로직
+    el.addEventListener('dragstart', (e) => {
+      draggedReadWorkIndex = index;
+      el.classList.add('dragging');
+    });
+    
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+    });
+    
+    el.addEventListener('dragover', (e) => {
+      e.preventDefault(); // 드롭 허용
+    });
+    
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const targetIndex = index;
+      if(draggedReadWorkIndex === targetIndex) return;
+      
+      // 배열 위치 변경
+      const item = readWorksList.splice(draggedReadWorkIndex, 1)[0];
+      readWorksList.splice(targetIndex, 0, item);
+      
+      saveReadWorks(); // 저장
+      renderReadWorks(); // 다시 그리기
+    });
+    
+    container.appendChild(el);
+  });
+}
+
+// 4. 직접 작품 추가 및 삭제 기능
+window.addReadWork = function() {
+  const name = document.getElementById('new-read-work-title').value.trim();
+  const colorClass = document.getElementById('new-read-work-platform').value;
+  let platform = colorClass === 'bg-skyblue' ? '리디' : (colorClass === 'bg-red' ? '레진' : '봄툰 등');
+  
+  if(!name) return alert("작품명을 입력해주세요!");
+  
+  readWorksList.unshift({ id: 'rw_'+Date.now(), name: name, platform: platform, colorClass: colorClass });
+  saveReadWorks();
+  renderReadWorks();
+  
+  document.getElementById('new-read-work-title').value = '';
+}
+
+window.deleteReadWork = function(index) {
+  if(confirm("이 작품을 컬렉션에서 지울까요?")) {
+    readWorksList.splice(index, 1);
+    saveReadWorks();
+    renderReadWorks();
+  }
 }
