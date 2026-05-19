@@ -639,24 +639,24 @@ function renderReadWorks() {
       el.style.border = ""; // 기본 테두리로 복귀
     });
     
-    // 드롭 시 순서 변경 및 저장
+    // 💡 드롭 이벤트에서 saveReadWorks(); 를 삭제했습니다.
     el.addEventListener('drop', (e) => {
       e.preventDefault(); 
       el.style.border = "";
       const targetIndex = index;
       if(draggedReadWorkIndex === targetIndex) return;
       
-      // 배열 순서 바꾸기
       const item = readWorksList.splice(draggedReadWorkIndex, 1)[0];
       readWorksList.splice(targetIndex, 0, item);
       
-      // 💡 저장 후 화면 갱신
-      saveReadWorks(); 
-      renderReadWorks();
+      // 💡 여기서 저장 안 함! 순서만 바꿈!
+      renderReadWorks(); 
     });
-    
-    container.appendChild(el);
-  });
+
+// 💡 버튼을 눌러야만 호출되는 함수 (이게 바로 저장 버튼)
+window.saveReadWorksManual = function() {
+  saveReadWorks();
+  alert("현재 순서가 서버에 저장되었습니다!");
 }
 window.addReadWork = function() {
   const name = document.getElementById('new-read-work-title').value.trim();
