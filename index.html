@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=30">
+  <link rel="stylesheet" href="style.css?v=31">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -271,23 +271,29 @@
   <div id="read-works-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📖 내가 본 웹툰 컬렉션</div>
-    <p style="color:#666; margin-bottom: 20px; text-align: left;">기본 등록된 웹툰들의 리스트입니다. 네모 박스를 드래그 앤 드롭해서 나만의 순서대로 마음껏 배치해 보세요!</p>
+    <p style="color:#666; margin-bottom: 20px; text-align: left;">네모 박스를 꾹 눌러 드래그하면 나만의 순서대로 마음껏 배치할 수 있어요!</p>
     
-    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-      <input type="text" id="new-read-work-title" placeholder="새로운 작품명 추가" style="flex:1; padding:10px; border-radius:8px; border:1px solid #d1d5db;">
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+      <input type="text" id="new-read-work-title" placeholder="새 작품 직접 입력" style="flex:1; min-width:150px; padding:10px; border-radius:8px; border:1px solid #d1d5db;">
       <select id="new-read-work-platform" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; outline:none;">
         <option value="bg-skyblue">리디 (하늘색)</option>
         <option value="bg-red">레진 (빨간색)</option>
         <option value="bg-white">봄툰 등 (흰색)</option>
       </select>
-      <button onclick="addReadWork()" style="background:#6366F1; color:white; border:none; padding:0 20px; border-radius:8px; cursor:pointer; font-weight:bold;">추가</button>
+      <button onclick="addReadWork()" style="background:#6366F1; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">추가</button>
+      
+      <select id="sort-read-works" onchange="sortReadWorksList(this.value)" style="padding:10px; border-radius:8px; border:2px solid #6366F1; outline:none; font-weight:bold; background:#e0e7ff; margin-left:auto; cursor:pointer;">
+        <option value="custom">✋ 내맘대로 드래그 순서</option>
+        <option value="heart">♥️ 내 취향 랭킹 (최상단부터)</option>
+        <option value="abc">🔠 ㄱㄴㄷ 이름순</option>
+      </select>
     </div>
 
     <div id="read-works-grid" class="work-grid" style="padding-bottom: 50px;">
       </div>
   </div>
 
-  <script src="script.js?v=30"></script>
+  <script src="script.js?v=31"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
