@@ -51,8 +51,6 @@ let tagCategories = [
 ];
 
 let readWorksList = [];
-
-// 💡 사진에서 직접 추출한 취향(♥️) 랭킹 순서 데이터! 
 const heartRankData = [
   "징크스", "홍실퀘스트", "물가의 밤", "FlashLight", "일간알바", "야화첩", "힐링 패러독스",
   "미혹의 경계", "스테이지 비하인드", "개구리 삶기", "해피투게더", "테라노 군과 쿠마자키 군", "드래그리스·섹스", "상극", "제물 남편", "언슬립", "소꿉친구와 감금당했다", "장미와 샴페인", "너는 나의 세상", "드라이버스 하이", "뱀 굴", "노 모럴", "호식이 이야기", "리미티드 런", "백라이트",
@@ -63,58 +61,63 @@ const heartRankData = [
 ];
 
 // ====================================================================
-// 2. 파이어베이스 연동 로직
+// 2. 파이어베이스 데이터 로드 및 저장 함수
 // ====================================================================
-let dbRef = null;
-
-const checkFirebase = setInterval(async () => {
-  if (window.db) {
-    clearInterval(checkFirebase);
-    try {
-      const { doc, getDoc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
-      dbRef = doc(window.db, "ti_me_data", "my_shared_data");
-      const snap = await getDoc(dbRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        projects = data.projects || {};
-        wishList = data.wishList || [];
-        scrapList = data.scrapList || [];
-        compareLogs = data.compareLogs || [];
-        deletedCands = data.deletedCands || [];
-        if (data.taggedWorksData) taggedWorksData = data.taggedWorksData;
-        if (data.tagCategories) tagCategories = data.tagCategories;
-        if (data.readWorksList) readWorksList = data.readWorksList;
-      } else {
-        projects = JSON.parse(localStorage.getItem('ti-me-data')) || {};
-        wishList = JSON.parse(localStorage.getItem('ti-me-wish')) || [];
-        scrapList = JSON.parse(localStorage.getItem('ti-me-scraps')) || [];
-        compareLogs = JSON.parse(localStorage.getItem('ti-me-logs')) || [];
-        deletedCands = JSON.parse(localStorage.getItem('ti-me-del-cands')) || [];
-        saveToFirebase(); 
-      }
-      initReadWorksList(); 
-      renderHome(); 
-    } catch (error) {
-      console.error("Firebase 로딩 에러:", error);
-    }
+async function initApp() {
+  if (!window.db) {
+    setTimeout(initApp, 100);
+    return;
   }
-}, 100);
-
-async function saveToFirebase() {
-  if (!dbRef) return;
+  
   try {
-    const { setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+    const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+    const dbRef = doc(window.db, "ti_me_data", "my_shared_data");
+    const snap = await getDoc(dbRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      projects = data.projects || {};
+      wishList = data.wishList || [];
+      scrapList = data.scrapList || [];
+      compareLogs = data.compareLogs || [];
+      deletedCands = data.deletedCands || [];
+      taggedWorksData = data.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData));
+      tagCategories = data.tagCategories || tagCategories;
+      readWorksList = data.readWorksList || [];
+    } else {
+      console.log("데이터 없음 - 초기값 사용");
+      taggedWorksData = JSON.parse(JSON.stringify(initialWorksData));
+    }
+  } catch (e) {
+    console.error("데이터 로드 실패:", e);
+    taggedWorksData = JSON.parse(JSON.stringify(initialWorksData));
+  }
+
+  // 초기화 및 화면 그리기
+  initReadWorksList();
+  renderHome();
+  if(document.getElementById('work-grid-view')) renderTaggingGrid();
+  if(document.getElementById('read-works-grid')) renderReadWorks();
+}
+initApp();
+
+async function saveAllData() {
+  if (!window.db) return;
+  try {
+    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+    const dbRef = doc(window.db, "ti_me_data", "my_shared_data");
     await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList });
-  } catch (error) { console.error("데이터 저장 실패:", error); }
+  } catch (error) {
+    console.error("데이터 저장 실패:", error);
+  }
 }
 
-function saveData() { saveToFirebase(); }
-function saveWish() { saveToFirebase(); }
-function saveScraps() { saveToFirebase(); }
-function saveLogs() { saveToFirebase(); }
-function saveDeletedCands() { saveToFirebase(); }
-function saveTaggingData() { saveToFirebase(); }
-function saveReadWorks() { saveToFirebase(); }
+// 통합 저장 함수 호출
+function saveData() { saveAllData(); }
+function saveWish() { saveAllData(); }
+function saveScraps() { saveAllData(); }
+function saveLogs() { saveAllData(); }
+function saveDeletedCands() { saveAllData(); }
+function saveTaggingData() { saveAllData(); }
 
 // ====================================================================
 // 💡 기본 UI 로직
@@ -141,7 +144,7 @@ function getNextTitle(baseTitle) {
 }
 
 // ====================================================================
-// 💡 웹툰 티어 및 키워드 티어 자동 생성 로직
+// 💡 웹툰 티어 및 키워드 랭킹 자동 생성
 // ====================================================================
 const webtoonCategories = [
   { color: "bg-skyblue", zoneId: "pool-skyblue", list: ["일간알바", "코드네임 아나스타샤", "소꿉친구와 감금당했다", "공과 사는 구분해!", "그 가이드가 집착광공의 품에서 벗어나는 방법", "더 뮤즈", "쉬운 선배", "노 모럴", "러브 오더", "솔트 소사이어티", "녹색전상", "고양이 테라피", "텐(TEN)", "반칙", "죽어 마땅한 것들", "결혼하는 남자", "별주부전", " 그 공작가 노예의 음란한 속사정", "망종(亡種)", "비밀이 많은 XX", "아우토반 로맨스", "아늑한 집착", "모두에게 친절한 너는 왜", "갱생의 여지", "그림자의 영역", "늑대 신랑 ", "과수원의 사정", "알파 트라우마", "오메가 콤플렉스", "서킷 브레이커", "롤플레잉-경찰❤️파일럿", "친구새끼들한테 따먹혔습니다", "실연 중독", "성실한 채무자?", "형제애", "위험한 편의점", "럽미닥터!", "상극", "피자배달부와 골드팰리스", "패션(PASSION)", "실수로 잘못 고백했는데", "더러운 욕망", "XX하면 알 수 있지 않을까?", "테라노 군과 쿠마자키 군", "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "페이크 팩트 립스", "소꿉친구로는 참을 수 없어", " 운명의 짝이 너라니", "오프 스테이지 러브 사이드", "테라피 게임", "나츠메 씨는 개발당하고 싶다", "가슴 지명", "드래그리스·섹스", "반하는 약을 먹은 완벽남이 위험합니다! 2권", "너무 야한 후카미군", "40까지 하고 싶은 10가지 일", "힐링 패러독스", "30살까지 동정이면 마법사가 될 수 있대", "독점! 마이 히어로", "개구리 삶기", "시맨틱 에러", "해피투게더"] },
@@ -182,7 +185,7 @@ document.getElementById('btn-auto-keyword-tier').addEventListener('click', () =>
 });
 
 // ====================================================================
-// 💡 프로젝트 리스트 렌더링 및 화면 전환
+// 💡 화면 전환 및 렌더링 로직
 // ====================================================================
 function createProject(type, title) {
   const id = Date.now().toString();
@@ -200,7 +203,10 @@ function renderHome() {
 window.deleteProject = function(id) { if (confirm("정말 삭제하시겠습니까?")) { delete projects[id]; saveData(); renderHome(); } }
 
 function hideAllScreens() {
-  ['home-screen', 'workspace-screen', 'worldcup-screen', 'compare-screen', 'wishlist-screen', 'scrap-screen', 'category-rank-screen', 'tagging-screen', 'read-works-screen'].forEach(id => document.getElementById(id).style.display = 'none');
+  ['home-screen', 'workspace-screen', 'worldcup-screen', 'compare-screen', 'wishlist-screen', 'scrap-screen', 'category-rank-screen', 'tagging-screen', 'read-works-screen'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
 }
 
 window.openProject = function(id) {
@@ -555,7 +561,7 @@ function setupDropZones() {
 }
 
 // ====================================================================
-// 🚀🚀🚀 내가 본 작품 컬렉션 (플랫폼별, 드래그 재정렬, 취향 정렬) 🚀🚀🚀
+// 🚀🚀🚀 내가 본 작품 컬렉션 (수동 저장 적용 완료) 🚀🚀🚀
 // ====================================================================
 function initReadWorksList() {
   if (readWorksList && readWorksList.length > 0) return;
@@ -578,25 +584,23 @@ document.getElementById('btn-open-read-works').addEventListener('click', () => {
 
 let draggedReadWorkIndex = null;
 
-// 💡 새로운 기능: 드롭다운으로 리스트 정렬하기
+// 💡 1. 수동 저장 버튼 함수
+window.saveReadWorksManual = function() {
+  saveAllData();
+  alert("현재 순서가 저장되었습니다!");
+}
+
 window.sortReadWorksList = function(type) {
   if (type === 'abc') {
-    // 가나다순 정렬
     readWorksList.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR'));
   } else if (type === 'heart') {
-    // ♥️ 사진에서 추출한 취향 랭킹 순서대로 정렬
     readWorksList.sort((a, b) => {
-      let idxA = heartRankData.indexOf(a.name);
-      let idxB = heartRankData.indexOf(b.name);
-      if(idxA === -1) idxA = 9999; // 목록에 없으면 맨 뒤로
-      if(idxB === -1) idxB = 9999;
+      let idxA = heartRankData.indexOf(a.name); let idxB = heartRankData.indexOf(b.name);
+      if(idxA === -1) idxA = 9999; if(idxB === -1) idxB = 9999;
       return idxA - idxB;
     });
   }
-  // 정렬 후엔 다시 드래그 모드로 표시
-  
-  saveReadWorks();
-  renderReadWorks();
+  renderReadWorks(); // 정렬 후 화면만 갱신 (저장 버튼 누르기 전엔 반영 안 됨)
 }
 
 function renderReadWorks() {
@@ -605,25 +609,28 @@ function renderReadWorks() {
     const el = document.createElement('div');
     el.className = `work-square ${work.colorClass}`; 
     el.draggable = true; el.dataset.index = index;
-    `;
+    
     el.innerHTML = `
-      <button class="del-tag" onclick="deleteReadWork(${index})" title="삭제">✕</button>
+      <button class="del-tag" onclick="event.stopPropagation(); deleteReadWork(${index})" title="삭제">✕</button>
       <div style="font-size:11px; font-weight:bold; margin-bottom:3px; opacity:0.7;">${work.platform}</div>
       <div class="work-square-title">${work.name}</div>
     `;
     
     el.addEventListener('dragstart', (e) => { 
       draggedReadWorkIndex = index; el.classList.add('dragging'); 
-      // 드래그를 시작하면 자동으로 '내맘대로 순서' 모드로 바뀜
       document.getElementById('sort-read-works').value = 'custom';
     });
-    el.addEventListener('dragend', () => { el.classList.remove('dragging'); });
-    el.addEventListener('dragover', (e) => { e.preventDefault(); });
+    el.addEventListener('dragend', () => { el.classList.remove('dragging'); draggedReadWorkIndex = null; });
+    el.addEventListener('dragover', (e) => { e.preventDefault(); el.style.border = "2px solid #6366F1"; });
+    el.addEventListener('dragleave', () => { el.style.border = ""; });
+    
+    // 💡 2. 드롭할 때 서버 자동 저장 제거됨! (화면만 변경)
     el.addEventListener('drop', (e) => {
-      e.preventDefault(); const targetIndex = index; if(draggedReadWorkIndex === targetIndex) return;
+      e.preventDefault(); el.style.border = "";
+      const targetIndex = index; if(draggedReadWorkIndex === targetIndex) return;
       const item = readWorksList.splice(draggedReadWorkIndex, 1)[0];
       readWorksList.splice(targetIndex, 0, item);
-      saveReadWorks(); renderReadWorks();
+      renderReadWorks(); 
     });
     
     container.appendChild(el);
