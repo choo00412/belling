@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=40">
+  <link rel="stylesheet" href="style.css?v=45">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -25,37 +25,43 @@
   </div>
 
   <div id="home-screen">
-    <h1>티메</h1>
-    <div class="home-buttons">
-      <button id="btn-new-tier" class="create-btn tier-btn">티어 생성</button>
-      <button id="btn-new-ranking" class="create-btn ranking-btn">랭킹 생성</button>
-      <button id="btn-open-wishlist" class="create-btn" style="background:#F43F5E; color:white;">📝 위시리스트</button>
-      <button id="btn-open-scrap" class="create-btn" style="background:#fb923c; color:white;">📌 스크랩 보드</button>
-    </div>
-    <div class="auto-buttons">
-      <button id="btn-auto-webtoon-tier" class="create-btn auto-btn">📚 웹툰 티어</button>
-      <button id="btn-auto-webtoon-ranking" class="create-btn auto-btn">🏆 웹툰 랭킹</button>
-    </div>
-    <div class="auto-buttons" style="margin-top: -20px;">
-      <button id="btn-worldcup" class="create-btn auto-btn" style="background:#8B5CF6; border-color:#7C3AED;">⚔️ 웹툰 월드컵 (전체)</button>
-      <button id="btn-compare" class="create-btn auto-btn" style="background:#10B981; border-color:#059669;">⚖️ 전체 1:1 비교소</button>
-    </div>
-    
-    <div class="auto-buttons" style="margin-top: -20px; display: flex; gap: 10px;">
-      <button id="btn-auto-keyword-tier" class="create-btn auto-btn" style="flex:1; background:#F59E0B; border-color:#D97706;">🔑 취향 키워드 랭킹</button>
-      <button id="btn-open-tagging" class="create-btn auto-btn" style="flex:1; background:#EC4899; border-color:#DB2777;">🏷️ 작품 키워드 서재</button>
+    <div class="main-header">
+      <h1>티메 <span>Ti-Me</span></h1>
+      <p>나만의 취향을 기록하고 분석하는 공간</p>
     </div>
 
-    <div class="auto-buttons" style="margin-top: -20px;">
-      <button id="btn-open-read-works" class="create-btn auto-btn" style="background:#6366F1; border-color:#4F46E5;">📖 내가 본 웹툰 컬렉션 (리스트형)</button>
+    <div class="dashboard-layout">
+      <div class="dash-section">
+        <h2 class="dash-title">🎮 플레이 그라운드</h2>
+        <div class="dash-grid">
+          <button id="btn-new-tier" class="dash-card bg-yellow">✨ 직접 티어 만들기</button>
+          <button id="btn-new-ranking" class="dash-card bg-yellow">🏆 직접 랭킹 만들기</button>
+          <button id="btn-auto-webtoon-tier" class="dash-card bg-blue">📚 웹툰 티어 (자동)</button>
+          <button id="btn-auto-keyword-tier" class="dash-card bg-orange">🔑 취향 키워드 랭킹</button>
+          <button id="btn-worldcup" class="dash-card bg-purple">⚔️ 이상형 월드컵</button>
+          <button id="btn-compare" class="dash-card bg-green">⚖️ 1:1 비교소</button>
+        </div>
+      </div>
+
+      <div class="dash-section">
+        <h2 class="dash-title">📚 나의 서재 & 기록</h2>
+        <div class="dash-grid">
+          <button id="btn-open-read-works" class="dash-card bg-indigo">📖 내가 본 웹툰 컬렉션</button>
+          <button id="btn-open-tagging" class="dash-card bg-pink">🏷️ 작품 키워드 서재</button>
+          <button id="btn-open-reading-log" class="dash-card bg-teal">📝 독서 기록장 (리뷰)</button>
+          <button id="btn-open-wishlist" class="dash-card bg-rose">🛒 보고 싶은 위시리스트</button>
+          <button id="btn-open-scrap" class="dash-card bg-orange-dark">📌 스크랩 보드</button>
+        </div>
+      </div>
     </div>
-    
+
+    <h2 class="dash-title" style="margin-top:40px;">📂 저장된 프로젝트</h2>
     <div class="project-list" id="project-list"></div>
   </div>
 
   <div id="wishlist-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
-    <div class="wc-title" style="text-align: left;">📝 보고 싶은 작품 모음</div>
+    <div class="wc-title" style="text-align: left;">🛒 보고 싶은 위시리스트</div>
     <p style="color:#666; margin-bottom: 30px; text-align: left;">나중에 볼 작품들을 메모하고, 다 읽으면 체크하세요!</p>
     <div class="wishlist-section">
       <div class="wish-input-box">
@@ -68,11 +74,11 @@
 
   <div id="scrap-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
-    <div class="wc-title" style="text-align: left;">📌 나만의 스크랩 보드</div>
-    <p style="color:#666; margin-bottom: 30px; text-align: left;">좋아하는 링크, 이미지, 그리고 주접글을 게시글 형태로 남겨보세요!</p>
+    <div class="wc-title" style="text-align: left;">📌 스크랩 보드</div>
+    <p style="color:#666; margin-bottom: 30px; text-align: left;">좋아하는 링크, 이미지, 주접글을 남겨보세요!</p>
     <div class="scrap-input-section">
       <input type="text" id="scrap-url" placeholder="복사한 링크(URL)를 붙여넣으세요">
-      <textarea id="scrap-comment" placeholder="여기에 주접을 마음껏 떨으세요 (감상평 등)"></textarea>
+      <textarea id="scrap-comment" placeholder="여기에 주접을 마음껏 떨으세요"></textarea>
       <div class="scrap-file-row">
         <label for="scrap-image">🖼️ 이미지 올리기</label>
         <input type="file" id="scrap-image" accept="image/*">
@@ -121,130 +127,68 @@
           <div class="tier-row"><div class="tier-label C">C<button class="tier-comp-btn" onclick="openTierCompare('C')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('C')">📊 세부 순위</button></div><div class="tier-items" data-zone="C"></div></div>
           <div class="tier-row"><div class="tier-label D">D<button class="tier-comp-btn" onclick="openTierCompare('D')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('D')">📊 세부 순위</button></div><div class="tier-items" data-zone="D"></div></div>
         </div>
+        
         <div id="ranking-mode" class="mode-area" style="display: none;"><div class="ranking-list" id="ranking-list" data-zone="ranking"></div></div>
-      </div>
-    </div>
-  </div>
 
-  <div id="category-rank-screen" style="display: none;" class="game-screen">
-    <div class="header" style="padding-top: 20px;"><button class="go-workspace-btn">⬅</button></div>
-    <div class="wc-title" id="cat-rank-title" style="text-align: left;">세부 순위</div>
-    <p style="color:#666; margin-bottom: 30px; text-align: left;">드래그하여 왼쪽(1등)부터 순서를 정해보세요!</p>
-    <div class="content-area">
-      <div class="tier-row"><div class="tier-label" style="background:#EEF2FF; color:#4F46E5;">🎨 작화</div><div class="tier-items cat-list" id="cat-art-list"></div></div>
-      <div class="tier-row"><div class="tier-label" style="background:#FDF4FF; color:#C026D3;">📖 스토리</div><div class="tier-items cat-list" id="cat-story-list"></div></div>
-      <div class="tier-row"><div class="tier-label" style="background:#FFF1F2; color:#E11D48;">🔥 씬</div><div class="tier-items cat-list" id="cat-scene-list"></div></div>
-    </div>
-  </div>
-
-  <div id="worldcup-screen" style="display: none;" class="game-screen">
-    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
-    <div class="wc-title">웹툰 이상형 월드컵</div>
-    <div id="wc-round-text" class="wc-round">준비 중...</div>
-    <div class="wc-container" id="wc-play-area">
-      <div id="wc-left" class="wc-card" onclick="selectWcItem('left')">왼쪽</div>
-      <div class="wc-vs">VS</div>
-      <div id="wc-right" class="wc-card" onclick="selectWcItem('right')">오른쪽</div>
-    </div>
-    <div id="wc-result-area" style="display: none; text-align: center; margin-top: 30px;">
-      <h2 style="margin-bottom: 20px;">🏆 최종 랭킹 🏆</h2>
-      <div id="wc-ranking-list" class="wc-ranking-box"></div>
-    </div>
-  </div>
-
-  <div id="compare-screen" style="display: none;" class="game-screen">
-    <div class="header" style="padding-top: 20px;"><button class="go-home-btn" id="comp-back-btn">⬅</button></div>
-    <div class="wc-title" id="comp-title">1:1 집중 비교소</div>
-    <p style="color:#666; margin-bottom: 30px;"><b>우클릭:기준(고정)</b> / <b>좌클릭:대상</b></p>
-    <div class="compare-container">
-      <div class="compare-slot">
-        <div class="compare-label" style="background:#4F46E5;">📌 기준 작품</div>
-        <div id="comp-fixed" class="wc-card empty">우클릭 하세요</div>
-        <button class="win-btn win-blue" onclick="recordCompare('fixed')">🏆 이 작품 승리!</button>
-      </div>
-      <div class="wc-vs">VS</div>
-      <div class="compare-slot">
-        <div class="compare-label" style="background:#E11D48;">⚔️ 비교 대상</div>
-        <div id="comp-target" class="wc-card empty">좌클릭 하세요</div>
-        <button class="win-btn win-red" onclick="recordCompare('target')">🏆 이 작품 승리!</button>
-      </div>
-    </div>
-    <div class="compare-bottom-layout">
-      <div class="comp-half">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: flex-end;">
-          <h3 style="color:#555; margin:0;">📝 분석 기록</h3>
-          <button onclick="clearLogs()" style="padding: 6px 12px; font-size:12px; background:#fee2e2; color:#ef4444; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🗑️ 기록 삭제</button>
+        <div id="keyword-mode" class="mode-area" style="display: none; flex-direction: column; gap: 15px;">
+          <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="tier-label" style="background:#F3F4F6; color:#374151; font-size:14px; flex-direction: column; justify-content: center;">📖 장르/배경<button class="tier-comp-btn" style="margin-top:10px; background:#4B5563; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-genre', 'pool-genre', '장르/배경')">⚖️ 비교</button></div>
+            <div class="ranking-list tier-items" data-zone="rank-genre" style="flex:1; display:flex; flex-wrap:wrap; padding:10px; gap:8px; background:white;"></div>
+          </div>
+          <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="tier-label" style="background:#E0F2FE; color:#0284C7; font-size:14px; flex-direction: column; justify-content: center;">👑 공 키워드<button class="tier-comp-btn" style="margin-top:10px; background:#0284C7; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-top', 'pool-top', '공 키워드')">⚖️ 비교</button></div>
+            <div class="ranking-list tier-items" data-zone="rank-top" style="flex:1; display:flex; flex-wrap:wrap; padding:10px; gap:8px; background:white;"></div>
+          </div>
+          <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="tier-label" style="background:#FFE4E6; color:#E11D48; font-size:14px; flex-direction: column; justify-content: center;">🌸 수 키워드<button class="tier-comp-btn" style="margin-top:10px; background:#E11D48; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-bottom', 'pool-bottom', '수 키워드')">⚖️ 비교</button></div>
+            <div class="ranking-list tier-items" data-zone="rank-bottom" style="flex:1; display:flex; flex-wrap:wrap; padding:10px; gap:8px; background:white;"></div>
+          </div>
+          <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <div class="tier-label" style="background:#FEF3C7; color:#D97706; font-size:14px; flex-direction: column; justify-content: center;">🔗 관계/전개<button class="tier-comp-btn" style="margin-top:10px; background:#D97706; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-plot', 'pool-plot', '관계/전개')">⚖️ 비교</button></div>
+            <div class="ranking-list tier-items" data-zone="rank-plot" style="flex:1; display:flex; flex-wrap:wrap; padding:10px; gap:8px; background:white;"></div>
+          </div>
         </div>
-        <div id="comp-log" class="comp-log-area"></div>
       </div>
-      <div class="comp-half">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; align-items: flex-end;">
-          <h3 style="color:#555; margin:0;">📊 실시간 데이터 랭킹</h3>
-          <button id="btn-apply-rank" onclick="applyRankingToTier()" style="display:none; padding: 6px 12px; font-size:12px; background:#10B981; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">✅ 결과 박스로 자동 정렬 적용</button>
-        </div>
-        <div id="comp-analysis" class="comp-analysis-area"></div>
-      </div>
-    </div>
-    <div style="margin-top: 40px; text-align: left;">
-      <h3 style="margin-bottom: 15px;">비교할 후보 목록</h3>
-      <div id="comp-list" class="comp-list-area"></div>
     </div>
   </div>
 
+  <div id="category-rank-screen" style="display: none;" class="game-screen"><div class="header" style="padding-top: 20px;"><button class="go-workspace-btn">⬅</button></div><div class="wc-title" id="cat-rank-title" style="text-align: left;">세부 순위</div><div class="content-area"><div class="tier-row"><div class="tier-label" style="background:#EEF2FF; color:#4F46E5;">🎨 작화</div><div class="tier-items cat-list" id="cat-art-list"></div></div><div class="tier-row"><div class="tier-label" style="background:#FDF4FF; color:#C026D3;">📖 스토리</div><div class="tier-items cat-list" id="cat-story-list"></div></div><div class="tier-row"><div class="tier-label" style="background:#FFF1F2; color:#E11D48;">🔥 씬</div><div class="tier-items cat-list" id="cat-scene-list"></div></div></div></div>
+  <div id="worldcup-screen" style="display: none;" class="game-screen"><div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div><div class="wc-title">웹툰 이상형 월드컵</div><div id="wc-round-text" class="wc-round">준비 중...</div><div class="wc-container" id="wc-play-area"><div id="wc-left" class="wc-card" onclick="selectWcItem('left')">왼쪽</div><div class="wc-vs">VS</div><div id="wc-right" class="wc-card" onclick="selectWcItem('right')">오른쪽</div></div><div id="wc-result-area" style="display: none; text-align: center; margin-top: 30px;"><h2 style="margin-bottom: 20px;">🏆 최종 랭킹 🏆</h2><div id="wc-ranking-list" class="wc-ranking-box"></div></div></div>
+  <div id="compare-screen" style="display: none;" class="game-screen"><div class="header" style="padding-top: 20px;"><button class="go-home-btn" id="comp-back-btn">⬅</button></div><div class="wc-title" id="comp-title">1:1 집중 비교소</div><div class="compare-container"><div class="compare-slot"><div class="compare-label" style="background:#4F46E5;">📌 기준 작품</div><div id="comp-fixed" class="wc-card empty">우클릭 하세요</div><button class="win-btn win-blue" onclick="recordCompare('fixed')">🏆 승리!</button></div><div class="wc-vs">VS</div><div class="compare-slot"><div class="compare-label" style="background:#E11D48;">⚔️ 비교 대상</div><div id="comp-target" class="wc-card empty">좌클릭 하세요</div><button class="win-btn win-red" onclick="recordCompare('target')">🏆 승리!</button></div></div><div class="compare-bottom-layout"><div class="comp-half"><h3 style="margin-bottom:10px;">📝 분석 기록</h3><div id="comp-log" class="comp-log-area"></div></div><div class="comp-half"><div style="display:flex; justify-content:space-between;"><h3 style="margin-bottom:10px;">📊 실시간 랭킹</h3><button id="btn-apply-rank" onclick="applyRankingToTier()" style="display:none; font-size:12px; background:#10B981; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;">✅ 적용</button></div><div id="comp-analysis" class="comp-analysis-area"></div></div></div><div style="margin-top: 40px;"><h3 style="margin-bottom: 15px;">후보 목록</h3><div id="comp-list" class="comp-list-area"></div></div></div>
+  
   <div id="tagging-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">🏷️ 작품 키워드 서재</div>
-    <p style="color:#666; margin-bottom: 20px; text-align: left;">작품을 클릭해서 키워드를 드래그해 정리해 보세요! (오른쪽 풀에서 키워드 추가/삭제 가능)</p>
-
     <div class="tagging-layout">
       <div class="tagging-left">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f3f4f6;">
-          <h3 style="margin:0; font-size:18px; color:#374151;">내 서재 목록</h3>
-          <button id="btn-show-add-work" style="background:#10B981; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">➕ 새 작품 추가</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #f3f4f6; padding-bottom:10px;">
+          <h3 style="margin:0; font-size:18px;">내 서재 목록</h3>
+          <button id="btn-show-add-work" style="background:#10B981; color:white; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:bold;">➕ 새 작품 추가</button>
         </div>
-
-        <div id="add-work-form" style="display: none; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <div id="add-work-form" style="display: none; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 15px;">
           <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <input type="text" id="new-work-title" placeholder="작품명 (필수)" style="flex: 2; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-            <input type="text" id="new-work-top" placeholder="공 이름 (선택)" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
-            <input type="text" id="new-work-bottom" placeholder="수 이름 (선택)" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+            <input type="text" id="new-work-title" placeholder="작품명 (필수)" style="flex: 2; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+            <input type="text" id="new-work-top" placeholder="공 이름" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+            <input type="text" id="new-work-bottom" placeholder="수 이름" style="flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
           </div>
           <div style="display: flex; justify-content: flex-end; gap: 10px;">
-            <button onclick="document.getElementById('add-work-form').style.display='none'" style="padding: 8px 16px; background:#f3f4f6; color:#374151; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">취소</button>
-            <button id="btn-confirm-add-work" style="background:#3B82F6; color:white; padding: 8px 16px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">완료</button>
+            <button onclick="document.getElementById('add-work-form').style.display='none'" style="padding: 8px 16px; background:#f3f4f6; border:none; border-radius:6px; cursor:pointer;">취소</button>
+            <button id="btn-confirm-add-work" style="background:#3B82F6; color:white; padding: 8px 16px; border:none; border-radius:6px; cursor:pointer;">완료</button>
           </div>
         </div>
-
         <div id="work-grid-view" class="work-grid"></div>
-
         <div id="work-detail-view" style="display: none;">
           <div class="work-detail-box">
             <div class="detail-header">
               <h3 class="detail-title" id="detail-work-title">작품명</h3>
-              <div>
-                <button class="btn-delete-work" onclick="deleteTaggingWork()" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:bold; margin-right: 8px;">🗑️ 삭제</button>
-                <button class="btn-back-grid" onclick="closeWorkDetail()">⬅ 전체 목록</button>
-              </div>
+              <div><button class="btn-delete-work" onclick="deleteTaggingWork()" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 16px; border-radius:8px; margin-right:8px; cursor:pointer;">🗑️ 삭제</button><button class="btn-back-grid" onclick="closeWorkDetail()">⬅ 전체 목록</button></div>
             </div>
-            
-            <div class="tag-row">
-              <div class="tag-label" style="color:#374151;">장르/전개</div>
-              <div class="tag-drop-zone" id="dz-title" data-target="title"></div>
-            </div>
-            
-            <div class="tag-row">
-              <div class="tag-label" style="color:#0284C7; background:#E0F2FE;" id="detail-top-name">공</div>
-              <div class="tag-drop-zone" id="dz-top" data-target="top"></div>
-            </div>
-            
-            <div class="tag-row">
-              <div class="tag-label" style="color:#E11D48; background:#FFE4E6;" id="detail-bottom-name">수</div>
-              <div class="tag-drop-zone" id="dz-bottom" data-target="bottom"></div>
-            </div>
+            <div class="tag-row"><div class="tag-label">장르/전개</div><div class="tag-drop-zone" id="dz-title" data-target="title"></div></div>
+            <div class="tag-row"><div class="tag-label" style="color:#0284C7; background:#E0F2FE;" id="detail-top-name">공</div><div class="tag-drop-zone" id="dz-top" data-target="top"></div></div>
+            <div class="tag-row"><div class="tag-label" style="color:#E11D48; background:#FFE4E6;" id="detail-bottom-name">수</div><div class="tag-drop-zone" id="dz-bottom" data-target="bottom"></div></div>
           </div>
         </div>
       </div>
-      
       <div class="tagging-right" id="keyword-pool-container"></div>
     </div>
   </div>
@@ -252,31 +196,61 @@
   <div id="read-works-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📖 내가 본 웹툰 컬렉션</div>
-    <p style="color:#666; margin-bottom: 20px; text-align: left;">표의 각 줄을 꾹 눌러 드래그하면 엑셀처럼 순서를 바꿀 수 있어요!</p>
     
     <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
       <input type="text" id="new-read-work-title" placeholder="새 작품 직접 입력" style="flex:1; min-width:150px; padding:10px; border-radius:8px; border:1px solid #d1d5db;">
       <select id="new-read-work-platform" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; outline:none;">
-        <option value="bg-skyblue">리디 (하늘색)</option>
-        <option value="bg-red">레진 (빨간색)</option>
-        <option value="bg-white">봄툰 등 (흰색)</option>
+        <option value="bg-skyblue">리디 (하늘색)</option><option value="bg-red">레진 (빨간색)</option><option value="bg-white">봄툰 등 (흰색)</option>
       </select>
       <button onclick="addReadWork()" style="background:#6366F1; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">추가</button>
-      
-      <button onclick="saveReadWorksManual()" style="background:#10B981; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; margin-left:10px; box-shadow: 0 2px 5px rgba(16,185,129,0.3);">💾 표 순서 저장</button>
+      <button onclick="saveReadWorksManual()" style="background:#10B981; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; margin-left:10px;">💾 표 순서 저장</button>
 
       <select id="sort-read-works" onchange="sortReadWorksList(this.value)" style="padding:10px; border-radius:8px; border:2px solid #6366F1; outline:none; font-weight:bold; background:#e0e7ff; margin-left:auto; cursor:pointer;">
         <option value="custom">✋ 내맘대로 드래그 순서</option>
-        <option value="heart">♥️ 내 취향 랭킹 (최상단부터)</option>
+        <option value="latest">🆕 최근 추가순</option> <option value="heart">♥️ 내 취향 랭킹 (최상단부터)</option>
         <option value="abc">🔠 ㄱㄴㄷ 이름순</option>
       </select>
     </div>
-
-    <div id="read-works-grid" class="work-table-container">
-      </div>
+    <div id="read-works-grid" class="work-table-container"></div>
   </div>
 
-  <script src="script.js?v=40"></script>
+  <div id="reading-log-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
+    <div class="wc-title" style="text-align: left;">📝 나만의 독서 기록장</div>
+    <p style="color:#666; margin-bottom: 20px; text-align: left;">내가 읽은 작품에 대한 감상과 사진을 책 모양으로 예쁘게 남겨보세요.</p>
+
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+      <button onclick="openLogModal()" style="background:#14B8A6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px;">➕ 새로운 기록 추가 (ADD)</button>
+      <select id="sort-reading-logs" onchange="sortReadingLogs(this.value)" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; font-weight:bold; cursor:pointer;">
+        <option value="oldest">🕰️ 과거순 (기본)</option>
+        <option value="latest">🆕 최신순</option>
+      </select>
+    </div>
+
+    <div id="reading-log-grid" class="book-grid"></div>
+  </div>
+
+  <div id="log-modal" class="modal-overlay" style="display: none;">
+    <div class="log-modal-box">
+      <h3 id="log-modal-title" style="margin-bottom:15px;">새로운 독서 기록</h3>
+      <input type="hidden" id="log-id">
+      <input type="text" id="log-title" placeholder="작품명 (제목)" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; font-weight:bold;">
+      <textarea id="log-content" placeholder="감상평이나 기억에 남는 내용을 적어주세요!" style="width:100%; height:150px; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; resize:none;"></textarea>
+      
+      <div style="text-align:left; margin-bottom:20px;">
+        <label for="log-image" style="background:#e5e7eb; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold;">🖼️ 내 갤러리에서 사진 첨부</label>
+        <input type="file" id="log-image" accept="image/*" style="display:none;" onchange="previewLogImage(event)">
+        <div id="log-image-preview" style="margin-top:10px; max-height:150px; overflow:hidden; border-radius:6px;"></div>
+      </div>
+
+      <div class="modal-buttons" style="justify-content:flex-end;">
+        <button onclick="closeLogModal()" class="btn-cancel">취소</button>
+        <button onclick="saveReadingLog()" class="btn-confirm" style="background:#14B8A6;">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js?v=45"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
