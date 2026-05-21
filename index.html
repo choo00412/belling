@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=45">
+  <link rel="stylesheet" href="style.css?v=50">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -34,12 +34,13 @@
       <div class="dash-section">
         <h2 class="dash-title">🎮 플레이 그라운드</h2>
         <div class="dash-grid">
-          <button id="btn-new-tier" class="dash-card bg-yellow">✨ 직접 티어 만들기</button>
-          <button id="btn-new-ranking" class="dash-card bg-yellow">🏆 직접 랭킹 만들기</button>
-          <button id="btn-auto-webtoon-tier" class="dash-card bg-blue">📚 웹툰 티어 (자동)</button>
-          <button id="btn-auto-keyword-tier" class="dash-card bg-orange">🔑 취향 키워드 랭킹</button>
-          <button id="btn-worldcup" class="dash-card bg-purple">⚔️ 이상형 월드컵</button>
-          <button id="btn-compare" class="dash-card bg-green">⚖️ 1:1 비교소</button>
+          <button id="btn-new-tier" class="dash-card bg-primary">✨ 직접 티어 만들기</button>
+          <button id="btn-new-ranking" class="dash-card bg-primary-dark">🏆 직접 랭킹 만들기</button>
+          <button id="btn-auto-webtoon-tier" class="dash-card bg-secondary">📚 웹툰 티어 (자동)</button>
+          <button id="btn-auto-webtoon-ranking" class="dash-card bg-secondary">🏆 웹툰 랭킹 (자동)</button>
+          <button id="btn-auto-keyword-tier" class="dash-card bg-tertiary">🔑 취향 키워드 랭킹</button>
+          <button id="btn-worldcup" class="dash-card bg-tertiary-dark">⚔️ 이상형 월드컵</button>
+          <button id="btn-compare" class="dash-card bg-accent">⚖️ 1:1 비교소</button>
         </div>
       </div>
 
@@ -47,10 +48,10 @@
         <h2 class="dash-title">📚 나의 서재 & 기록</h2>
         <div class="dash-grid">
           <button id="btn-open-read-works" class="dash-card bg-indigo">📖 내가 본 웹툰 컬렉션</button>
-          <button id="btn-open-tagging" class="dash-card bg-pink">🏷️ 작품 키워드 서재</button>
-          <button id="btn-open-reading-log" class="dash-card bg-teal">📝 독서 기록장 (리뷰)</button>
-          <button id="btn-open-wishlist" class="dash-card bg-rose">🛒 보고 싶은 위시리스트</button>
-          <button id="btn-open-scrap" class="dash-card bg-orange-dark">📌 스크랩 보드</button>
+          <button id="btn-open-tagging" class="dash-card bg-indigo-dark">🏷️ 작품 키워드 서재</button>
+          <button id="btn-open-reading-log" class="dash-card bg-purple">📝 독서 기록장 (리뷰)</button>
+          <button id="btn-open-wishlist" class="dash-card bg-purple-dark">🛒 보고 싶은 위시리스트</button>
+          <button id="btn-open-scrap" class="dash-card bg-dark">📌 스크랩 보드</button>
         </div>
       </div>
     </div>
@@ -62,7 +63,6 @@
   <div id="wishlist-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">🛒 보고 싶은 위시리스트</div>
-    <p style="color:#666; margin-bottom: 30px; text-align: left;">나중에 볼 작품들을 메모하고, 다 읽으면 체크하세요!</p>
     <div class="wishlist-section">
       <div class="wish-input-box">
         <input type="text" id="wish-input" placeholder="새로운 작품 이름을 입력하세요">
@@ -75,7 +75,6 @@
   <div id="scrap-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📌 스크랩 보드</div>
-    <p style="color:#666; margin-bottom: 30px; text-align: left;">좋아하는 링크, 이미지, 주접글을 남겨보세요!</p>
     <div class="scrap-input-section">
       <input type="text" id="scrap-url" placeholder="복사한 링크(URL)를 붙여넣으세요">
       <textarea id="scrap-comment" placeholder="여기에 주접을 마음껏 떨으세요"></textarea>
@@ -207,7 +206,8 @@
 
       <select id="sort-read-works" onchange="sortReadWorksList(this.value)" style="padding:10px; border-radius:8px; border:2px solid #6366F1; outline:none; font-weight:bold; background:#e0e7ff; margin-left:auto; cursor:pointer;">
         <option value="custom">✋ 내맘대로 드래그 순서</option>
-        <option value="latest">🆕 최근 추가순</option> <option value="heart">♥️ 내 취향 랭킹 (최상단부터)</option>
+        <option value="latest">🆕 최근 추가순</option>
+        <option value="heart">♥️ 내 취향 랭킹 (최상단부터)</option>
         <option value="abc">🔠 ㄱㄴㄷ 이름순</option>
       </select>
     </div>
@@ -217,40 +217,65 @@
   <div id="reading-log-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📝 나만의 독서 기록장</div>
-    <p style="color:#666; margin-bottom: 20px; text-align: left;">내가 읽은 작품에 대한 감상과 사진을 책 모양으로 예쁘게 남겨보세요.</p>
+    <p style="color:#666; margin-bottom: 20px; text-align: left;">작품(책)을 먼저 추가하고, 책을 클릭해서 여러 개의 독서록을 남겨보세요.</p>
 
     <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-      <button onclick="openLogModal()" style="background:#14B8A6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px;">➕ 새로운 기록 추가 (ADD)</button>
-      <select id="sort-reading-logs" onchange="sortReadingLogs(this.value)" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; font-weight:bold; cursor:pointer;">
+      <button onclick="openBookModal()" style="background:#14B8A6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px;">➕ 새로운 책 추가</button>
+    </div>
+    <div id="reading-book-grid" class="book-grid"></div>
+  </div>
+
+  <div id="reading-detail-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;">
+      <button onclick="goBackToBooks()" style="padding: 10px 15px; background: white; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">⬅ 책장으로</button>
+    </div>
+    <div class="wc-title" id="detail-book-title" style="text-align: left; color:#14B8A6;">작품명</div>
+    
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items:center;">
+      <button onclick="openEntryModal()" style="background:#3B82F6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:14px;">✍️ 이 책에 글쓰기</button>
+      <select id="sort-reading-entries" onchange="sortReadingEntries(this.value)" style="padding:8px; border-radius:8px; border:1px solid #d1d5db; font-weight:bold; cursor:pointer;">
         <option value="oldest">🕰️ 과거순 (기본)</option>
         <option value="latest">🆕 최신순</option>
       </select>
     </div>
-
-    <div id="reading-log-grid" class="book-grid"></div>
+    <div id="reading-entry-list" class="entry-list-container"></div>
   </div>
 
-  <div id="log-modal" class="modal-overlay" style="display: none;">
+  <div id="book-modal" class="modal-overlay" style="display: none;">
     <div class="log-modal-box">
-      <h3 id="log-modal-title" style="margin-bottom:15px;">새로운 독서 기록</h3>
-      <input type="hidden" id="log-id">
-      <input type="text" id="log-title" placeholder="작품명 (제목)" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; font-weight:bold;">
-      <textarea id="log-content" placeholder="감상평이나 기억에 남는 내용을 적어주세요!" style="width:100%; height:150px; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; resize:none;"></textarea>
-      
+      <h3 id="book-modal-title" style="margin-bottom:15px;">새로운 책 만들기</h3>
+      <input type="hidden" id="book-id">
+      <input type="text" id="book-title" placeholder="작품명 (제목)" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; font-weight:bold;">
       <div style="text-align:left; margin-bottom:20px;">
-        <label for="log-image" style="background:#e5e7eb; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold;">🖼️ 내 갤러리에서 사진 첨부</label>
-        <input type="file" id="log-image" accept="image/*" style="display:none;" onchange="previewLogImage(event)">
-        <div id="log-image-preview" style="margin-top:10px; max-height:150px; overflow:hidden; border-radius:6px;"></div>
+        <label for="book-image" style="background:#e5e7eb; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold;">🖼️ 표지 사진 (선택)</label>
+        <input type="file" id="book-image" accept="image/*" style="display:none;" onchange="previewImage(event, 'book-image-preview')">
+        <div id="book-image-preview" style="margin-top:10px; max-height:150px; overflow:hidden; border-radius:6px;"></div>
       </div>
-
       <div class="modal-buttons" style="justify-content:flex-end;">
-        <button onclick="closeLogModal()" class="btn-cancel">취소</button>
-        <button onclick="saveReadingLog()" class="btn-confirm" style="background:#14B8A6;">저장</button>
+        <button onclick="closeBookModal()" class="btn-cancel">취소</button>
+        <button onclick="saveReadingBook()" class="btn-confirm" style="background:#14B8A6;">만들기</button>
       </div>
     </div>
   </div>
 
-  <script src="script.js?v=45"></script>
+  <div id="entry-modal" class="modal-overlay" style="display: none;">
+    <div class="log-modal-box">
+      <h3 id="entry-modal-title" style="margin-bottom:15px;">독서 기록 작성</h3>
+      <input type="hidden" id="entry-id">
+      <textarea id="entry-content" placeholder="감상평이나 기억에 남는 내용을 적어주세요!" style="width:100%; height:150px; padding:12px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; resize:none;"></textarea>
+      <div style="text-align:left; margin-bottom:20px;">
+        <label for="entry-image" style="background:#e5e7eb; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold;">🖼️ 갤러리에서 사진 첨부 (선택)</label>
+        <input type="file" id="entry-image" accept="image/*" style="display:none;" onchange="previewImage(event, 'entry-image-preview')">
+        <div id="entry-image-preview" style="margin-top:10px; max-height:150px; overflow:hidden; border-radius:6px;"></div>
+      </div>
+      <div class="modal-buttons" style="justify-content:flex-end;">
+        <button onclick="closeEntryModal()" class="btn-cancel">취소</button>
+        <button onclick="saveReadingEntry()" class="btn-confirm">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js?v=50"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";

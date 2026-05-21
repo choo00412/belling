@@ -1,5 +1,5 @@
 // ====================================================================
-// 1. 초기 변수 세팅 (파이어베이스 연동 포함)
+// 1. 초기 변수 세팅
 // ====================================================================
 let projects = {};
 let wishList = [];
@@ -9,7 +9,8 @@ let deletedCands = [];
 let taggedWorksData = [];
 let readWorksList = [];
 let tagCategories = [];
-let readingLogs = []; // 🚀 [새 기능] 독서 기록장 배열
+// 🚀 독서 기록장 (책장 구조: 각 책 안에 entries 배열이 존재)
+let readingBooks = []; 
 
 let currentId = null;
 let draggedItem = null;
@@ -19,6 +20,7 @@ let pendingProjectType = '';
 let currentCompareTier = null; 
 let currentRankArr = [];
 let draggedReadWorkIndex = null;
+let currentReadingBookId = null; // 현재 열려있는 책 ID
 
 const initialWorksData = [
   {id: "w1", title: "징크스", top: "주재경", bottom: "김단", tags: { title: [], top: [], bottom: [] }},
@@ -50,7 +52,7 @@ const initialTagCategories = [
 const heartRankData = [ "징크스", "홍실퀘스트", "물가의 밤", "FlashLight", "일간알바", "야화첩", "힐링 패러독스", "미혹의 경계", "스테이지 비하인드", "개구리 삶기", "해피투게더", "테라노 군과 쿠마자키 군", "드래그리스·섹스", "상극", "제물 남편", "언슬립", "소꿉친구와 감금당했다", "장미와 샴페인", "너는 나의 세상", "드라이버스 하이", "뱀 굴", "노 모럴", "호식이 이야기", "리미티드 런", "백라이트", "스케치", "고양이 테라피", "너무 야한 후카미군", "하이스쿨 솔티 하트", "30살까지 동정이면 마법사가 될 수 있대", "패션", "외사랑", "신을 품는 방법", "걷지않는다리", "아기 삶을 낳아줘, 나 미치는 꼴 보기 싫으면!", "남보다 못한 사이", "시거나 떫거나", "향의 경계", "그래서 누가 깔린건데?", "논제로섬", "백련이 피는 온도", "가장 완벽한 도형", "강아지는 건드리지 마라", "키스 미 이프 유 캔", "필 마이 베네핏", "너드프로젝트", "피자배달부와 골드팰리스", "독점! 마이 히어로", "짝사랑 필승법", "비밀이 많은 XX", "공과 사는 구분해!", "러브 오더", "망종", "솔트 소사이어티", "오메가 콤플렉스", "친구새끼들한테 따먹혔습니다", "페이크 팩트 립스", "알파 트라우마", "운명의 짝이 너라니", "내가 네 운명의 가이드는 아니지만", "그 공작가 노예의 음란한 속사정", "아이돌 보러 간다며!", "스미르나 앤 카프리", "망돌 콤플렉스", "40까지 하고 싶은 10가지 일", "은총의 밤", "자두를 누르지 마시오", "선 넘는 사이", "실연 중독", "바라메 강림하여 주소서", "박하사탕", "풀북", "테라피 게임", "캐시 오어 크레딧", "더블다운", "뼈와 꽃잎", "누군가 정해둔 것처럼", "소꿉친구로는 참을 수 없어", "백야의 꽃길", "감금당해 주세요!", "엑시덴탈 베이비", "코드네임 아나스타샤", "해빙곡선", "원룸 조교님", "시시포스의 개들", "유원불변", "방문 판매 왔습니다!", "일요일의 구원자", "가장 깊은 고백", "엎질러진 피", "녹색전상", "위험한 편의점", "형제애", "알페가", "시맨틱 에러", "슬립 업", "등쳐먹는 연애", "이리 사랑스러운 너", "넌 내게 수치심을 줬어❤️", "유성이 내리는 우주", "럭키 다이스", "피앙세는 토마토", "환장의 가이딩", "코티지 가든", "솔직하고 대담하게", "XX하면 알 수 있지 않을까?", "당신이 방심한 사이", "가슴 지명", "갱생의 여지", "나츠메 씨는 개발당하고 싶다", "럽미닥터!", "녹색전상 : 몽리 / 녹색전상", "파도의 해안", "해 뜨는 집", "멍멍한 관계", "조개소년 : 발화 / 조개소년", "해와 달의 공생관계", "아우토반 로맨스", "반하는 약을 먹은 완벽남이 위험합니다! 2권", "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "하절기", "인 마이 배드", "꽃이 지는 연못", "구른 김에 왕까지", "러브 올 플레이", "스쿠프", "작전명 마레오" ];
 
 // ====================================================================
-// 2. 파이어베이스 데이터 로드 및 저장 (안정화 완벽판)
+// 2. 파이어베이스 데이터 로드 및 저장
 // ====================================================================
 async function initApp() {
   if (!window.db) { setTimeout(initApp, 100); return; }
@@ -65,7 +67,7 @@ async function initApp() {
       taggedWorksData = data.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData));
       tagCategories = data.tagCategories || initialTagCategories;
       readWorksList = data.readWorksList || [];
-      readingLogs = data.readingLogs || []; // 🚀 독서 기록장 로드
+      readingBooks = data.readingBooks || []; // 🚀 독서 책장 로드
     } else {
       taggedWorksData = JSON.parse(JSON.stringify(initialWorksData));
       tagCategories = initialTagCategories;
@@ -80,7 +82,7 @@ async function initApp() {
   renderHome();
   if(document.getElementById('work-grid-view')) renderTaggingGrid();
   if(document.getElementById('read-works-grid')) renderReadWorks();
-  if(document.getElementById('reading-log-grid')) renderReadingLogs(); // 🚀 독서 기록장 렌더링
+  if(document.getElementById('reading-book-grid')) renderReadingBooks();
 }
 initApp();
 
@@ -89,7 +91,7 @@ window.saveAllData = async function() {
   try {
     const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     const dbRef = doc(window.db, "ti_me_data", "my_shared_data");
-    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList, readingLogs });
+    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList, readingBooks });
   } catch (error) { console.error("데이터 저장 실패:", error); }
 }
 
@@ -127,6 +129,7 @@ function getNextTitle(baseTitle) {
 }
 
 document.getElementById('btn-auto-webtoon-tier').addEventListener('click', () => createAutoProject('tier'));
+document.getElementById('btn-auto-webtoon-ranking').addEventListener('click', () => createAutoProject('ranking')); // 💡 랭킹 버튼 연결
 document.getElementById('btn-auto-keyword-tier').addEventListener('click', () => {
   const id = Date.now().toString();
   projects[id] = { id, title: getNextTitle('🔑 내 취향 키워드 랭킹'), type: 'tier', subType: 'keyword', items: [] };
@@ -167,13 +170,12 @@ function renderHome() {
 window.deleteProject = function(id) { if (confirm("정말 삭제하시겠습니까?")) { delete projects[id]; saveData(); renderHome(); } }
 
 function hideAllScreens() {
-  ['home-screen', 'workspace-screen', 'worldcup-screen', 'compare-screen', 'wishlist-screen', 'scrap-screen', 'category-rank-screen', 'tagging-screen', 'read-works-screen', 'reading-log-screen'].forEach(id => {
+  ['home-screen', 'workspace-screen', 'worldcup-screen', 'compare-screen', 'wishlist-screen', 'scrap-screen', 'category-rank-screen', 'tagging-screen', 'read-works-screen', 'reading-log-screen', 'reading-detail-screen'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.style.display = 'none';
   });
 }
 
-// 💡 홈 버튼 이벤트 연결 💡
 document.querySelectorAll('.go-home-btn').forEach(btn => {
   btn.addEventListener('click', (e) => { 
     hideAllScreens(); 
@@ -190,7 +192,6 @@ window.openProject = function(id) {
   currentId = id; const p = projects[id];
   document.getElementById('current-project-title').innerText = p.title;
   
-  // 모든 모드 화면 숨기기
   ['tier-mode', 'ranking-mode', 'keyword-mode'].forEach(i => {
       const el = document.getElementById(i);
       if(el) el.style.display = 'none';
@@ -199,7 +200,6 @@ window.openProject = function(id) {
   if (p.subType === 'keyword') {
     document.getElementById('webtoon-pools').style.display = 'none'; 
     document.getElementById('keyword-pools').style.display = 'block';
-    // 키워드 모드 화면 켜기!
     const kwMode = document.getElementById('keyword-mode');
     if(kwMode) kwMode.style.display = 'flex';
   } else {
@@ -263,9 +263,8 @@ function updateRanking() {
   });
 }
 
-
 // ====================================================================
-// 💡 위시리스트 & 스크랩
+// 💡 위시리스트 & 스크랩 보드
 // ====================================================================
 document.getElementById('btn-open-wishlist').addEventListener('click', () => { hideAllScreens(); document.getElementById('wishlist-screen').style.display = 'block'; renderWishList(); });
 window.addWishItem = function() {
@@ -522,7 +521,7 @@ function setupDropZones() {
 }
 
 // ====================================================================
-// 🚀 내가 본 작품 컬렉션 (리스트 뷰)
+// 🚀 내가 본 작품 컬렉션 (리스트 뷰 & 최신순 정렬)
 // ====================================================================
 function initReadWorksList() {
   if (readWorksList && readWorksList.length > 0) return;
@@ -543,9 +542,7 @@ document.getElementById('btn-open-read-works').addEventListener('click', () => {
   hideAllScreens(); document.getElementById('read-works-screen').style.display = 'block'; renderReadWorks();
 });
 
-window.saveReadWorksManual = function() {
-  saveAllData(); alert("현재 리스트 순서가 완벽하게 저장되었습니다!");
-}
+window.saveReadWorksManual = function() { saveAllData(); alert("현재 리스트 순서가 완벽하게 저장되었습니다!"); }
 
 window.sortReadWorksList = function(type) {
   if (type === 'abc') {
@@ -556,11 +553,11 @@ window.sortReadWorksList = function(type) {
       if(idxA === -1) idxA = 9999; if(idxB === -1) idxB = 9999;
       return idxA - idxB;
     });
-  } else if (type === 'latest') { // 💡 최신순 추가
+  } else if (type === 'latest') { // 💡 최신 추가순 정렬 로직
     readWorksList.sort((a, b) => {
-      const idA = parseInt(a.id.split('_')[1] || 0);
-      const idB = parseInt(b.id.split('_')[1] || 0);
-      return idB - idA; // 숫자가 큰(최근 시간) 것이 위로
+      const idA = parseInt(a.id.replace('rw_', '')) || 0;
+      const idB = parseInt(b.id.replace('rw_', '')) || 0;
+      return idB - idA;
     });
   }
   renderReadWorks(); 
@@ -572,7 +569,6 @@ window.addReadWork = function() {
   let platform = colorClass === 'bg-skyblue' ? '리디' : (colorClass === 'bg-red' ? '레진' : '봄툰 등');
   
   if(!name) return alert("작품명을 입력해주세요!");
-  // id에 Date.now()를 넣어서 최신순 정렬에 써먹습니다.
   readWorksList.unshift({ id: 'rw_'+Date.now(), name: name, platform: platform, colorClass: colorClass });
   saveReadWorks(); renderReadWorks();
   document.getElementById('new-read-work-title').value = '';
@@ -588,7 +584,6 @@ function renderReadWorks() {
   const container = document.getElementById('read-works-grid'); container.innerHTML = '';
   
   readWorksList.forEach((work, index) => {
-    // 💡 색상 자동 복구 💡
     if (!work.colorClass || !work.platform || work.platform === "undefined") {
       work.colorClass = 'bg-white'; work.platform = '봄툰 등';
       webtoonCategories.forEach(cat => {
@@ -636,107 +631,187 @@ function renderReadWorks() {
 }
 
 // ====================================================================
-// 🚀 [새 기능] 독서 기록장 (리뷰장)
+// 🚀 [완전 개편] 독서 기록장 (책장 -> 다이어리 구조)
 // ====================================================================
-let currentLogEditId = null;
 
-document.getElementById('btn-open-reading-log').addEventListener('click', () => {
-  hideAllScreens(); document.getElementById('reading-log-screen').style.display = 'block'; renderReadingLogs();
-});
-
-window.openLogModal = function(id = null) {
-  currentLogEditId = id;
-  const titleEl = document.getElementById('log-title');
-  const contentEl = document.getElementById('log-content');
-  const imagePreview = document.getElementById('log-image-preview');
-  
-  if (id) {
-    const log = readingLogs.find(l => l.id === id);
-    document.getElementById('log-modal-title').innerText = "독서 기록 수정";
-    titleEl.value = log.title;
-    contentEl.value = log.content;
-    imagePreview.innerHTML = log.img ? `<img src="${log.img}" style="width:100%; border-radius:6px; object-fit:cover;">` : '';
-  } else {
-    document.getElementById('log-modal-title').innerText = "새로운 독서 기록";
-    titleEl.value = ''; contentEl.value = ''; imagePreview.innerHTML = '';
-    document.getElementById('log-image').value = '';
-  }
-  document.getElementById('log-modal').style.display = 'flex';
-}
-
-window.closeLogModal = function() {
-  document.getElementById('log-modal').style.display = 'none';
-}
-
-window.previewLogImage = function(event) {
+// --- 공통 이미지 미리보기 ---
+window.previewImage = function(event, previewId) {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onload = function(e) {
-      document.getElementById('log-image-preview').innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:6px; object-fit:cover;">`;
+      document.getElementById(previewId).innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:6px; object-fit:cover;">`;
     }
     reader.readAsDataURL(file);
   }
 }
 
-window.saveReadingLog = function() {
-  const title = document.getElementById('log-title').value.trim();
-  const content = document.getElementById('log-content').value.trim();
-  const previewImg = document.getElementById('log-image-preview').querySelector('img');
-  const imgData = previewImg ? previewImg.src : null;
+// --- 1. 책장 (Book) 로직 ---
+document.getElementById('btn-open-reading-log').addEventListener('click', () => {
+  hideAllScreens(); document.getElementById('reading-log-screen').style.display = 'block'; renderReadingBooks();
+});
+
+window.openBookModal = function(id = null) {
+  const titleEl = document.getElementById('book-title');
+  const previewEl = document.getElementById('book-image-preview');
+  document.getElementById('book-id').value = id || '';
+  
+  if (id) {
+    const book = readingBooks.find(b => b.id == id);
+    document.getElementById('book-modal-title').innerText = "책 정보 수정";
+    titleEl.value = book.title;
+    previewEl.innerHTML = book.coverImg ? `<img src="${book.coverImg}" style="width:100%; border-radius:6px; object-fit:cover;">` : '';
+  } else {
+    document.getElementById('book-modal-title').innerText = "새로운 책 만들기";
+    titleEl.value = ''; previewEl.innerHTML = '';
+    document.getElementById('book-image').value = '';
+  }
+  document.getElementById('book-modal').style.display = 'flex';
+}
+window.closeBookModal = function() { document.getElementById('book-modal').style.display = 'none'; }
+
+window.saveReadingBook = function() {
+  const id = document.getElementById('book-id').value;
+  const title = document.getElementById('book-title').value.trim();
+  const previewImg = document.getElementById('book-image-preview').querySelector('img');
+  const coverImg = previewImg ? previewImg.src : null;
 
   if (!title) return alert("작품명을 입력해주세요!");
 
-  if (currentLogEditId) { // 수정
-    const log = readingLogs.find(l => l.id === currentLogEditId);
-    log.title = title; log.content = content; log.img = imgData;
-  } else { // 신규
-    readingLogs.push({ id: Date.now(), title, content, img: imgData, date: new Date().toISOString() });
+  if (id) {
+    const book = readingBooks.find(b => b.id == id);
+    book.title = title; book.coverImg = coverImg;
+  } else {
+    readingBooks.push({ id: Date.now(), title, coverImg, entries: [] });
   }
   
-  saveReadingLogData(); closeLogModal(); renderReadingLogs();
+  saveReadingLogData(); closeBookModal(); renderReadingBooks();
 }
 
-window.deleteReadingLog = function(id) {
-  if(confirm("이 독서 기록을 삭제하시겠습니까?")) {
-    readingLogs = readingLogs.filter(l => l.id !== id);
-    saveReadingLogData(); renderReadingLogs();
+window.deleteReadingBook = function(id) {
+  if(confirm("이 책과 안의 기록들을 모두 삭제하시겠습니까?")) {
+    readingBooks = readingBooks.filter(b => b.id != id);
+    saveReadingLogData(); renderReadingBooks();
   }
 }
 
-window.sortReadingLogs = function(order) {
-  document.getElementById('sort-reading-logs').dataset.order = order;
-  renderReadingLogs();
-}
-
-window.renderReadingLogs = function() {
-  const container = document.getElementById('reading-log-grid'); container.innerHTML = '';
-  
-  // 정렬 기준 가져오기 (기본값: oldest)
-  const order = document.getElementById('sort-reading-logs').dataset.order || 'oldest';
-  
-  let sortedLogs = [...readingLogs];
-  if (order === 'latest') { sortedLogs.sort((a, b) => b.id - a.id); } // 최신순 (id가 timestamp)
-  else { sortedLogs.sort((a, b) => a.id - b.id); } // 과거순
-
-  sortedLogs.forEach(log => {
-    const card = document.createElement('div');
-    card.className = 'book-card';
+window.renderReadingBooks = function() {
+  const container = document.getElementById('reading-book-grid'); container.innerHTML = '';
+  readingBooks.forEach(book => {
+    const card = document.createElement('div'); card.className = 'book-card';
+    card.onclick = () => openBookDetail(book.id);
     
-    const dateStr = new Date(log.id).toLocaleDateString('ko-KR');
+    const entriesCount = book.entries ? book.entries.length : 0;
     
     card.innerHTML = `
       <div class="book-actions">
-        <button class="btn-book-edit" onclick="openLogModal(${log.id})" title="수정">✏️</button>
-        <button class="btn-book-del" onclick="deleteReadingLog(${log.id})" title="삭제">🗑️</button>
+        <button class="btn-book-edit" onclick="event.stopPropagation(); openBookModal(${book.id})" title="수정">✏️</button>
+        <button class="btn-book-del" onclick="event.stopPropagation(); deleteReadingBook(${book.id})" title="삭제">🗑️</button>
       </div>
-      ${log.img ? `<img src="${log.img}" class="book-img">` : `<div class="book-img" style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:40px;">📖</div>`}
+      ${book.coverImg ? `<img src="${book.coverImg}" class="book-img">` : `<div class="book-img" style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:40px;">📖</div>`}
       <div class="book-content">
-        <div class="book-title">${log.title}</div>
-        <div class="book-desc">${log.content || '작성된 내용이 없습니다.'}</div>
-        <div class="book-date">${dateStr} 기록</div>
+        <div class="book-title">${book.title}</div>
+        <div class="book-date">기록 ${entriesCount}개</div>
       </div>
     `;
     container.appendChild(card);
+  });
+}
+
+// --- 2. 책 내부 (Entries 다이어리) 로직 ---
+window.openBookDetail = function(bookId) {
+  currentReadingBookId = bookId;
+  const book = readingBooks.find(b => b.id == bookId);
+  document.getElementById('reading-log-screen').style.display = 'none';
+  document.getElementById('reading-detail-screen').style.display = 'block';
+  document.getElementById('detail-book-title').innerText = `📖 ${book.title}`;
+  renderReadingEntries();
+}
+
+window.goBackToBooks = function() {
+  document.getElementById('reading-detail-screen').style.display = 'none';
+  document.getElementById('reading-log-screen').style.display = 'block';
+  currentReadingBookId = null;
+  renderReadingBooks();
+}
+
+window.openEntryModal = function(entryId = null) {
+  const contentEl = document.getElementById('entry-content');
+  const previewEl = document.getElementById('entry-image-preview');
+  document.getElementById('entry-id').value = entryId || '';
+  
+  if (entryId) {
+    const book = readingBooks.find(b => b.id == currentReadingBookId);
+    const entry = book.entries.find(e => e.id == entryId);
+    contentEl.value = entry.content;
+    previewEl.innerHTML = entry.img ? `<img src="${entry.img}" style="width:100%; border-radius:6px; object-fit:cover;">` : '';
+  } else {
+    contentEl.value = ''; previewEl.innerHTML = '';
+    document.getElementById('entry-image').value = '';
+  }
+  document.getElementById('entry-modal').style.display = 'flex';
+}
+window.closeEntryModal = function() { document.getElementById('entry-modal').style.display = 'none'; }
+
+window.saveReadingEntry = function() {
+  const entryId = document.getElementById('entry-id').value;
+  const content = document.getElementById('entry-content').value.trim();
+  const previewImg = document.getElementById('entry-image-preview').querySelector('img');
+  const imgData = previewImg ? previewImg.src : null;
+  
+  if(!content && !imgData) return alert("내용이나 사진을 추가해주세요!");
+
+  const book = readingBooks.find(b => b.id == currentReadingBookId);
+  if (!book.entries) book.entries = [];
+
+  if (entryId) {
+    const entry = book.entries.find(e => e.id == entryId);
+    entry.content = content; entry.img = imgData;
+  } else {
+    book.entries.push({ id: Date.now(), content, img: imgData, date: new Date().toISOString() });
+  }
+  
+  saveReadingLogData(); closeEntryModal(); renderReadingEntries();
+}
+
+window.deleteReadingEntry = function(entryId) {
+  if(confirm("이 글을 삭제하시겠습니까?")) {
+    const book = readingBooks.find(b => b.id == currentReadingBookId);
+    book.entries = book.entries.filter(e => e.id != entryId);
+    saveReadingLogData(); renderReadingEntries();
+  }
+}
+
+window.sortReadingEntries = function(order) {
+  document.getElementById('sort-reading-entries').dataset.order = order;
+  renderReadingEntries();
+}
+
+window.renderReadingEntries = function() {
+  const container = document.getElementById('reading-entry-list'); container.innerHTML = '';
+  const book = readingBooks.find(b => b.id == currentReadingBookId);
+  if (!book || !book.entries || book.entries.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:50px; color:#9ca3af;">첫 독서록을 작성해 보세요! ✍️</div>';
+    return;
+  }
+
+  const order = document.getElementById('sort-reading-entries').dataset.order || 'oldest';
+  let sortedEntries = [...book.entries];
+  if (order === 'latest') { sortedEntries.sort((a, b) => b.id - a.id); } 
+  else { sortedEntries.sort((a, b) => a.id - b.id); }
+
+  sortedEntries.forEach(entry => {
+    const dateStr = new Date(entry.date).toLocaleString('ko-KR', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    const el = document.createElement('div'); el.className = 'entry-card';
+    el.innerHTML = `
+      <div class="entry-actions">
+        <button onclick="openEntryModal(${entry.id})">수정</button>
+        <button onclick="deleteReadingEntry(${entry.id})" style="color:#ef4444;">삭제</button>
+      </div>
+      <div class="entry-date">${dateStr}</div>
+      ${entry.content ? `<div class="entry-content">${entry.content}</div>` : ''}
+      ${entry.img ? `<img src="${entry.img}" class="entry-img">` : ''}
+    `;
+    container.appendChild(el);
   });
 }
