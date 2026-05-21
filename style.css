@@ -135,43 +135,19 @@ h1 { text-align: center; font-size: 2.5rem; color: #1f2937; margin-bottom: 30px;
 .rank-name-box { display: flex; align-items: center; font-size: 16px; font-weight: bold; }
 .rank-medal { width: 30px; text-align: center; margin-right: 10px; font-size: 18px; }
 
-/* 키워드 색상 */
-.kw-genre { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; }
-.kw-top { background: #E0F2FE; color: #0284C7; border: 1px solid #7DD3FC; }
-.kw-bottom { background: #FFE4E6; color: #E11D48; border: 1px solid #FDA4AF; }
-.kw-plot { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
-
 /* 작품 서재 태깅 레이아웃 */
 .tagging-layout { display: flex; gap: 20px; align-items: flex-start; }
 .tagging-left { flex: 2; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; min-height: 600px; }
 .tagging-right { flex: 1; background: #f9fafb; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; max-height: 800px; overflow-y: auto; }
 
-/* 💡 1) 내가 본 웹툰 & 서재 갤러리 뷰 (정사각형 삭제 -> 직사각형 형태로 수정) 💡 */
+/* 서재 갤러리 뷰 */
 .work-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
-.work-square { 
-    position: relative; /* 초소형 삭제 버튼 위치의 기준 */
-    background: white; border: 1px solid #e5e7eb; border-radius: 10px; 
-    padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.2s ease; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
-    display: flex; flex-direction: column; align-items: center; justify-content: center; 
-    min-height: 80px; /* 기존 정사각형 비율(aspect-ratio)을 지우고 세로 길이를 얄쌍하게 줄임 */
-}
+.work-square { position: relative; background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px; }
 .work-square:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); }
 .work-square-title { font-weight: 800; font-size: 14px; color: #111; margin-bottom: 2px; word-break: keep-all; }
 .work-square-desc { font-size: 11px; color: #6b7280; }
-
-/* 💡 2) 초소형 콩알 삭제 버튼 (우측 상단) 💡 */
-.work-square .del-tag {
-    position: absolute; top: 6px; right: 6px;
-    width: 16px; height: 16px; font-size: 9px;
-    background: rgba(0,0,0,0.05); border: none; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: #9ca3af; padding: 0; margin: 0;
-}
+.work-square .del-tag { position: absolute; top: 6px; right: 6px; width: 16px; height: 16px; font-size: 9px; background: rgba(0,0,0,0.05); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #9ca3af; padding: 0; margin: 0; }
 .work-square .del-tag:hover { background: #ef4444; color: white; }
-
-/* 드래그 상태 */
-.work-square.dragging { opacity: 0.5; border: 2px dashed #6b7280; transform: scale(0.95); }
 
 /* 상세 태깅 뷰 */
 .work-detail-box { display: flex; flex-direction: column; gap: 20px; }
@@ -183,7 +159,12 @@ h1 { text-align: center; font-size: 2.5rem; color: #1f2937; margin-bottom: 30px;
 .tag-drop-zone { flex: 1; border: 2px dashed #d1d5db; border-radius: 8px; padding: 15px; min-height: 80px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; background: #fafafa; transition: background 0.2s; }
 .tag-drop-zone.dragover { background: #eff6ff; border-color: #3b82f6; }
 
-/* 키워드 풀 */
+/* 키워드 색상 & 풀 */
+.kw-genre { background: #F3F4F6; color: #374151; border: 1px solid #D1D5DB; }
+.kw-top { background: #E0F2FE; color: #0284C7; border: 1px solid #7DD3FC; }
+.kw-bottom { background: #FFE4E6; color: #E11D48; border: 1px solid #FDA4AF; }
+.kw-plot { background: #FEF3C7; color: #D97706; border: 1px solid #FCD34D; }
+
 .pool-section { margin-bottom: 25px; }
 .pool-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .pool-header h4 { font-size: 14px; color: #4b5563; font-weight: 800; }
@@ -194,3 +175,16 @@ h1 { text-align: center; font-size: 2.5rem; color: #1f2937; margin-bottom: 30px;
 .tag-badge:active { cursor: grabbing; }
 .del-tag { background: none; border: none; font-size: 11px; color: inherit; opacity: 0.5; cursor: pointer; padding: 0 2px; }
 .del-tag:hover { opacity: 1; }
+
+/* 🚀 새롭게 추가된 스프레드시트(테이블) 디자인 🚀 */
+.work-table-container { width: 100%; background: white; border-radius: 8px; border: 1px solid #e5e7eb; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
+.work-table-row { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #e5e7eb; background: white; transition: background 0.2s; cursor: grab; }
+.work-table-row:last-child { border-bottom: none; }
+.work-table-row:hover { background: #f9fafb; }
+.work-table-row.dragging { opacity: 0.6; background: #f3f4f6; border-top: 2px dashed #9ca3af; }
+.work-col-drag { width: 40px; color: #9ca3af; cursor: grab; text-align: center; font-size: 18px; user-select: none; }
+.work-col-platform { width: 80px; text-align: center; font-weight: 900; font-size: 12px; padding: 5px 0; border-radius: 6px; margin-right: 20px; }
+.work-col-title { flex: 1; font-size: 16px; font-weight: 800; color: #111; }
+.work-col-actions { width: 60px; text-align: right; }
+.work-col-actions button { background: #fee2e2; color: #ef4444; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
+.work-col-actions button:hover { background: #ef4444; color: white; }

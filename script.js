@@ -1,12 +1,11 @@
 // ====================================================================
-// 1. 초기 변수 세팅 (파이어베이스와 연동될 데이터들)
+// 1. 초기 변수 세팅
 // ====================================================================
 let projects = {};
 let wishList = [];
 let scrapList = [];
 let compareLogs = [];
 let deletedCands = [];
-
 let currentId = null;
 let draggedItem = null;
 let draggedCatItem = null;
@@ -52,47 +51,43 @@ let tagCategories = [
 
 let readWorksList = [];
 const heartRankData = [
-  "징크스", "홍실퀘스트", "물가의 밤", "FlashLight", "일간알바", "야화첩", "힐링 패러독스",
-  "미혹의 경계", "스테이지 비하인드", "개구리 삶기", "해피투게더", "테라노 군과 쿠마자키 군", "드래그리스·섹스", "상극", "제물 남편", "언슬립", "소꿉친구와 감금당했다", "장미와 샴페인", "너는 나의 세상", "드라이버스 하이", "뱀 굴", "노 모럴", "호식이 이야기", "리미티드 런", "백라이트",
-  "스케치", "고양이 테라피", "너무 야한 후카미군", "하이스쿨 솔티 하트", "30살까지 동정이면 마법사가 될 수 있대", "패션", "외사랑", "신을 품는 방법", "걷지않는다리", "아기 삶을 낳아줘, 나 미치는 꼴 보기 싫으면!", "남보다 못한 사이", "시거나 떫거나", "향의 경계", "그래서 누가 깔린건데?", "논제로섬", "백련이 피는 온도", "가장 완벽한 도형", "강아지는 건드리지 마라", "키스 미 이프 유 캔", "필 마이 베네핏", "너드프로젝트", "피자배달부와 골드팰리스",
-  "독점! 마이 히어로", "짝사랑 필승법", "비밀이 많은 XX", "공과 사는 구분해!", "러브 오더", "망종", "솔트 소사이어티", "오메가 콤플렉스", "친구새끼들한테 따먹혔습니다", "페이크 팩트 립스", "알파 트라우마", "운명의 짝이 너라니", "내가 네 운명의 가이드는 아니지만", "그 공작가 노예의 음란한 속사정", "아이돌 보러 간다며!", "스미르나 앤 카프리", "망돌 콤플렉스", "40까지 하고 싶은 10가지 일", "은총의 밤", "자두를 누르지 마시오", "선 넘는 사이", "실연 중독", "바라메 강림하여 주소서", "박하사탕", "풀북", "테라피 게임", "캐시 오어 크레딧", "더블다운", "뼈와 꽃잎", "누군가 정해둔 것처럼", "소꿉친구로는 참을 수 없어", "백야의 꽃길", "감금당해 주세요!", "엑시덴탈 베이비", "코드네임 아나스타샤", "해빙곡선", "원룸 조교님", "시시포스의 개들", "유원불변", "방문 판매 왔습니다!", "일요일의 구원자", "가장 깊은 고백",
-  "엎질러진 피", "녹색전상", "위험한 편의점", "형제애", "알페가", "시맨틱 에러", "슬립 업", "등쳐먹는 연애", "이리 사랑스러운 너", "넌 내게 수치심을 줬어❤️", "유성이 내리는 우주", "럭키 다이스", "피앙세는 토마토", "환장의 가이딩", "코티지 가든", "솔직하고 대담하게", "XX하면 알 수 있지 않을까?", "당신이 방심한 사이", "가슴 지명", "갱생의 여지", "나츠메 씨는 개발당하고 싶다", "럽미닥터!", "녹색전상 : 몽리 / 녹색전상", "파도의 해안", "해 뜨는 집", "멍멍한 관계", "조개소년 : 발화 / 조개소년", "해와 달의 공생관계",
-  "아우토반 로맨스", "반하는 약을 먹은 완벽남이 위험합니다! 2권", "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "하절기", "인 마이 배드", "꽃이 지는 연못", "구른 김에 왕까지", "러브 올 플레이", "스쿠프", "작전명 마레오"
+  "징크스", "홍실퀘스트", "물가의 밤", "FlashLight", "일간알바", "야화첩", "힐링 패러독스", "미혹의 경계", "스테이지 비하인드", "개구리 삶기", "해피투게더", "테라노 군과 쿠마자키 군", "드래그리스·섹스", "상극", "제물 남편", "언슬립", "소꿉친구와 감금당했다", "장미와 샴페인", "너는 나의 세상", "드라이버스 하이", "뱀 굴", "노 모럴", "호식이 이야기", "리미티드 런", "백라이트", "스케치", "고양이 테라피", "너무 야한 후카미군", "하이스쿨 솔티 하트", "30살까지 동정이면 마법사가 될 수 있대", "패션", "외사랑", "신을 품는 방법", "걷지않는다리", "아기 삶을 낳아줘, 나 미치는 꼴 보기 싫으면!", "남보다 못한 사이", "시거나 떫거나", "향의 경계", "그래서 누가 깔린건데?", "논제로섬", "백련이 피는 온도", "가장 완벽한 도형", "강아지는 건드리지 마라", "키스 미 이프 유 캔", "필 마이 베네핏", "너드프로젝트", "피자배달부와 골드팰리스", "독점! 마이 히어로", "짝사랑 필승법", "비밀이 많은 XX", "공과 사는 구분해!", "러브 오더", "망종", "솔트 소사이어티", "오메가 콤플렉스", "친구새끼들한테 따먹혔습니다", "페이크 팩트 립스", "알파 트라우마", "운명의 짝이 너라니", "내가 네 운명의 가이드는 아니지만", "그 공작가 노예의 음란한 속사정", "아이돌 보러 간다며!", "스미르나 앤 카프리", "망돌 콤플렉스", "40까지 하고 싶은 10가지 일", "은총의 밤", "자두를 누르지 마시오", "선 넘는 사이", "실연 중독", "바라메 강림하여 주소서", "박하사탕", "풀북", "테라피 게임", "캐시 오어 크레딧", "더블다운", "뼈와 꽃잎", "누군가 정해둔 것처럼", "소꿉친구로는 참을 수 없어", "백야의 꽃길", "감금당해 주세요!", "엑시덴탈 베이비", "코드네임 아나스타샤", "해빙곡선", "원룸 조교님", "시시포스의 개들", "유원불변", "방문 판매 왔습니다!", "일요일의 구원자", "가장 깊은 고백", "엎질러진 피", "녹색전상", "위험한 편의점", "형제애", "알페가", "시맨틱 에러", "슬립 업", "등쳐먹는 연애", "이리 사랑스러운 너", "넌 내게 수치심을 줬어❤️", "유성이 내리는 우주", "럭키 다이스", "피앙세는 토마토", "환장의 가이딩", "코티지 가든", "솔직하고 대담하게", "XX하면 알 수 있지 않을까?", "당신이 방심한 사이", "가슴 지명", "갱생의 여지", "나츠메 씨는 개발당하고 싶다", "럽미닥터!", "녹색전상 : 몽리 / 녹색전상", "파도의 해안", "해 뜨는 집", "멍멍한 관계", "조개소년 : 발화 / 조개소년", "해와 달의 공생관계", "아우토반 로맨스", "반하는 약을 먹은 완벽남이 위험합니다! 2권", "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "하절기", "인 마이 배드", "꽃이 지는 연못", "구른 김에 왕까지", "러브 올 플레이", "스쿠프", "작전명 마레오"
 ];
 
+const webtoonCategories = [
+  { color: "bg-skyblue", zoneId: "pool-skyblue", list: ["일간알바", "코드네임 아나스타샤", "소꿉친구와 감금당했다", "공과 사는 구분해!", "그 가이드가 집착광공의 품에서 벗어나는 방법", "더 뮤즈", "쉬운 선배", "노 모럴", "러브 오더", "솔트 소사이어티", "녹색전상", "고양이 테라피", "텐(TEN)", "반칙", "죽어 마땅한 것들", "결혼하는 남자", "별주부전", " 그 공작가 노예의 음란한 속사정", "망종(亡種)", "비밀이 많은 XX", "아우토반 로맨스", "아늑한 집착", "모두에게 친절한 너는 왜", "갱생의 여지", "그림자의 영역", "늑대 신랑 ", "과수원의 사정", "알파 트라우마", "오메가 콤플렉스", "서킷 브레이커", "롤플레잉-경찰❤️파일럿", "친구새끼들한테 따먹혔습니다", "실연 중독", "성실한 채무자?", "형제애", "위험한 편의점", "럽미닥터!", "상극", "피자배달부와 골드팰리스", "패션(PASSION)", "실수로 잘못 고백했는데", "더러운 욕망", "XX하면 알 수 있지 않을까?", "테라노 군과 쿠마자키 군", "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "페이크 팩트 립스", "소꿉친구로는 참을 수 없어", " 운명의 짝이 너라니", "오프 스테이지 러브 사이드", "테라피 게임", "나츠메 씨는 개발당하고 싶다", "가슴 지명", "드래그리스·섹스", "반하는 약을 먹은 완벽남이 위험합니다! 2권", "너무 야한 후카미군", "40까지 하고 싶은 10가지 일", "힐링 패러독스", "30살까지 동정이면 마법사가 될 수 있대", "독점! 마이 히어로", "개구리 삶기", "시맨틱 에러", "해피투게더"] },
+  { color: "bg-red", zoneId: "pool-red", list: ["호식이 이야기", "강아지는 건드리지 마라", "슬립 업(Slip Up)", "가장 깊은 고백", "소꿉친구와 감금당했다", "키스 미 이프 유 캔(Kiss Me If You Can)", "드라이버스 하이 (Driver's high)", "해빙곡선", "장미와 샴페인", "리미티드 런", "FlashLight (플래시라이트)", "외사랑", "이리 사랑스러운 너", "스미르나 앤 카프리", "뱀 굴", "야화첩", "하이스쿨 솔티 하트", "조개소년 : 발화 / 조개소년", "징크스", "향의 경계", "선 넘는 사이", "언슬립", "알페가(Alphega)", "풀북", "멍멍한 관계", "백라이트", "내가 네 운명의 가이드는 아니지만", "녹색전상 : 몽리 / 녹색전상", "유원불변", "해와 달의 공생관계", "너드프로젝트", "시시포스의 개들", "뼈와 꽃잎", "박하사탕", "더블다운", "캐시 오어 크레딧", "남보다 못한 사이", "바라메 강림하여 주소서", "제물 남편", "시거나 떫거나", "은총의 밤", "가장 완벽한 도형", "백련이 피는 온도", "논제로섬", "아이돌 보러 간다며!"] },
+  { color: "bg-white", zoneId: "pool-white", list: ["등쳐먹는 연애", "홍실퀘스트", "필 마이 베네핏", "작전명 마레오", "망돌 콤플렉스", "인 마이 배드(In My Bad)", "너는 나의 세상", "하절기", "짝사랑 필승법", "솔직하고 대담하게", "넌 내게 수치심을 줬어❤️", "환장의 가이딩", "신을 품는 방법", "꽃이 지는 연못", "원룸 조교님", "엎질러진 피", "코티지 가든(Cottage garden)", "럭키 다이스", "러브 올 플레이(LOVE ALL PLAY)", "구른 김에 왕까지", "월요일의 구원자", "엑시덴탈 베이비(Accidental baby)", "피앙세는 토마토", "유성이 내리는 우주", "스테이지 비하인드", "방문 판매 왔습니다!", "백야의 꽃길", "당신이 방심한 사이", "미혹의 경계", "아기 삶을 낳아줘, 나 미치는 꼴 보기 싫으면!", "그래서 누가 깔린건데?", "스쿠프", "해 뜨는 집", "물가의 밤", "파도의 해안", "누군가 정해둔 것처럼", "자두를 누르지 마시오", "감금당해 주세요!"] }
+];
+const cleanWebtoonList = [];
+webtoonCategories.forEach(c => c.list.forEach(name => {
+  const cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim();
+  if(!cleanWebtoonList.includes(cleanName)) cleanWebtoonList.push(cleanName);
+}));
+
 // ====================================================================
-// 2. 파이어베이스 데이터 로드 및 저장 함수
+// 2. 파이어베이스 연동 및 로드
 // ====================================================================
 async function initApp() {
-  if (!window.db) {
-    setTimeout(initApp, 100);
-    return;
-  }
-  
+  if (!window.db) { setTimeout(initApp, 100); return; }
   try {
     const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     const dbRef = doc(window.db, "ti_me_data", "my_shared_data");
     const snap = await getDoc(dbRef);
     if (snap.exists()) {
       const data = snap.data();
-      projects = data.projects || {};
-      wishList = data.wishList || [];
-      scrapList = data.scrapList || [];
-      compareLogs = data.compareLogs || [];
-      deletedCands = data.deletedCands || [];
+      projects = data.projects || {}; wishList = data.wishList || []; scrapList = data.scrapList || [];
+      compareLogs = data.compareLogs || []; deletedCands = data.deletedCands || [];
       taggedWorksData = data.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData));
       tagCategories = data.tagCategories || tagCategories;
       readWorksList = data.readWorksList || [];
     } else {
-      console.log("데이터 없음 - 초기값 사용");
       taggedWorksData = JSON.parse(JSON.stringify(initialWorksData));
     }
   } catch (e) {
     console.error("데이터 로드 실패:", e);
     taggedWorksData = JSON.parse(JSON.stringify(initialWorksData));
   }
-
-  // 초기화 및 화면 그리기
   initReadWorksList();
   renderHome();
   if(document.getElementById('work-grid-view')) renderTaggingGrid();
@@ -100,24 +95,22 @@ async function initApp() {
 }
 initApp();
 
-async function saveAllData() {
+window.saveAllData = async function() {
   if (!window.db) return;
   try {
     const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     const dbRef = doc(window.db, "ti_me_data", "my_shared_data");
     await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList });
-  } catch (error) {
-    console.error("데이터 저장 실패:", error);
-  }
+  } catch (error) { console.error("데이터 저장 실패:", error); }
 }
 
-// 통합 저장 함수 호출
 function saveData() { saveAllData(); }
 function saveWish() { saveAllData(); }
 function saveScraps() { saveAllData(); }
 function saveLogs() { saveAllData(); }
 function saveDeletedCands() { saveAllData(); }
 function saveTaggingData() { saveAllData(); }
+function saveReadWorks() { saveAllData(); }
 
 // ====================================================================
 // 💡 기본 UI 로직
@@ -142,20 +135,6 @@ function getNextTitle(baseTitle) {
   if (!existingTitles.includes(baseTitle)) return baseTitle;
   let count = 2; while (existingTitles.includes(`${baseTitle} ${count}`)) { count++; } return `${baseTitle} ${count}`;
 }
-
-// ====================================================================
-// 💡 웹툰 티어 및 키워드 랭킹 자동 생성
-// ====================================================================
-const webtoonCategories = [
-  { color: "bg-skyblue", zoneId: "pool-skyblue", list: ["일간알바", "코드네임 아나스타샤", "소꿉친구와 감금당했다", "공과 사는 구분해!", "그 가이드가 집착광공의 품에서 벗어나는 방법", "더 뮤즈", "쉬운 선배", "노 모럴", "러브 오더", "솔트 소사이어티", "녹색전상", "고양이 테라피", "텐(TEN)", "반칙", "죽어 마땅한 것들", "결혼하는 남자", "별주부전", " 그 공작가 노예의 음란한 속사정", "망종(亡種)", "비밀이 많은 XX", "아우토반 로맨스", "아늑한 집착", "모두에게 친절한 너는 왜", "갱생의 여지", "그림자의 영역", "늑대 신랑 ", "과수원의 사정", "알파 트라우마", "오메가 콤플렉스", "서킷 브레이커", "롤플레잉-경찰❤️파일럿", "친구새끼들한테 따먹혔습니다", "실연 중독", "성실한 채무자?", "형제애", "위험한 편의점", "럽미닥터!", "상극", "피자배달부와 골드팰리스", "패션(PASSION)", "실수로 잘못 고백했는데", "더러운 욕망", "XX하면 알 수 있지 않을까?", "테라노 군과 쿠마자키 군", "절대 BL이 되는 세계 VS 절대 BL이 되고 싶지 않은 남자", "페이크 팩트 립스", "소꿉친구로는 참을 수 없어", " 운명의 짝이 너라니", "오프 스테이지 러브 사이드", "테라피 게임", "나츠메 씨는 개발당하고 싶다", "가슴 지명", "드래그리스·섹스", "반하는 약을 먹은 완벽남이 위험합니다! 2권", "너무 야한 후카미군", "40까지 하고 싶은 10가지 일", "힐링 패러독스", "30살까지 동정이면 마법사가 될 수 있대", "독점! 마이 히어로", "개구리 삶기", "시맨틱 에러", "해피투게더"] },
-  { color: "bg-red", zoneId: "pool-red", list: ["호식이 이야기", "강아지는 건드리지 마라", "슬립 업(Slip Up)", "가장 깊은 고백", "소꿉친구와 감금당했다", "키스 미 이프 유 캔(Kiss Me If You Can)", "드라이버스 하이 (Driver's high)", "해빙곡선", "장미와 샴페인", "리미티드 런", "FlashLight (플래시라이트)", "외사랑", "이리 사랑스러운 너", "스미르나 앤 카프리", "뱀 굴", "야화첩", "하이스쿨 솔티 하트", "조개소년 : 발화 / 조개소년", "징크스", "향의 경계", "선 넘는 사이", "언슬립", "알페가(Alphega)", "풀북", "멍멍한 관계", "백라이트", "내가 네 운명의 가이드는 아니지만", "녹색전상 : 몽리 / 녹색전상", "유원불변", "해와 달의 공생관계", "너드프로젝트", "시시포스의 개들", "뼈와 꽃잎", "박하사탕", "더블다운", "캐시 오어 크레딧", "남보다 못한 사이", "바라메 강림하여 주소서", "제물 남편", "시거나 떫거나", "은총의 밤", "가장 완벽한 도형", "백련이 피는 온도", "논제로섬", "아이돌 보러 간다며!"] },
-  { color: "bg-white", zoneId: "pool-white", list: ["등쳐먹는 연애", "홍실퀘스트", "필 마이 베네핏", "작전명 마레오", "망돌 콤플렉스", "인 마이 배드(In My Bad)", "너는 나의 세상", "하절기", "짝사랑 필승법", "솔직하고 대담하게", "넌 내게 수치심을 줬어❤️", "환장의 가이딩", "신을 품는 방법", "꽃이 지는 연못", "원룸 조교님", "엎질러진 피", "코티지 가든(Cottage garden)", "럭키 다이스", "러브 올 플레이(LOVE ALL PLAY)", "구른 김에 왕까지", "월요일의 구원자", "엑시덴탈 베이비(Accidental baby)", "피앙세는 토마토", "유성이 내리는 우주", "스테이지 비하인드", "방문 판매 왔습니다!", "백야의 꽃길", "당신이 방심한 사이", "미혹의 경계", "아기 삶을 낳아줘, 나 미치는 꼴 보기 싫으면!", "그래서 누가 깔린건데?", "스쿠프", "해 뜨는 집", "물가의 밤", "파도의 해안", "누군가 정해둔 것처럼", "자두를 누르지 마시오", "감금당해 주세요!"] }
-];
-const cleanWebtoonList = [];
-webtoonCategories.forEach(c => c.list.forEach(name => {
-  const cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim();
-  if(!cleanWebtoonList.includes(cleanName)) cleanWebtoonList.push(cleanName);
-}));
 
 document.getElementById('btn-auto-webtoon-tier').addEventListener('click', () => createAutoProject('tier'));
 document.getElementById('btn-auto-webtoon-ranking').addEventListener('click', () => createAutoProject('ranking'));
@@ -184,9 +163,7 @@ document.getElementById('btn-auto-keyword-tier').addEventListener('click', () =>
   saveData(); renderHome(); openProject(id);
 });
 
-// ====================================================================
-// 💡 화면 전환 및 렌더링 로직
-// ====================================================================
+// 프로젝트 관리
 function createProject(type, title) {
   const id = Date.now().toString();
   projects[id] = { id, title, type, subType: 'custom', items: [] }; saveData(); renderHome(); openProject(id);
@@ -235,7 +212,7 @@ document.querySelectorAll('.go-home-btn').forEach(btn => {
 document.querySelectorAll('.go-workspace-btn').forEach(btn => { btn.addEventListener('click', () => { hideAllScreens(); document.getElementById('workspace-screen').style.display = 'block'; }); });
 
 // ====================================================================
-// 💡 스크랩 보드 및 위시리스트 (+체크 기능 포함)
+// 💡 스크랩 보드 및 위시리스트
 // ====================================================================
 document.getElementById('btn-open-scrap').addEventListener('click', () => { hideAllScreens(); document.getElementById('scrap-screen').style.display = 'block'; renderScrapList(); });
 window.addScrapItem = function() {
@@ -274,7 +251,7 @@ function renderWishList() {
 }
 
 // ====================================================================
-// 💡 세부 순위 (작화/스토리/씬) 드래그 및 월드컵
+// 💡 세부 순위 드래그, 월드컵, 1:1 비교소
 // ====================================================================
 window.openCategoryRank = function(tierId) {
   const tierItems = projects[currentId].items.filter(i => i.zone === tierId);
@@ -297,13 +274,10 @@ function saveCategoryRanks(tierId) {
 }
 ['art', 'story', 'scene'].forEach(cat => {
   const zone = document.getElementById(`cat-${cat}-list`);
-  zone.addEventListener('dragover', (e) => {
-    e.preventDefault(); if(!draggedCatItem || draggedCatItem.dataset.cat !== cat) return; 
-    const afterElement = getDragAfterElement(zone, e.clientX, e.clientY, '.cat-sort-item'); if (afterElement == null) { zone.appendChild(draggedCatItem); } else { zone.insertBefore(draggedCatItem, afterElement); }
-  });
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); if(!draggedCatItem || draggedCatItem.dataset.cat !== cat) return; const afterElement = getDragAfterElement(zone, e.clientX, e.clientY, '.cat-sort-item'); if (afterElement == null) { zone.appendChild(draggedCatItem); } else { zone.insertBefore(draggedCatItem, afterElement); } });
 });
 
-let wcCurrentRound = []; let wcNextRound = []; let wcMatchIndex = 0; let wcRankings = []; let wcLosersThisRound = [];
+let wcCurrentRound = [], wcNextRound = [], wcMatchIndex = 0, wcRankings = [], wcLosersThisRound = [];
 document.getElementById('btn-worldcup').addEventListener('click', () => {
   hideAllScreens(); document.getElementById('worldcup-screen').style.display = 'block'; document.getElementById('wc-play-area').style.display = 'flex'; document.getElementById('wc-result-area').style.display = 'none';
   let activeList = cleanWebtoonList.filter(name => !deletedCands.includes(name));
@@ -326,9 +300,6 @@ window.selectWcItem = function(side) {
   if (wcMatchIndex >= wcCurrentRound.length) { wcRankings.unshift([...wcLosersThisRound]); wcLosersThisRound = []; wcCurrentRound = wcNextRound; wcNextRound = []; wcMatchIndex = 0; } updateWcUI();
 }
 
-// ====================================================================
-// 💡 1:1 비교소 & 엘로 랭킹
-// ====================================================================
 window.openTierCompare = function(tierId) {
   const tierItems = projects[currentId].items.filter(i => i.zone === tierId).map(i => i.name);
   if(tierItems.length < 2) return alert("비교할 작품이 2개 이상 없습니다!");
@@ -365,8 +336,7 @@ window.recordCompare = function(side) {
 }
 function renderLogs() {
   const logArea = document.getElementById('comp-log');
-  if (compareLogs.length === 0) { logArea.innerHTML = '<span style="color:#999;">기록이 없습니다.</span>'; } 
-  else {
+  if (compareLogs.length === 0) { logArea.innerHTML = '<span style="color:#999;">기록이 없습니다.</span>'; } else {
     logArea.innerHTML = ''; compareLogs.forEach(log => {
       const p = document.createElement('div'); p.style.padding = "8px 0"; p.style.borderBottom = "1px solid #f0f0f0"; p.style.display = "flex"; p.style.justifyContent = "space-between"; p.style.alignItems = "center";
       p.innerHTML = `<div>${log.html}</div><button onclick="deleteLog(${log.id})" style="border:none; background:none; cursor:pointer; color:#ef4444; font-weight:bold; font-size:16px;">×</button>`; logArea.appendChild(p);
@@ -404,7 +374,7 @@ window.applyRankingToTier = function() {
 }
 
 // ====================================================================
-// 💡 메인 드래그 앤 드롭 아이템 렌더링
+// 💡 메인 드래그 앤 드롭
 // ====================================================================
 document.getElementById('add-item-btn').addEventListener('click', () => {
   const name = document.getElementById('item-name').value; const memo = document.getElementById('item-memo').value;
@@ -444,10 +414,7 @@ function renderItems() {
 
 document.querySelectorAll('.tier-items, .pool, .ranking-list').forEach(zone => {
   if(zone.classList.contains('cat-list')) return; 
-  zone.addEventListener('dragover', (e) => {
-    e.preventDefault(); const afterElement = getDragAfterElement(zone, e.clientX, e.clientY); const dragging = document.querySelector('.dragging');
-    if (dragging) { if (afterElement == null) { zone.appendChild(dragging); } else { zone.insertBefore(dragging, afterElement); } }
-  });
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); const afterElement = getDragAfterElement(zone, e.clientX, e.clientY); const dragging = document.querySelector('.dragging'); if (dragging) { if (afterElement == null) { zone.appendChild(dragging); } else { zone.insertBefore(dragging, afterElement); } } });
 });
 
 function updateRanking() {
@@ -462,9 +429,8 @@ function updateRanking() {
 }
 
 // ====================================================================
-// 🚀 작품 키워드 서재 (작품 추가/삭제 & 태깅 완벽판) 
+// 🚀 작품 키워드 서재 
 // ====================================================================
-let currentTaggingWorkId = null;
 document.getElementById('btn-open-tagging').addEventListener('click', () => { hideAllScreens(); document.getElementById('tagging-screen').style.display = 'block'; closeWorkDetail(); renderKeywordPool(); });
 document.getElementById('btn-show-add-work').addEventListener('click', () => { document.getElementById('add-work-form').style.display = 'block'; });
 document.getElementById('btn-confirm-add-work').addEventListener('click', () => {
@@ -513,10 +479,7 @@ function renderDetailTags() {
 }
 
 function renderTagsHTML(tagsArray, workId, target) { return tagsArray.map((tag, index) => `<div class="tag-badge ${tag.colorClass}">${tag.name} <button class="del-tag" onclick="removeTag('${workId}', '${target}', ${index})">✕</button></div>`).join(''); }
-
-window.removeTag = function(workId, target, index) {
-  const work = taggedWorksData.find(w => w.id === workId); if (work) { work.tags[target].splice(index, 1); saveTaggingData(); renderDetailTags(); }
-}
+window.removeTag = function(workId, target, index) { const work = taggedWorksData.find(w => w.id === workId); if (work) { work.tags[target].splice(index, 1); saveTaggingData(); renderDetailTags(); } }
 
 function renderKeywordPool() {
   const container = document.getElementById('keyword-pool-container'); container.innerHTML = '';
@@ -561,7 +524,7 @@ function setupDropZones() {
 }
 
 // ====================================================================
-// 🚀🚀🚀 내가 본 작품 컬렉션 (수동 저장 적용 완료) 🚀🚀🚀
+// 🚀🚀🚀 내가 본 작품 컬렉션 (스프레드시트 뷰 + 색상 자동 복구 기능) 🚀🚀🚀
 // ====================================================================
 function initReadWorksList() {
   if (readWorksList && readWorksList.length > 0) return;
@@ -584,12 +547,13 @@ document.getElementById('btn-open-read-works').addEventListener('click', () => {
 
 let draggedReadWorkIndex = null;
 
-// 💡 1. 수동 저장 버튼 함수
+// [저장 버튼 함수]
 window.saveReadWorksManual = function() {
   saveAllData();
-  alert("현재 순서가 저장되었습니다!");
+  alert("현재 리스트 순서가 완벽하게 저장되었습니다!");
 }
 
+// [정렬 함수]
 window.sortReadWorksList = function(type) {
   if (type === 'abc') {
     readWorksList.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR'));
@@ -600,43 +564,10 @@ window.sortReadWorksList = function(type) {
       return idxA - idxB;
     });
   }
-  renderReadWorks(); // 정렬 후 화면만 갱신 (저장 버튼 누르기 전엔 반영 안 됨)
+  renderReadWorks(); 
 }
 
-function renderReadWorks() {
-  const container = document.getElementById('read-works-grid'); container.innerHTML = '';
-  readWorksList.forEach((work, index) => {
-    const el = document.createElement('div');
-    el.className = `work-square ${work.colorClass}`; 
-    el.draggable = true; el.dataset.index = index;
-    
-    el.innerHTML = `
-      <button class="del-tag" onclick="event.stopPropagation(); deleteReadWork(${index})" title="삭제">✕</button>
-      <div style="font-size:11px; font-weight:bold; margin-bottom:3px; opacity:0.7;">${work.platform}</div>
-      <div class="work-square-title">${work.name}</div>
-    `;
-    
-    el.addEventListener('dragstart', (e) => { 
-      draggedReadWorkIndex = index; el.classList.add('dragging'); 
-      document.getElementById('sort-read-works').value = 'custom';
-    });
-    el.addEventListener('dragend', () => { el.classList.remove('dragging'); draggedReadWorkIndex = null; });
-    el.addEventListener('dragover', (e) => { e.preventDefault(); el.style.border = "2px solid #6366F1"; });
-    el.addEventListener('dragleave', () => { el.style.border = ""; });
-    
-    // 💡 2. 드롭할 때 서버 자동 저장 제거됨! (화면만 변경)
-    el.addEventListener('drop', (e) => {
-      e.preventDefault(); el.style.border = "";
-      const targetIndex = index; if(draggedReadWorkIndex === targetIndex) return;
-      const item = readWorksList.splice(draggedReadWorkIndex, 1)[0];
-      readWorksList.splice(targetIndex, 0, item);
-      renderReadWorks(); 
-    });
-    
-    container.appendChild(el);
-  });
-}
-
+// [추가 버튼 함수]
 window.addReadWork = function() {
   const name = document.getElementById('new-read-work-title').value.trim();
   const colorClass = document.getElementById('new-read-work-platform').value;
@@ -648,8 +579,65 @@ window.addReadWork = function() {
   document.getElementById('new-read-work-title').value = '';
 }
 
+// [삭제 기능]
 window.deleteReadWork = function(index) {
   if(confirm("이 작품을 컬렉션에서 지울까요?")) {
     readWorksList.splice(index, 1); saveReadWorks(); renderReadWorks();
   }
+}
+
+// [리스트(표) 렌더링 함수 - 색상 자동 복구 포함]
+function renderReadWorks() {
+  const container = document.getElementById('read-works-grid'); container.innerHTML = '';
+  
+  readWorksList.forEach((work, index) => {
+    // 🔥 색상 자동 힐링 로직 (파이어베이스 꼬였을 때 복구) 🔥
+    if (!work.colorClass || !work.platform || work.platform === "undefined") {
+      work.colorClass = 'bg-white'; work.platform = '봄툰 등';
+      webtoonCategories.forEach(cat => {
+        const cleanList = cat.list.map(n => n.replace(/\[.*?\]|\(.*?\)/g, '').trim());
+        if (cleanList.includes(work.name)) {
+          work.colorClass = cat.color;
+          work.platform = cat.color === 'bg-skyblue' ? '리디' : (cat.color === 'bg-red' ? '레진' : '봄툰');
+        }
+      });
+    }
+
+    const el = document.createElement('div');
+    el.className = 'work-table-row'; 
+    el.draggable = true; el.dataset.index = index;
+    
+    // 뱃지 색상 동적 계산
+    let badgeBg = work.colorClass === 'bg-skyblue' ? '#E0F2FE' : (work.colorClass === 'bg-red' ? '#FFE4E6' : '#F3F4F6');
+    let badgeText = work.colorClass === 'bg-skyblue' ? '#0284C7' : (work.colorClass === 'bg-red' ? '#E11D48' : '#374151');
+
+    el.innerHTML = `
+      <div class="work-col-drag" title="드래그해서 순서 변경">≡</div>
+      <div class="work-col-platform" style="background:${badgeBg}; color:${badgeText};">${work.platform}</div>
+      <div class="work-col-title">${work.name}</div>
+      <div class="work-col-actions">
+        <button onclick="event.stopPropagation(); deleteReadWork(${index})" title="삭제">삭제</button>
+      </div>
+    `;
+    
+    // 드래그 앤 드롭 이벤트
+    el.addEventListener('dragstart', (e) => { 
+      draggedReadWorkIndex = index; el.classList.add('dragging'); 
+      document.getElementById('sort-read-works').value = 'custom';
+    });
+    el.addEventListener('dragend', () => { el.classList.remove('dragging'); draggedReadWorkIndex = null; });
+    el.addEventListener('dragover', (e) => { e.preventDefault(); el.style.borderTop = "2px solid #6366F1"; });
+    el.addEventListener('dragleave', () => { el.style.borderTop = ""; });
+    
+    el.addEventListener('drop', (e) => {
+      e.preventDefault(); el.style.borderTop = "";
+      const targetIndex = index; if(draggedReadWorkIndex === targetIndex) return;
+      
+      const item = readWorksList.splice(draggedReadWorkIndex, 1)[0];
+      readWorksList.splice(targetIndex, 0, item);
+      renderReadWorks(); 
+    });
+    
+    container.appendChild(el);
+  });
 }

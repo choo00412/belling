@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=35">
+  <link rel="stylesheet" href="style.css?v=40">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -47,7 +47,7 @@
     </div>
 
     <div class="auto-buttons" style="margin-top: -20px;">
-      <button id="btn-open-read-works" class="create-btn auto-btn" style="background:#6366F1; border-color:#4F46E5;">📖 내가 본 웹툰 컬렉션 (플랫폼별)</button>
+      <button id="btn-open-read-works" class="create-btn auto-btn" style="background:#6366F1; border-color:#4F46E5;">📖 내가 본 웹툰 컬렉션 (리스트형)</button>
     </div>
     
     <div class="project-list" id="project-list"></div>
@@ -252,9 +252,9 @@
   <div id="read-works-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📖 내가 본 웹툰 컬렉션</div>
-    <p style="color:#666; margin-bottom: 20px; text-align: left;">네모 박스를 꾹 눌러 드래그하면 나만의 순서대로 마음껏 배치할 수 있어요!</p>
+    <p style="color:#666; margin-bottom: 20px; text-align: left;">표의 각 줄을 꾹 눌러 드래그하면 엑셀처럼 순서를 바꿀 수 있어요!</p>
     
-    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
       <input type="text" id="new-read-work-title" placeholder="새 작품 직접 입력" style="flex:1; min-width:150px; padding:10px; border-radius:8px; border:1px solid #d1d5db;">
       <select id="new-read-work-platform" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; outline:none;">
         <option value="bg-skyblue">리디 (하늘색)</option>
@@ -263,7 +263,7 @@
       </select>
       <button onclick="addReadWork()" style="background:#6366F1; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">추가</button>
       
-      <button onclick="saveReadWorksManual()" style="background:#10B981; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; margin-left:10px; box-shadow: 0 2px 5px rgba(16,185,129,0.3);">💾 순서 저장</button>
+      <button onclick="saveReadWorksManual()" style="background:#10B981; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; margin-left:10px; box-shadow: 0 2px 5px rgba(16,185,129,0.3);">💾 표 순서 저장</button>
 
       <select id="sort-read-works" onchange="sortReadWorksList(this.value)" style="padding:10px; border-radius:8px; border:2px solid #6366F1; outline:none; font-weight:bold; background:#e0e7ff; margin-left:auto; cursor:pointer;">
         <option value="custom">✋ 내맘대로 드래그 순서</option>
@@ -272,11 +272,11 @@
       </select>
     </div>
 
-    <div id="read-works-grid" class="work-grid" style="padding-bottom: 50px;">
+    <div id="read-works-grid" class="work-table-container">
       </div>
   </div>
 
-  <script src="script.js?v=35"></script>
+  <script src="script.js?v=40"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
