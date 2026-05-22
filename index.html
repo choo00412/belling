@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=50">
+  <link rel="stylesheet" href="style.css?v=55">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -105,7 +105,7 @@
         <div id="webtoon-pools">
           <p class="pool-label">대기실 (하늘색 그룹)</p><div class="pool" id="pool-skyblue" data-zone="pool-skyblue"></div>
           <p class="pool-label" style="margin-top: 20px;">대기실 (빨간색 그룹)</p><div class="pool" id="pool-red" data-zone="pool-red"></div>
-          <p class="pool-label" style="margin-top: 20px;">대기실 (흰색 그룹)</p><div class="pool" id="pool-white" data-zone="pool-white"></div>
+          <p class="pool-label" style="margin-top: 20px;">대기실 (봄툰 - 연노랑)</p><div class="pool" id="pool-yellow" data-zone="pool-yellow"></div>
         </div>
 
         <div id="keyword-pools" style="display: none;">
@@ -118,32 +118,32 @@
 
       <div class="content-area">
         <div id="tier-mode" class="mode-area">
-          <div class="tier-row"><div class="tier-label SSR">SSR<button class="tier-comp-btn" onclick="openTierCompare('SSR')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('SSR')">📊 세부 순위</button></div><div class="tier-items" data-zone="SSR"></div></div>
-          <div class="tier-row"><div class="tier-label SR">SR<button class="tier-comp-btn" onclick="openTierCompare('SR')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('SR')">📊 세부 순위</button></div><div class="tier-items" data-zone="SR"></div></div>
-          <div class="tier-row"><div class="tier-label S">S<button class="tier-comp-btn" onclick="openTierCompare('S')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('S')">📊 세부 순위</button></div><div class="tier-items" data-zone="S"></div></div>
-          <div class="tier-row"><div class="tier-label A">A<button class="tier-comp-btn" onclick="openTierCompare('A')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('A')">📊 세부 순위</button></div><div class="tier-items" data-zone="A"></div></div>
-          <div class="tier-row"><div class="tier-label B">B<button class="tier-comp-btn" onclick="openTierCompare('B')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('B')">📊 세부 순위</button></div><div class="tier-items" data-zone="B"></div></div>
-          <div class="tier-row"><div class="tier-label C">C<button class="tier-comp-btn" onclick="openTierCompare('C')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('C')">📊 세부 순위</button></div><div class="tier-items" data-zone="C"></div></div>
-          <div class="tier-row"><div class="tier-label D">D<button class="tier-comp-btn" onclick="openTierCompare('D')">⚖️ 1:1 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('D')">📊 세부 순위</button></div><div class="tier-items" data-zone="D"></div></div>
+          <div class="tier-row"><div class="tier-label SSR">SSR<button class="tier-comp-btn" onclick="openTierCompare('SSR')">⚖️ 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('SSR')">📊 순위</button></div><div class="tier-items" data-zone="SSR"></div></div>
+          <div class="tier-row"><div class="tier-label SR">SR<button class="tier-comp-btn" onclick="openTierCompare('SR')">⚖️ 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('SR')">📊 순위</button></div><div class="tier-items" data-zone="SR"></div></div>
+          <div class="tier-row"><div class="tier-label S">S<button class="tier-comp-btn" onclick="openTierCompare('S')">⚖️ 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('S')">📊 순위</button></div><div class="tier-items" data-zone="S"></div></div>
+          <div class="tier-row"><div class="tier-label A">A<button class="tier-comp-btn" onclick="openTierCompare('A')">⚖️ 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('A')">📊 순위</button></div><div class="tier-items" data-zone="A"></div></div>
+          <div class="tier-row"><div class="tier-label B">B<button class="tier-comp-btn" onclick="openTierCompare('B')">⚖️ 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('B')">📊 순위</button></div><div class="tier-items" data-zone="B"></div></div>
+          <div class="tier-row"><div class="tier-label C">C<button class="tier-comp-btn" onclick="openTierCompare('C')">⚖️ 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('C')">📊 순위</button></div><div class="tier-items" data-zone="C"></div></div>
+          <div class="tier-row"><div class="tier-label D">D<button class="tier-comp-btn" onclick="openTierCompare('D')">⚖️ 비교</button><button class="tier-cat-btn" onclick="openCategoryRank('D')">📊 순위</button></div><div class="tier-items" data-zone="D"></div></div>
         </div>
         
         <div id="ranking-mode" class="mode-area" style="display: none;"><div class="ranking-list" id="ranking-list" data-zone="ranking"></div></div>
 
         <div id="keyword-mode" class="mode-area" style="display: none; flex-direction: column; gap: 15px;">
           <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <div class="tier-label" style="background:#F3F4F6; color:#374151; font-size:14px; flex-direction: column; justify-content: center;">📖 장르/배경<button class="tier-comp-btn" style="margin-top:10px; background:#4B5563; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-genre', 'pool-genre', '장르/배경')">⚖️ 비교</button></div>
+            <div class="tier-label" style="background:#F3F4F6; color:#374151; font-size:14px; flex-direction: column; justify-content: center;">📖 장르/배경<button class="tier-comp-btn" style="margin-top:10px;" onclick="openKeywordCompare('rank-genre', 'pool-genre', '장르/배경')">⚖️ 비교</button></div>
             <div class="ranking-list tier-items" data-zone="rank-genre" style="flex:1; display:flex; flex-wrap:wrap; padding:10px; gap:8px; background:white;"></div>
           </div>
           <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <div class="tier-label" style="background:#E0F2FE; color:#0284C7; font-size:14px; flex-direction: column; justify-content: center;">👑 공 키워드<button class="tier-comp-btn" style="margin-top:10px; background:#0284C7; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-top', 'pool-top', '공 키워드')">⚖️ 비교</button></div>
+            <div class="tier-label" style="background:#E0F2FE; color:#0284C7; font-size:14px; flex-direction: column; justify-content: center;">👑 공 키워드<button class="tier-comp-btn" style="margin-top:10px;" onclick="openKeywordCompare('rank-top', 'pool-top', '공 키워드')">⚖️ 비교</button></div>
             <div class="ranking-list tier-items" data-zone="rank-top" style="flex:1; display:flex; flex-wrap:wrap; padding:10px; gap:8px; background:white;"></div>
           </div>
           <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <div class="tier-label" style="background:#FFE4E6; color:#E11D48; font-size:14px; flex-direction: column; justify-content: center;">🌸 수 키워드<button class="tier-comp-btn" style="margin-top:10px; background:#E11D48; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-bottom', 'pool-bottom', '수 키워드')">⚖️ 비교</button></div>
+            <div class="tier-label" style="background:#FFE4E6; color:#E11D48; font-size:14px; flex-direction: column; justify-content: center;">🌸 수 키워드<button class="tier-comp-btn" style="margin-top:10px;" onclick="openKeywordCompare('rank-bottom', 'pool-bottom', '수 키워드')">⚖️ 비교</button></div>
             <div class="ranking-list tier-items" data-zone="rank-bottom" style="flex:1; display:flex; flex-wrap:wrap; padding:10px; gap:8px; background:white;"></div>
           </div>
           <div class="tier-row" style="min-height: 120px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-            <div class="tier-label" style="background:#FEF3C7; color:#D97706; font-size:14px; flex-direction: column; justify-content: center;">🔗 관계/전개<button class="tier-comp-btn" style="margin-top:10px; background:#D97706; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;" onclick="openKeywordCompare('rank-plot', 'pool-plot', '관계/전개')">⚖️ 비교</button></div>
+            <div class="tier-label" style="background:#FEF3C7; color:#D97706; font-size:14px; flex-direction: column; justify-content: center;">🔗 관계/전개<button class="tier-comp-btn" style="margin-top:10px;" onclick="openKeywordCompare('rank-plot', 'pool-plot', '관계/전개')">⚖️ 비교</button></div>
             <div class="ranking-list tier-items" data-zone="rank-plot" style="flex:1; display:flex; flex-wrap:wrap; padding:10px; gap:8px; background:white;"></div>
           </div>
         </div>
@@ -152,8 +152,46 @@
   </div>
 
   <div id="category-rank-screen" style="display: none;" class="game-screen"><div class="header" style="padding-top: 20px;"><button class="go-workspace-btn">⬅</button></div><div class="wc-title" id="cat-rank-title" style="text-align: left;">세부 순위</div><div class="content-area"><div class="tier-row"><div class="tier-label" style="background:#EEF2FF; color:#4F46E5;">🎨 작화</div><div class="tier-items cat-list" id="cat-art-list"></div></div><div class="tier-row"><div class="tier-label" style="background:#FDF4FF; color:#C026D3;">📖 스토리</div><div class="tier-items cat-list" id="cat-story-list"></div></div><div class="tier-row"><div class="tier-label" style="background:#FFF1F2; color:#E11D48;">🔥 씬</div><div class="tier-items cat-list" id="cat-scene-list"></div></div></div></div>
+  
   <div id="worldcup-screen" style="display: none;" class="game-screen"><div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div><div class="wc-title">웹툰 이상형 월드컵</div><div id="wc-round-text" class="wc-round">준비 중...</div><div class="wc-container" id="wc-play-area"><div id="wc-left" class="wc-card" onclick="selectWcItem('left')">왼쪽</div><div class="wc-vs">VS</div><div id="wc-right" class="wc-card" onclick="selectWcItem('right')">오른쪽</div></div><div id="wc-result-area" style="display: none; text-align: center; margin-top: 30px;"><h2 style="margin-bottom: 20px;">🏆 최종 랭킹 🏆</h2><div id="wc-ranking-list" class="wc-ranking-box"></div></div></div>
-  <div id="compare-screen" style="display: none;" class="game-screen"><div class="header" style="padding-top: 20px;"><button class="go-home-btn" id="comp-back-btn">⬅</button></div><div class="wc-title" id="comp-title">1:1 집중 비교소</div><div class="compare-container"><div class="compare-slot"><div class="compare-label" style="background:#4F46E5;">📌 기준 작품</div><div id="comp-fixed" class="wc-card empty">우클릭 하세요</div><button class="win-btn win-blue" onclick="recordCompare('fixed')">🏆 승리!</button></div><div class="wc-vs">VS</div><div class="compare-slot"><div class="compare-label" style="background:#E11D48;">⚔️ 비교 대상</div><div id="comp-target" class="wc-card empty">좌클릭 하세요</div><button class="win-btn win-red" onclick="recordCompare('target')">🏆 승리!</button></div></div><div class="compare-bottom-layout"><div class="comp-half"><h3 style="margin-bottom:10px;">📝 분석 기록</h3><div id="comp-log" class="comp-log-area"></div></div><div class="comp-half"><div style="display:flex; justify-content:space-between;"><h3 style="margin-bottom:10px;">📊 실시간 랭킹</h3><button id="btn-apply-rank" onclick="applyRankingToTier()" style="display:none; font-size:12px; background:#10B981; color:white; border:none; padding:5px; border-radius:6px; cursor:pointer;">✅ 적용</button></div><div id="comp-analysis" class="comp-analysis-area"></div></div></div><div style="margin-top: 40px;"><h3 style="margin-bottom: 15px;">후보 목록</h3><div id="comp-list" class="comp-list-area"></div></div></div>
+  
+  <div id="compare-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn" id="comp-back-btn">⬅</button></div>
+    <div class="wc-title" id="comp-title">1:1 집중 비교소</div>
+    
+    <div class="compare-container">
+      <div class="compare-slot">
+        <div class="compare-label" style="background:#4F46E5;">📌 기준 작품</div>
+        <div id="comp-fixed" class="wc-card empty">우클릭 하세요</div>
+        <button class="win-btn win-blue" onclick="recordCompare('fixed')">🏆 이 작품 승리!</button>
+      </div>
+      <div class="wc-vs">VS</div>
+      <div class="compare-slot">
+        <div class="compare-label" style="background:#E11D48;">⚔️ 비교 대상</div>
+        <div id="comp-target" class="wc-card empty">좌클릭 하세요</div>
+        <button class="win-btn win-red" onclick="recordCompare('target')">🏆 이 작품 승리!</button>
+      </div>
+    </div>
+
+    <div class="compare-bottom-layout">
+      <div class="comp-half">
+        <h3 style="margin-bottom:10px;">📝 분석 기록</h3>
+        <div id="comp-log" class="comp-log-area"></div>
+      </div>
+      <div class="comp-half">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin-bottom:10px;">📊 실시간 엘로 랭킹</h3>
+          <button id="btn-apply-rank" onclick="applyRankingToTier()" style="display:none; font-size:12px; background:#10B981; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">✅ 순위 결과 적용</button>
+        </div>
+        <div id="comp-analysis" class="comp-analysis-area"></div>
+      </div>
+    </div>
+
+    <div style="margin-top: 40px;">
+      <h3 style="margin-bottom: 15px;">후보 목록</h3>
+      <div id="comp-list" class="comp-list-area"></div>
+    </div>
+  </div>
   
   <div id="tagging-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
@@ -180,7 +218,10 @@
           <div class="work-detail-box">
             <div class="detail-header">
               <h3 class="detail-title" id="detail-work-title">작품명</h3>
-              <div><button class="btn-delete-work" onclick="deleteTaggingWork()" style="background:#fee2e2; color:#ef4444; border:none; padding:8px 16px; border-radius:8px; margin-right:8px; cursor:pointer;">🗑️ 삭제</button><button class="btn-back-grid" onclick="closeWorkDetail()">⬅ 전체 목록</button></div>
+              <div>
+                <button class="btn-delete-work" onclick="deleteTaggingWork()">🗑️ 삭제</button>
+                <button class="btn-back-grid" onclick="closeWorkDetail()">⬅ 전체 목록</button>
+              </div>
             </div>
             <div class="tag-row"><div class="tag-label">장르/전개</div><div class="tag-drop-zone" id="dz-title" data-target="title"></div></div>
             <div class="tag-row"><div class="tag-label" style="color:#0284C7; background:#E0F2FE;" id="detail-top-name">공</div><div class="tag-drop-zone" id="dz-top" data-target="top"></div></div>
@@ -199,7 +240,9 @@
     <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
       <input type="text" id="new-read-work-title" placeholder="새 작품 직접 입력" style="flex:1; min-width:150px; padding:10px; border-radius:8px; border:1px solid #d1d5db;">
       <select id="new-read-work-platform" style="padding:10px; border-radius:8px; border:1px solid #d1d5db; outline:none;">
-        <option value="bg-skyblue">리디 (하늘색)</option><option value="bg-red">레진 (빨간색)</option><option value="bg-white">봄툰 등 (흰색)</option>
+        <option value="bg-skyblue">리디 (하늘색)</option>
+        <option value="bg-red">레진 (빨간색)</option>
+        <option value="bg-yellow-light">봄툰 (연노랑)</option>
       </select>
       <button onclick="addReadWork()" style="background:#6366F1; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold;">추가</button>
       <button onclick="saveReadWorksManual()" style="background:#10B981; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; margin-left:10px;">💾 표 순서 저장</button>
@@ -217,8 +260,6 @@
   <div id="reading-log-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📝 나만의 독서 기록장</div>
-    <p style="color:#666; margin-bottom: 20px; text-align: left;">작품(책)을 먼저 추가하고, 책을 클릭해서 여러 개의 독서록을 남겨보세요.</p>
-
     <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
       <button onclick="openBookModal()" style="background:#14B8A6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px;">➕ 새로운 책 추가</button>
     </div>
@@ -227,7 +268,7 @@
 
   <div id="reading-detail-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;">
-      <button onclick="goBackToBooks()" style="padding: 10px 15px; background: white; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;">⬅ 책장으로</button>
+      <button class="btn-back-grid" onclick="goBackToBooks()">⬅ 책장으로</button>
     </div>
     <div class="wc-title" id="detail-book-title" style="text-align: left; color:#14B8A6;">작품명</div>
     
@@ -275,7 +316,7 @@
     </div>
   </div>
 
-  <script src="script.js?v=50"></script>
+  <script src="script.js?v=55"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -288,14 +329,10 @@
       projectId: "belling-f298f",
       storageBucket: "belling-f298f.firebasestorage.app",
       messagingSenderId: "980068063348",
-      appId: "1:980068063348:web:59d80f1ff000ccd576d921",
-      measurementId: "G-HQ6XVNXY9J"
+      appId: "1:980068063348:web:59d80f1ff000ccd576d921"
     };
-
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const db = getFirestore(app);
-    window.db = db;
+    window.db = getFirestore(app);
   </script>
 </body>
 </html>
