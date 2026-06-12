@@ -10,6 +10,7 @@ let taggedWorksData = [];
 let readWorksList = [];
 let tagCategories = [];
 let readingBooks = []; 
+let timetableData = { weekly: {}, tendays: {} }; // 📅 시간표 데이터 추가
 
 let currentId = null;
 let draggedItem = null;
@@ -20,7 +21,27 @@ let currentCompareTier = null;
 let currentRankArr = [];
 let draggedReadWorkIndex = null;
 let currentReadingBookId = null;
-let currentTaggingWorkId = null; // ✅ 상세 페이지용 변수
+let currentTaggingWorkId = null; 
+
+// 📅 시간표 초기 기본 데이터 
+const initialTimetableData = {
+  weekly: {
+    mon: [ {id: 1, name: "신을 품는 방법", color: "tt-pink"}, {id: 2, name: "강건마", color: "tt-peach"}, {id: 3, name: "더블 다운", color: "tt-peach"} ],
+    tue: [ {id: 4, name: "미혹의 경계", color: "tt-pink"}, {id: 5, name: "쥐덫", color: "tt-peach"}, {id: 6, name: "키스 미 이프 유 캔", color: "tt-peach"} ],
+    wed: [ {id: 7, name: "당밤사", color: "tt-pink"}, {id: 8, name: "안 되는 사이", color: "tt-pink"}, {id: 9, name: "권태주의보", color: "tt-peach"}, {id: 10, name: "언슬립", color: "tt-peach"} ],
+    thu: [ {id: 11, name: "짝사랑 필승법", color: "tt-pink"}, {id: 12, name: "배드 애플", color: "tt-pink"}, {id: 13, name: "선 넘는 사이", color: "tt-peach"} ],
+    fri: [ {id: 14, name: "은총의 밤", color: "tt-peach"}, {id: 15, name: "시거나 떫거나", color: "tt-peach"}, {id: 16, name: "제물 남편", color: "tt-peach"}, {id: 17, name: "향의 경계", color: "tt-peach"}, {id: 18, name: "개구리 삶기", color: "tt-blue"}, {id: 19, name: "언로맨틱 오피스", color: "tt-blue"} ],
+    sat: [ {id: 20, name: "힛미하드", color: "tt-peach"}, {id: 21, name: "캐오크", color: "tt-peach"}, {id: 22, name: "백련이 피는 온도", color: "tt-peach"} ],
+    sun: [ {id: 23, name: "누군가 정해둔 것처럼", color: "tt-pink"}, {id: 24, name: "아기 삶", color: "tt-pink"}, {id: 25, name: "바라메 강림", color: "tt-peach"}, {id: 26, name: "뱀굴", color: "tt-peach"}, {id: 27, name: "소꿉친구와 감금", color: "tt-peach"}, {id: 28, name: "러브 오더", color: "tt-blue"} ]
+  },
+  tendays: {
+    d1: [ {id: 29, name: "고양이 테라피", color: "tt-blue"} ],
+    d3: [ {id: 30, name: "너는 나의 세상", color: "tt-pink"}, {id: 31, name: "징크스", color: "tt-peach"} ],
+    d6: [ {id: 32, name: "해빙곡선", color: "tt-peach"}, {id: 33, name: "일간 알바", color: "tt-blue"} ],
+    d8: [ {id: 34, name: "하이스쿨 솔티 하트", color: "tt-peach"} ],
+    d10: [ {id: 35, name: "미혹의 경계", color: "tt-pink"}, {id: 36, name: "스테이지 비하인드", color: "tt-pink"}, {id: 37, name: "해피투게더", color: "tt-blue"} ]
+  }
+};
 
 const initialWorksData = [
   {id: "w1", title: "징크스", top: "주재경", bottom: "김단", tags: { title: [], top: [], bottom: [] }},
@@ -38,12 +59,7 @@ const webtoonCategories = [
 ];
 
 const cleanWebtoonList = [];
-webtoonCategories.forEach(c => {
-  c.list.forEach(name => {
-    const cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim();
-    if(!cleanWebtoonList.includes(cleanName)) cleanWebtoonList.push(cleanName);
-  });
-});
+webtoonCategories.forEach(c => { c.list.forEach(name => { const cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim(); if(!cleanWebtoonList.includes(cleanName)) cleanWebtoonList.push(cleanName); }); });
 
 const initialTagCategories = [
   { type: 'genre', name: '장르/배경/세계관', colorClass: 'kw-genre', items: ["현대물", "시대물", "동양풍", "서양풍", "판타지", "오메가버스", "캠퍼스물", "오피스물(리만물)", "연예계물", "빙의물", "환생물"] },
@@ -68,9 +84,13 @@ async function initApp() {
     const dbRef = doc(window.db, "ti_me_data", "my_shared_data"); 
     const snap = await getDoc(dbRef);
     if (snap.exists()) {
-      const data = snap.data(); projects = data.projects || {}; wishList = data.wishList || []; scrapList = data.scrapList || []; compareLogs = data.compareLogs || []; deletedCands = data.deletedCands || []; taggedWorksData = data.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData)); tagCategories = data.tagCategories || initialTagCategories; readWorksList = data.readWorksList || []; readingBooks = data.readingBooks || [];
-    } else { taggedWorksData = JSON.parse(JSON.stringify(initialWorksData)); tagCategories = initialTagCategories; }
-  } catch (e) { console.error("로드 실패:", e); taggedWorksData = JSON.parse(JSON.stringify(initialWorksData)); tagCategories = initialTagCategories; }
+      const data = snap.data(); 
+      projects = data.projects || {}; wishList = data.wishList || []; scrapList = data.scrapList || []; compareLogs = data.compareLogs || []; deletedCands = data.deletedCands || []; taggedWorksData = data.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData)); tagCategories = data.tagCategories || initialTagCategories; readWorksList = data.readWorksList || []; readingBooks = data.readingBooks || [];
+      timetableData = data.timetableData || initialTimetableData; // 📅 추가
+    } else { 
+        taggedWorksData = JSON.parse(JSON.stringify(initialWorksData)); tagCategories = initialTagCategories; timetableData = initialTimetableData;
+    }
+  } catch (e) { console.error("로드 실패:", e); taggedWorksData = JSON.parse(JSON.stringify(initialWorksData)); tagCategories = initialTagCategories; timetableData = initialTimetableData;}
   
   initReadWorksList(); renderHome();
   if(document.getElementById('work-grid-view')) renderTaggingGrid();
@@ -84,7 +104,7 @@ window.saveAllData = async function() {
   try {
     const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     const dbRef = doc(window.db, "ti_me_data", "my_shared_data");
-    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList, readingBooks });
+    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList, readingBooks, timetableData });
   } catch (error) { console.error("저장 실패:", error); }
 }
 
@@ -116,20 +136,27 @@ document.getElementById('btn-auto-keyword-tier').addEventListener('click', () =>
 
 function createAutoProject(type) {
   const id = Date.now().toString(); projects[id] = { id, title: getNextTitle('웹툰 취향 리스트'), type: type, subType: 'webtoon', items: [] }; let itemIndex = 0;
-  readWorksList.forEach(work => { projects[id].items.push({ itemId: id + '-' + (itemIndex++), name: work.name, memo: '', img: null, zone: work.colorClass === 'bg-skyblue' ? 'pool-skyblue' : (work.colorClass === 'bg-red' ? 'pool-red' : 'pool-yellow'), color: work.colorClass }); });
+  webtoonCategories.forEach(category => { category.list.forEach(name => { projects[id].items.push({ itemId: id + '-' + (itemIndex++), name: name.replace(/\[.*?\]|\(.*?\)/g, '').trim(), memo: '', img: null, zone: category.zoneId, color: category.color }); }); });
   saveData(); renderHome(); openProject(id);
 }
-
 function createProject(type, title) { const id = Date.now().toString(); projects[id] = { id, title, type, subType: 'custom', items: [] }; saveData(); renderHome(); openProject(id); }
 
+// 💡 저장된 프로젝트 렌더링 (열기 버튼 삭제 & x버튼 스타일 강제 적용) 💡
 function renderHome() {
   const list = document.getElementById('project-list'); list.innerHTML = '';
   Object.values(projects).forEach(p => {
     const card = document.createElement('div'); card.className = 'project-card';
-    card.innerHTML = `<div><span style="font-size:12px; color:#888; font-weight:600; margin-bottom:6px; display:block;">${p.subType === 'keyword' ? '키워드 모드' : (p.type === 'tier' ? '티어 모드' : '랭킹 모드')}</span><h3>${p.title}</h3></div><div class="project-actions"><button onclick="openProject('${p.id}')">열기</button><button onclick="deleteProject('${p.id}')" class="del-btn">삭제</button></div>`;
+    card.innerHTML = `
+      <div onclick="openProject('${p.id}')" style="width:100%; height:100%; box-sizing:border-box;">
+          <span style="font-size:12px; color:#888; font-weight:600; margin-bottom:6px; display:block;">${p.subType === 'keyword' ? '키워드 모드' : (p.type === 'tier' ? '티어 모드' : '랭킹 모드')}</span>
+          <h3>${p.title}</h3>
+      </div>
+      <button onclick="event.stopPropagation(); deleteProject('${p.id}')" style="position:absolute; top:15px; right:15px; background:transparent; color:#ef4444; border:none; font-size:18px; font-weight:900; cursor:pointer; padding:0; outline:none; box-shadow:none;">✕</button>
+    `;
     list.appendChild(card);
   });
 }
+
 window.deleteProject = function(id) { if (confirm("정말 삭제하시겠습니까?")) { delete projects[id]; saveData(); renderHome(); } }
 
 function hideAllScreens() { ['home-screen', 'workspace-screen', 'worldcup-screen', 'compare-screen', 'wishlist-screen', 'scrap-screen', 'category-rank-screen', 'tagging-screen', 'read-works-screen', 'reading-log-screen', 'reading-detail-screen', 'timetable-screen'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; }); }
@@ -139,13 +166,77 @@ document.querySelectorAll('.go-home-btn').forEach(btn => {
 });
 document.querySelectorAll('.go-workspace-btn').forEach(btn => { btn.addEventListener('click', () => { hideAllScreens(); document.getElementById('workspace-screen').style.display = 'block'; }); });
 
-// 📅 시간표 화면 열기
+// 📅 시간표 화면 열기 & 동적 렌더링
 document.getElementById('btn-open-timetable').addEventListener('click', () => {
     hideAllScreens();
     document.getElementById('timetable-screen').style.display = 'block';
+    renderTimetable();
 });
 
-// ✅ 프로젝트 이름 변경
+window.renderTimetable = function() {
+    if(!timetableData.weekly) timetableData.weekly = {mon:[], tue:[], wed:[], thu:[], fri:[], sat:[], sun:[]};
+    if(!timetableData.tendays) timetableData.tendays = {d1:[], d3:[], d6:[], d8:[], d10:[]};
+
+    ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+        const td = document.getElementById(`tt-${day}`);
+        if(td) {
+            td.innerHTML = timetableData.weekly[day].map(item => `
+                <div class="tt-item ${item.color}">
+                    ${item.name}
+                    <button class="tt-item-del" onclick="deleteTimetableItem('weekly', '${day}', ${item.id})">✕</button>
+                </div>
+            `).join('');
+        }
+    });
+
+    ['d1', 'd3', 'd6', 'd8', 'd10'].forEach(day => {
+        const td = document.getElementById(`tt-${day}`);
+        if(td) {
+            td.innerHTML = timetableData.tendays[day].map(item => `
+                <div class="tt-item ${item.color}">
+                    ${item.name}
+                    <button class="tt-item-del" onclick="deleteTimetableItem('tendays', '${day}', ${item.id})">✕</button>
+                </div>
+            `).join('');
+        }
+    });
+}
+
+window.openTimetableModal = function() {
+    document.getElementById('tt-modal-title').value = '';
+    document.getElementById('timetable-modal').style.display = 'flex';
+}
+
+window.closeTimetableModal = function() {
+    document.getElementById('timetable-modal').style.display = 'none';
+}
+
+window.saveTimetableItem = function() {
+    const title = document.getElementById('tt-modal-title').value.trim();
+    const dayValue = document.getElementById('tt-modal-day').value;
+    const color = document.getElementById('tt-modal-color').value;
+
+    if(!title) return alert("작품명을 입력해주세요!");
+
+    const type = dayValue.startsWith('d') ? 'tendays' : 'weekly';
+    const newItem = { id: Date.now(), name: title, color: color };
+
+    if(!timetableData[type][dayValue]) timetableData[type][dayValue] = [];
+    timetableData[type][dayValue].push(newItem);
+
+    saveAllData();
+    renderTimetable();
+    closeTimetableModal();
+}
+
+window.deleteTimetableItem = function(type, day, id) {
+    if(confirm("이 일정을 삭제할까요?")) {
+        timetableData[type][day] = timetableData[type][day].filter(item => item.id !== id);
+        saveAllData();
+        renderTimetable();
+    }
+}
+
 document.getElementById('current-project-title').addEventListener('click', () => {
     if (!currentId) return;
     const newTitle = prompt("새로운 프로젝트 이름을 입력하세요:", projects[currentId].title);
@@ -236,7 +327,7 @@ function saveCategoryRanks(tierId) { if(!projects[currentId].categoryRanks) proj
 let wcCurrentRound = [], wcNextRound = [], wcMatchIndex = 0, wcRankings = [], wcLosersThisRound = [];
 document.getElementById('btn-worldcup').addEventListener('click', () => {
   hideAllScreens(); document.getElementById('worldcup-screen').style.display = 'block'; document.getElementById('wc-play-area').style.display = 'flex'; document.getElementById('wc-result-area').style.display = 'none';
-  let activeList = getDynamicWebtoonList().filter(name => !deletedCands.includes(name));
+  let activeList = cleanWebtoonList.filter(name => !deletedCands.includes(name));
   if (activeList.length < 2) { alert("내가 본 웹툰 컬렉션에 작품이 2개 이상 있어야 합니다!"); document.getElementById('home-screen').style.display = 'block'; document.getElementById('worldcup-screen').style.display = 'none'; return; }
   wcCurrentRound = [...activeList].sort(() => Math.random() - 0.5); wcNextRound = []; wcMatchIndex = 0; wcRankings = []; wcLosersThisRound = []; updateWcUI();
 });
@@ -264,7 +355,7 @@ window.openKeywordCompare = function(targetZone, poolZone, titleLabel) {
   const items = projects[currentId].items.filter(i => i.zone === targetZone || i.zone === poolZone).map(i => i.name); if(items.length < 2) return alert("비교할 키워드가 2개 이상 없습니다!");
   currentCompareTier = targetZone; document.getElementById('btn-apply-rank').style.display = 'block'; document.getElementById('comp-title').innerText = `[${titleLabel}] 1:1 집중 비교소`; compareLogs = []; saveLogs(); openCompareMode(items.sort());
 }
-document.getElementById('btn-compare').addEventListener('click', () => { currentCompareTier = null; document.getElementById('btn-apply-rank').style.display = 'none'; document.getElementById('comp-title').innerText = "전체 1:1 집중 비교소"; openCompareMode([...getDynamicWebtoonList()].sort()); });
+document.getElementById('btn-compare').addEventListener('click', () => { currentCompareTier = null; document.getElementById('btn-apply-rank').style.display = 'none'; document.getElementById('comp-title').innerText = "전체 1:1 집중 비교소"; openCompareMode([...cleanWebtoonList].sort()); });
 
 function openCompareMode(itemList) {
   hideAllScreens(); document.getElementById('compare-screen').style.display = 'block';
@@ -326,17 +417,10 @@ window.applyRankingToTier = function() {
 }
 
 // ====================================================================
-// 🚀 작품 키워드 서재 (상세뷰 완전 개편)
+// 🚀 작품 키워드 서재
 // ====================================================================
-document.getElementById('btn-open-tagging').addEventListener('click', () => { 
-  hideAllScreens(); 
-  document.getElementById('tagging-screen').style.display = 'block'; 
-  closeWorkDetail(); 
-  renderKeywordPool(); 
-});
-
+document.getElementById('btn-open-tagging').addEventListener('click', () => { hideAllScreens(); document.getElementById('tagging-screen').style.display = 'block'; closeWorkDetail(); renderKeywordPool(); });
 document.getElementById('btn-show-add-work').addEventListener('click', () => { document.getElementById('add-work-form').style.display = 'block'; });
-
 document.getElementById('btn-confirm-add-work').addEventListener('click', () => {
   const title = document.getElementById('new-work-title').value.trim(); const top = document.getElementById('new-work-top').value.trim(); const bottom = document.getElementById('new-work-bottom').value.trim();
   if(!title) return alert("작품명은 꼭 입력해주세요!");
@@ -349,7 +433,6 @@ window.deleteTaggingWork = function() {
   if(!currentTaggingWorkId) return; const work = taggedWorksData.find(w => w.id === currentTaggingWorkId);
   if(confirm(`'${work.title}' 작품을 서재에서 완전히 삭제할까요?`)) { taggedWorksData = taggedWorksData.filter(w => w.id !== currentTaggingWorkId); saveTaggingData(); closeWorkDetail(); }
 }
-
 function renderTaggingGrid() {
   const container = document.getElementById('work-grid-view'); container.innerHTML = '';
   taggedWorksData.forEach(work => {
@@ -359,34 +442,16 @@ function renderTaggingGrid() {
   });
 }
 window.deleteTaggingWorkGrid = function(workId) { const work = taggedWorksData.find(w => w.id === workId); if(confirm(`'${work.title}' 작품을 서재에서 완전히 삭제할까요?`)) { taggedWorksData = taggedWorksData.filter(w => w.id !== workId); saveTaggingData(); renderTaggingGrid(); } }
-
 window.openWorkDetail = function(workId) {
-  currentTaggingWorkId = workId; 
-  const work = taggedWorksData.find(w => w.id === workId);
+  currentTaggingWorkId = workId; const work = taggedWorksData.find(w => w.id === workId);
   if(work) {
-    document.getElementById('tagging-grid-container').style.display = 'none'; 
-    document.getElementById('work-detail-view').style.display = 'block';
-    
-    document.getElementById('detail-work-title').innerText = `📖 ${work.title}`; 
-    document.getElementById('detail-top-name').innerText = `공: ${work.top}`; 
-    document.getElementById('detail-bottom-name').innerText = `수: ${work.bottom}`;
-    
-    document.getElementById('dz-title').setAttribute('data-work-id', work.id); 
-    document.getElementById('dz-top').setAttribute('data-work-id', work.id); 
-    document.getElementById('dz-bottom').setAttribute('data-work-id', work.id);
-    
-    renderDetailTags(); 
-    setupDropZones();
+    document.getElementById('tagging-grid-container').style.display = 'none'; document.getElementById('work-detail-view').style.display = 'block';
+    document.getElementById('detail-work-title').innerText = `📖 ${work.title}`; document.getElementById('detail-top-name').innerText = `공: ${work.top}`; document.getElementById('detail-bottom-name').innerText = `수: ${work.bottom}`;
+    document.getElementById('dz-title').setAttribute('data-work-id', work.id); document.getElementById('dz-top').setAttribute('data-work-id', work.id); document.getElementById('dz-bottom').setAttribute('data-work-id', work.id);
+    renderDetailTags(); setupDropZones();
   }
 }
-
-window.closeWorkDetail = function() { 
-    currentTaggingWorkId = null; 
-    document.getElementById('work-detail-view').style.display = 'none'; 
-    document.getElementById('tagging-grid-container').style.display = 'block'; 
-    renderTaggingGrid(); 
-}
-
+window.closeWorkDetail = function() { currentTaggingWorkId = null; document.getElementById('work-detail-view').style.display = 'none'; document.getElementById('tagging-grid-container').style.display = 'block'; renderTaggingGrid(); }
 function renderDetailTags() {
   const work = taggedWorksData.find(w => w.id === currentTaggingWorkId); if(!work) return;
   document.getElementById('dz-title').innerHTML = renderTagsHTML(work.tags.title, work.id, 'title'); document.getElementById('dz-top').innerHTML = renderTagsHTML(work.tags.top, work.id, 'top'); document.getElementById('dz-bottom').innerHTML = renderTagsHTML(work.tags.bottom, work.id, 'bottom');
@@ -411,7 +476,7 @@ function renderKeywordPool() {
 }
 window.addNewKeyword = function(catIndex) {
   const newWord = prompt("새롭게 추가할 키워드를 입력하세요!");
-  if (newWord && newWord.trim() !== "") { if(tagCategories[catIndex].items.includes(newWord.trim())) return alert("이미 존재하는 키워드입니다!"); tagCategories[catIndex].items.push(newWord.trim()); saveTaggingData(); renderKeywordPool(); }
+  if (newWord && newWord.trim() !== "") { if(tagCategories[catIndex].items.includes(newWord.trim())) { return alert("이미 존재하는 키워드입니다!"); } tagCategories[catIndex].items.push(newWord.trim()); saveTaggingData(); renderKeywordPool(); }
 }
 window.deleteKeywordFromPool = function(catIndex, kwIndex) {
   const targetWord = tagCategories[catIndex].items[kwIndex]; if(confirm(`'${targetWord}' 키워드를 삭제할까요?`)) { tagCategories[catIndex].items.splice(kwIndex, 1); saveTaggingData(); renderKeywordPool(); }
@@ -427,7 +492,7 @@ function setupDropZones() {
       e.preventDefault(); newZone.classList.remove('dragover'); const payloadStr = e.dataTransfer.getData('text/plain'); if (!payloadStr) return;
       try {
         const payload = JSON.parse(payloadStr); const workId = newZone.getAttribute('data-work-id'); const target = newZone.getAttribute('data-target'); const work = taggedWorksData.find(w => w.id === workId);
-        if (work && !work.tags[target].find(t => t.name === payload.name)) { work.tags[target].push(payload); saveTaggingData(); renderDetailTags(); }
+        if (work) { if (!work.tags[target].find(t => t.name === payload.name)) { work.tags[target].push(payload); saveTaggingData(); renderDetailTags(); } }
       } catch (err) { console.error(err); }
     });
   });
@@ -435,16 +500,14 @@ function setupDropZones() {
 
 function initReadWorksList() {
   if (readWorksList && readWorksList.length > 0) return; let rId = 0;
-  webtoonCategories.forEach(cat => { let platform = cat.color === 'bg-skyblue' ? '리디' : (cat.color === 'bg-red' ? '레진' : '봄툰'); cat.list.forEach(name => { let cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim(); if(!readWorksList.find(w => w.name === cleanName)) readWorksList.push({ id: 'rw_'+(rId++), name: cleanName, platform: platform, colorClass: cat.color }); }); });
+  webtoonCategories.forEach(cat => { let platform = cat.color === 'bg-skyblue' ? '리디' : (cat.color === 'bg-red' ? '레진' : '봄툰'); cat.list.forEach(name => { let cleanName = name.replace(/\[.*?\]|\(.*?\)/g, '').trim(); if(!readWorksList.find(w => w.name === cleanName)) { readWorksList.push({ id: 'rw_'+(rId++), name: cleanName, platform: platform, colorClass: cat.color }); } }); });
   saveReadWorks();
 }
 
 document.getElementById('btn-open-read-works').addEventListener('click', () => { hideAllScreens(); document.getElementById('read-works-screen').style.display = 'block'; renderReadWorks(); });
 window.saveReadWorksManual = function() { saveAllData(); alert("현재 리스트 순서가 완벽하게 저장되었습니다!"); }
 window.sortReadWorksList = function(type) {
-  if (type === 'abc') readWorksList.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR'));
-  else if (type === 'heart') readWorksList.sort((a, b) => { let idxA = heartRankData.indexOf(a.name); let idxB = heartRankData.indexOf(b.name); return (idxA === -1 ? 9999 : idxA) - (idxB === -1 ? 9999 : idxB); });
-  else if (type === 'latest') readWorksList.sort((a, b) => (parseInt(b.id.replace('rw_', '')) || 0) - (parseInt(a.id.replace('rw_', '')) || 0));
+  if (type === 'abc') { readWorksList.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR')); } else if (type === 'heart') { readWorksList.sort((a, b) => { let idxA = heartRankData.indexOf(a.name); let idxB = heartRankData.indexOf(b.name); if(idxA === -1) idxA = 9999; if(idxB === -1) idxB = 9999; return idxA - idxB; }); } else if (type === 'latest') { readWorksList.sort((a, b) => { const idA = parseInt(a.id.replace('rw_', '')) || 0; const idB = parseInt(b.id.replace('rw_', '')) || 0; return idB - idA; }); }
   renderReadWorks(); 
 }
 
@@ -457,6 +520,10 @@ window.deleteReadWork = function(index) { if(confirm("이 작품을 지울까요
 function renderReadWorks() {
   const container = document.getElementById('read-works-grid'); container.innerHTML = '';
   readWorksList.forEach((work, index) => {
+    if (work.colorClass === 'bg-white' || work.platform === '봄툰 등' || !work.colorClass) {
+      work.colorClass = 'bg-yellow-light'; work.platform = '봄툰';
+      webtoonCategories.forEach(cat => { const cleanList = cat.list.map(n => n.replace(/\[.*?\]|\(.*?\)/g, '').trim()); if (cleanList.includes(work.name)) { work.colorClass = cat.color; work.platform = cat.color === 'bg-skyblue' ? '리디' : (cat.color === 'bg-red' ? '레진' : '봄툰'); } });
+    }
     const el = document.createElement('div'); el.className = 'work-table-row'; el.draggable = true; el.dataset.index = index;
     let badgeBg = work.colorClass === 'bg-skyblue' ? '#E0F2FE' : (work.colorClass === 'bg-red' ? '#FFE4E6' : '#FEF9C3'); let badgeText = work.colorClass === 'bg-skyblue' ? '#0284C7' : (work.colorClass === 'bg-red' ? '#E11D48' : '#A16207');
     el.innerHTML = `<div class="work-col-drag" title="드래그해서 순서 변경">≡</div><div class="work-col-platform" style="background:${badgeBg}; color:${badgeText};">${work.platform}</div><div class="work-col-title">${work.name}</div><div class="work-col-actions"><button onclick="event.stopPropagation(); deleteReadWork(${index})">삭제</button></div>`;
@@ -476,19 +543,19 @@ window.pickRandomWebtoon = function() {
 }
 
 window.previewImage = function(event, previewId) {
-  const file = event.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById(previewId).innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:6px; object-fit:cover;">`; }; reader.readAsDataURL(file); }
+  const file = event.target.files[0];
+  if (file) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById(previewId).innerHTML = `<img src="${e.target.result}" style="width:100%; border-radius:6px; object-fit:cover;">`; }
+    reader.readAsDataURL(file); }
 }
 
 document.getElementById('btn-open-reading-log').addEventListener('click', () => { hideAllScreens(); document.getElementById('reading-log-screen').style.display = 'block'; renderReadingBooks(); });
 
 window.openBookModal = function(id = null) {
   const titleEl = document.getElementById('book-title'); const previewEl = document.getElementById('book-image-preview'); document.getElementById('book-id').value = id || '';
-  if (id) { const book = readingBooks.find(b => b.id == id); document.getElementById('book-modal-title').innerText = "책 정보 수정"; titleEl.value = book.title; previewEl.innerHTML = book.coverImg ? `<img src="${book.coverImg}" style="width:100%; border-radius:6px; object-fit:cover;">` : ''; } 
-  else { document.getElementById('book-modal-title').innerText = "새로운 책 만들기"; titleEl.value = ''; previewEl.innerHTML = ''; document.getElementById('book-image').value = ''; }
+  if (id) { const book = readingBooks.find(b => b.id == id); document.getElementById('book-modal-title').innerText = "책 정보 수정"; titleEl.value = book.title; previewEl.innerHTML = book.coverImg ? `<img src="${book.coverImg}" style="width:100%; border-radius:6px; object-fit:cover;">` : ''; } else { document.getElementById('book-modal-title').innerText = "새로운 책 만들기"; titleEl.value = ''; previewEl.innerHTML = ''; document.getElementById('book-image').value = ''; }
   document.getElementById('book-modal').style.display = 'flex';
 }
 window.closeBookModal = function() { document.getElementById('book-modal').style.display = 'none'; }
-
 window.saveReadingBook = function() {
   const id = document.getElementById('book-id').value; const title = document.getElementById('book-title').value.trim(); const previewImg = document.getElementById('book-image-preview').querySelector('img'); const coverImg = previewImg ? previewImg.src : null;
   if (!title) return alert("작품명을 입력해주세요!");
@@ -500,8 +567,9 @@ window.deleteReadingBook = function(id) { if(confirm("이 책과 안의 기록�
 window.renderReadingBooks = function() {
   const container = document.getElementById('reading-book-grid'); container.innerHTML = '';
   readingBooks.forEach(book => {
-    const card = document.createElement('div'); card.className = 'book-card'; card.onclick = () => openBookDetail(book.id); const entriesCount = book.entries ? book.entries.length : 0;
-    card.innerHTML = `<div class="book-actions"><button class="btn-book-edit" onclick="event.stopPropagation(); openBookModal(${book.id})" title="수정">✏️</button><button class="btn-book-del" onclick="event.stopPropagation(); deleteReadingBook(${book.id})" title="삭제">✕</button></div>${book.coverImg ? `<img src="${book.coverImg}" class="book-img">` : `<div class="book-img" style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:40px;">📖</div>`}<div class="book-content"><div class="book-title">${book.title}</div><div style="font-size:12px; color:#666; margin-top:5px;">기록 ${entriesCount}개</div></div>`;
+    const card = document.createElement('div'); card.className = 'book-card'; card.onclick = () => openBookDetail(book.id);
+    const entriesCount = book.entries ? book.entries.length : 0;
+    card.innerHTML = `<div class="book-actions"><button class="btn-book-edit" onclick="event.stopPropagation(); openBookModal(${book.id})" title="수정">✏️</button><button class="btn-book-del" onclick="event.stopPropagation(); deleteReadingBook(${book.id})" title="삭제">✕</button></div>${book.coverImg ? `<img src="${book.coverImg}" class="book-img">` : `<div class="book-img" style="display:flex; align-items:center; justify-content:center; color:#ccc; font-size:40px;">📖</div>`}<div class="book-content"><div class="book-title">${book.title}</div><div class="book-date">기록 ${entriesCount}개</div></div>`;
     container.appendChild(card);
   });
 }
@@ -513,15 +581,15 @@ window.goBackToBooks = function() { document.getElementById('reading-detail-scre
 
 window.openEntryModal = function(entryId = null) {
   const contentEl = document.getElementById('entry-content'); const previewEl = document.getElementById('entry-image-preview'); document.getElementById('entry-id').value = entryId || '';
-  if (entryId) { const book = readingBooks.find(b => b.id == currentReadingBookId); const entry = book.entries.find(e => e.id == entryId); contentEl.value = entry.content; previewEl.innerHTML = entry.img ? `<img src="${entry.img}" style="width:100%; border-radius:6px; object-fit:cover;">` : ''; } 
-  else { contentEl.value = ''; previewEl.innerHTML = ''; document.getElementById('entry-image').value = ''; }
+  if (entryId) { const book = readingBooks.find(b => b.id == currentReadingBookId); const entry = book.entries.find(e => e.id == entryId); contentEl.value = entry.content; previewEl.innerHTML = entry.img ? `<img src="${entry.img}" style="width:100%; border-radius:6px; object-fit:cover;">` : ''; } else { contentEl.value = ''; previewEl.innerHTML = ''; document.getElementById('entry-image').value = ''; }
   document.getElementById('entry-modal').style.display = 'flex';
 }
 window.closeEntryModal = function() { document.getElementById('entry-modal').style.display = 'none'; }
 
 window.saveReadingEntry = function() {
   const entryId = document.getElementById('entry-id').value; const content = document.getElementById('entry-content').value.trim(); const previewImg = document.getElementById('entry-image-preview').querySelector('img'); const imgData = previewImg ? previewImg.src : null;
-  if(!content && !imgData) return alert("내용이나 사진을 추가해주세요!"); const book = readingBooks.find(b => b.id == currentReadingBookId); if (!book.entries) book.entries = [];
+  if(!content && !imgData) return alert("내용이나 사진을 추가해주세요!");
+  const book = readingBooks.find(b => b.id == currentReadingBookId); if (!book.entries) book.entries = [];
   if (entryId) { const entry = book.entries.find(e => e.id == entryId); entry.content = content; entry.img = imgData; } else { book.entries.push({ id: Date.now(), content, img: imgData, date: new Date().toISOString() }); }
   saveReadingLogData(); closeEntryModal(); renderReadingEntries();
 }
@@ -529,12 +597,14 @@ window.deleteReadingEntry = function(id) { if(confirm("이 글을 삭제하시�
 window.sortReadingEntries = function(order) { document.getElementById('sort-reading-entries').dataset.order = order; renderReadingEntries(); }
 
 window.renderReadingEntries = function() {
-  const container = document.getElementById('reading-entry-list'); container.innerHTML = ''; const book = readingBooks.find(b => b.id == currentReadingBookId); 
+  const container = document.getElementById('reading-entry-list'); container.innerHTML = '';
+  const book = readingBooks.find(b => b.id == currentReadingBookId); 
   if (!book || !book.entries || book.entries.length === 0) { container.innerHTML = '<div style="text-align:center; padding:50px; color:#9ca3af;">첫 독서록을 작성해 보세요! ✍️</div>'; return; }
   const order = document.getElementById('sort-reading-entries').dataset.order || 'oldest'; let sortedEntries = [...book.entries];
-  if (order === 'latest') sortedEntries.sort((a, b) => b.id - a.id); else sortedEntries.sort((a, b) => a.id - b.id); 
+  if (order === 'latest') { sortedEntries.sort((a, b) => b.id - a.id); } else { sortedEntries.sort((a, b) => a.id - b.id); }
   sortedEntries.forEach(entry => {
-    const dateStr = new Date(entry.date).toLocaleString('ko-KR', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' }); const el = document.createElement('div'); el.className = 'entry-card';
+    const dateStr = new Date(entry.date).toLocaleString('ko-KR', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    const el = document.createElement('div'); el.className = 'entry-card';
     el.innerHTML = `<div class="entry-actions"><button onclick="openEntryModal(${entry.id})">수정</button><button onclick="deleteReadingEntry(${entry.id})" style="color:#ef4444;">삭제</button></div><div class="entry-date">${dateStr}</div>${entry.content ? `<div class="entry-content">${entry.content}</div>` : ''}${entry.img ? `<img src="${entry.img}" class="entry-img">` : ''}`;
     container.appendChild(el);
   });
