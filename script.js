@@ -416,7 +416,7 @@ function renderReadWorks() {
 window.pickRandomWebtoon = function() {
   if (!readWorksList || readWorksList.length === 0) return alert("내가 본 웹툰 컬렉션에 먼저 작품을 추가해주세요!");
   const randomIndex = Math.floor(Math.random() * readWorksList.length); const pickedWork = readWorksList[randomIndex];
-  const resultDiv = document.getElementById('random-result'); resultDiv.innerHTML = `<span style="font-size:16px;">오늘의 정주행 픽은..</span><br>✨ <span style="color:#FFF;">${pickedWork.name}</span> ✨`;
+  const resultDiv = document.getElementById('random-result'); resultDiv.innerHTML = `<span style="font-size:16px;">오늘은..</span><br>✨ <span style="color:#111;">${pickedWork.name}</span> ✨`;
 }
 
 window.previewImage = function(event, previewId) {
