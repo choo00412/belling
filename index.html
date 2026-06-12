@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>티메 (Ti-Me)</title>
-  <link rel="stylesheet" href="style.css?v=60">
+  <link rel="stylesheet" href="style.css?v=61">
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
 </head>
@@ -81,8 +81,8 @@
       <div class="scrap-file-row">
         <label for="scrap-image">🖼️ 이미지 올리기</label>
         <input type="file" id="scrap-image" accept="image/*">
+        <button id="btn-add-scrap" onclick="addScrapItem()" style="margin-left:auto;">스크랩 게시하기</button>
       </div>
-      <button id="btn-add-scrap" onclick="addScrapItem()">스크랩 게시하기</button>
     </div>
     <div id="scrap-list" class="scrap-container"></div>
   </div>
@@ -95,7 +95,7 @@
 
     <div class="add-section">
       <input type="text" id="item-name" placeholder="후보 이름">
-      <input type="file" id="item-image" accept="image/*">
+      <input type="file" id="item-image" accept="image/*" style="display:none;" id="file-upload-dummy">
       <input type="text" id="item-memo" placeholder="선정 이유 (메모)">
       <button id="add-item-btn">추가</button>
     </div>
@@ -105,7 +105,7 @@
         <div id="webtoon-pools">
           <p class="pool-label" style="color: #0284C7;">리디</p><div class="pool" id="pool-skyblue" data-zone="pool-skyblue"></div>
           <p class="pool-label" style="margin-top: 20px; color: #E11D48;">레진</p><div class="pool" id="pool-red" data-zone="pool-red"></div>
-          <p class="pool-label" style="margin-top: 20px; color: #A16207;">봄툰</p><div class="pool" id="pool-yellow" data-zone="pool-yellow"></div>
+          <p class="pool-label" style="margin-top: 20px; color: #A16207;">봄툰 및 기타</p><div class="pool" id="pool-yellow" data-zone="pool-yellow"></div>
         </div>
 
         <div id="keyword-pools" style="display: none;">
@@ -236,6 +236,12 @@
   <div id="read-works-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
     <div class="wc-title" style="text-align: left;">📖 내가 본 웹툰 컬렉션</div>
+
+    <div id="random-pick-box" style="background: linear-gradient(135deg, #A855F7, #EC4899); color:white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h3 style="margin-bottom:10px; font-size:18px;">🎲 뭐 볼지 고민될 때? 랜덤 정주행!</h3>
+      <div id="random-result" style="font-size:22px; font-weight:900; margin-bottom:15px; min-height:30px;">버튼을 눌러보세요!</div>
+      <button onclick="pickRandomWebtoon()" style="background:white; color:#EC4899; font-weight:bold; padding:10px 20px; border-radius:8px; font-size:14px;">랜덤 뽑기</button>
+    </div>
     
     <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
       <input type="text" id="new-read-work-title" placeholder="새 작품 직접 입력" style="flex:1; min-width:150px; padding:10px; border-radius:8px; border:1px solid #d1d5db;">
@@ -259,9 +265,9 @@
 
   <div id="reading-log-screen" style="display: none;" class="game-screen">
     <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
-    <div class="wc-title" style="text-align: left;">📝 나만의 독서 기록장</div>
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-      <button onclick="openBookModal()" style="background:#14B8A6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:16px;">➕ 새로운 책 추가</button>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div class="wc-title" style="text-align: left; margin: 0;">📝 나만의 독서 기록장</div>
+      <button onclick="openBookModal()" style="background:#14B8A6; color:white; padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:14px;">책 추가</button>
     </div>
     <div id="reading-book-grid" class="book-grid"></div>
   </div>
@@ -270,14 +276,17 @@
     <div class="header" style="padding-top: 20px;">
       <button class="btn-back-grid" onclick="goBackToBooks()">⬅ 책장으로</button>
     </div>
-    <div class="wc-title" id="detail-book-title" style="text-align: left; color:#14B8A6;">작품명</div>
+    <div class="wc-title" id="detail-book-title" style="text-align: left; margin-bottom: 20px;">작품명</div>
     
     <div style="display: flex; justify-content: space-between; margin-bottom: 20px; align-items:center;">
-      <button onclick="openEntryModal()" style="background:#3B82F6; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:14px;">✍️ 이 책에 글쓰기</button>
-      <select id="sort-reading-entries" onchange="sortReadingEntries(this.value)" style="padding:8px; border-radius:8px; border:1px solid #d1d5db; font-weight:bold; cursor:pointer;">
-        <option value="oldest">🕰️ 과거순 (기본)</option>
-        <option value="latest">🆕 최신순</option>
-      </select>
+      <div style="flex:1;"></div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button onclick="openEntryModal()" style="background:#f3f4f6; color:#111; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">추가</button>
+        <select id="sort-reading-entries" onchange="sortReadingEntries(this.value)" style="padding:6px; border-radius:6px; border:1px solid #d1d5db; font-size:12px; cursor:pointer;">
+          <option value="oldest">🕰️ 과거순 (기본)</option>
+          <option value="latest">🆕 최신순</option>
+        </select>
+      </div>
     </div>
     <div id="reading-entry-list" class="entry-list-container"></div>
   </div>
@@ -316,7 +325,7 @@
     </div>
   </div>
 
-  <script src="script.js?v=55"></script>
+  <script src="script.js?v=61"></script>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -335,3 +344,4 @@
     window.db = getFirestore(app);
   </script>
 </body>
+</html>
