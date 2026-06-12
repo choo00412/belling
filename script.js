@@ -141,17 +141,24 @@ function createAutoProject(type) {
 }
 function createProject(type, title) { const id = Date.now().toString(); projects[id] = { id, title, type, subType: 'custom', items: [] }; saveData(); renderHome(); openProject(id); }
 
-// 💡 저장된 프로젝트 렌더링 (열기 버튼 삭제 & x버튼 스타일 강제 적용) 💡
+// 💡 저장된 프로젝트 렌더링 (예전 크기 빵빵하게 복구 + x버튼 유지)
 function renderHome() {
-  const list = document.getElementById('project-list'); list.innerHTML = '';
+  const list = document.getElementById('project-list'); 
+  list.innerHTML = '';
+  
   Object.values(projects).forEach(p => {
-    const card = document.createElement('div'); card.className = 'project-card';
+    const card = document.createElement('div'); 
+    card.className = 'project-card';
+    
+    // 카드 전체 영역을 누르면 프로젝트가 열리도록 설정
+    card.onclick = () => openProject(p.id);
+    
     card.innerHTML = `
-      <div onclick="openProject('${p.id}')" style="width:100%; height:100%; box-sizing:border-box;">
-          <span style="font-size:12px; color:#888; font-weight:600; margin-bottom:6px; display:block;">${p.subType === 'keyword' ? '키워드 모드' : (p.type === 'tier' ? '티어 모드' : '랭킹 모드')}</span>
-          <h3>${p.title}</h3>
-      </div>
-      <button onclick="event.stopPropagation(); deleteProject('${p.id}')" style="position:absolute; top:15px; right:15px; background:transparent; color:#ef4444; border:none; font-size:18px; font-weight:900; cursor:pointer; padding:0; outline:none; box-shadow:none;">✕</button>
+      <span style="font-size:12px; color:#888; font-weight:600; margin-bottom:6px; display:block;">
+          ${p.subType === 'keyword' ? '키워드 모드' : (p.type === 'tier' ? '티어 모드' : '랭킹 모드')}
+      </span>
+      <h3>${p.title}</h3>
+      <button onclick="event.stopPropagation(); deleteProject('${p.id}')" style="position:absolute; top:20px; right:20px; background:transparent; color:#ef4444; border:none; font-size:18px; font-weight:900; cursor:pointer; padding:0; outline:none; box-shadow:none;">✕</button>
     `;
     list.appendChild(card);
   });
@@ -608,4 +615,25 @@ window.renderReadingEntries = function() {
     el.innerHTML = `<div class="entry-actions"><button onclick="openEntryModal(${entry.id})">수정</button><button onclick="deleteReadingEntry(${entry.id})" style="color:#ef4444;">삭제</button></div><div class="entry-date">${dateStr}</div>${entry.content ? `<div class="entry-content">${entry.content}</div>` : ''}${entry.img ? `<img src="${entry.img}" class="entry-img">` : ''}`;
     container.appendChild(el);
   });
+}
+
+// ====================================================================
+// 📸 시간표 이미지로 다운로드 기능
+// ====================================================================
+window.downloadTimetable = function() {
+    // 캡처할 대상 영역을 선택 (시간표 전체 박스)
+    const targetElement = document.querySelector('.timetable-container');
+    if (!targetElement) return;
+
+    // html2canvas 실행해서 캔버스로 변환 후 다운로드
+    html2canvas(targetElement, {
+        scale: 2, // 화질을 2배로 선명하게! (글씨 안 깨지게)
+        backgroundColor: "#f3f4f6" // 배경색 지정 (투명하게 나오는 것 방지)
+    }).then(canvas => {
+        // 가상의 a 태그를 만들어서 다운로드 실행
+        const link = document.createElement('a');
+        link.download = '나의_웹툰_시간표.png'; // 저장될 파일 이름
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
 }

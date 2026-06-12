@@ -33,11 +33,11 @@ button { border: none !important; cursor: pointer; transition: 0.2s; }
 .bg-accent { background: #06B6D4; } .bg-indigo { background: #4F46E5; } .bg-indigo-dark { background: #4338CA; }
 .bg-purple { background: #9333EA; } .bg-purple-dark { background: #A855F7; } .bg-dark { background: #475569; }
 
-/* 📂 저장된 프로젝트 레이아웃 (열기 버튼 완전히 삭제됨) */
+/* 📂 저장된 프로젝트 레이아웃 복구 */
 .project-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 50px; }
-.project-card { background: white; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; position: relative; overflow: hidden; padding: 0; }
-.project-card:hover { border-color: #3B82F6; }
-.project-card h3 { font-size: 18px; color: #1f2937; margin-top: 5px; }
+.project-card { background: white; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0,0,0,0.05); cursor: pointer; position: relative; overflow: hidden; padding: 25px; min-height: 105px; display: flex; flex-direction: column; justify-content: center; transition: 0.2s; }
+.project-card:hover { border-color: #3B82F6; transform: translateY(-2px); }
+.project-card h3 { font-size: 18px; color: #1f2937; margin: 0; margin-top: 5px; }
 
 /* 서브화면 공통 스타일 버튼 */
 .header { display: flex; align-items: center; margin-bottom: 25px; gap: 15px; }
