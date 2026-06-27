@@ -682,7 +682,7 @@ window.toggleWorkInGroup = function(groupId, workName) {
 window.renderGroupManager = function() {
   const container = document.getElementById('group-management-area');
   container.innerHTML = '';
-  const allWorks = readWorksList.map(w => w.name); // '내가 본 웹툰 컬렉션' 기반
+  const allWorks = readWorksList.map(w => w.name); 
   
   if(Object.keys(webtoonGroups).length === 0) {
     container.innerHTML = '<div style="text-align:center; padding:40px; color:#9ca3af; font-weight:bold;">생성된 그룹이 없습니다. 새로운 취향 그룹을 만들어보세요!</div>';
@@ -693,12 +693,13 @@ window.renderGroupManager = function() {
     const card = document.createElement('div');
     card.className = 'group-container-card';
     
+    // ✏️ 체크박스 대신 태그(Chip) 형태의 HTML로 변경!
     let worksCheckboxesHTML = allWorks.map(workName => {
       const isChecked = group.works && group.works.includes(workName) ? 'checked' : '';
       return `
-        <label class="group-work-item">
+        <label class="group-work-label">
           <input type="checkbox" onchange="toggleWorkInGroup('${group.id}', '${workName}')" ${isChecked}>
-          ${workName}
+          <span class="group-work-chip">${workName}</span>
         </label>
       `;
     }).join('');
