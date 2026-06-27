@@ -626,21 +626,31 @@ window.renderReadingEntries = function() {
 }
 
 // ====================================================================
-// 📸 시간표 이미지로 다운로드 기능
+// 📸 시간표 이미지로 다운로드 기능 (모바일 잘림 현상 완벽 해결!)
 // ====================================================================
 window.downloadTimetable = function() {
-    // 캡처할 대상 영역을 선택 (시간표 전체 박스)
     const targetElement = document.querySelector('.timetable-container');
     if (!targetElement) return;
 
-    // html2canvas 실행해서 캔버스로 변환 후 다운로드
+    // 1. 캡처하기 직전, 모바일 화면에서 숨겨진(스크롤된) 부분까지 다 나오게 박스를 쫙 늘립니다.
+    const originalOverflow = targetElement.style.overflow;
+    const originalWidth = targetElement.style.width;
+    
+    targetElement.style.overflow = 'visible';
+    targetElement.style.width = targetElement.scrollWidth + 'px'; // 숨겨진 실제 표 길이만큼 강제 확장!
+
+    // 2. 전체가 펼쳐진 상태로 찰칵! 캡처합니다.
     html2canvas(targetElement, {
-        scale: 2, // 화질을 2배로 선명하게! (글씨 안 깨지게)
-        backgroundColor: "#f3f4f6" // 배경색 지정 (투명하게 나오는 것 방지)
+        scale: 2, // 2배 화질
+        backgroundColor: "#ffffff" // 시간표 배경색 (흰색)
     }).then(canvas => {
-        // 가상의 a 태그를 만들어서 다운로드 실행
+        // 3. 사진을 다 찍었으면 유저가 눈치채기 전에 다시 원래 스크롤되던 모바일 크기로 되돌려 놓습니다.
+        targetElement.style.overflow = originalOverflow;
+        targetElement.style.width = originalWidth;
+
+        // 4. 저장 (다운로드)
         const link = document.createElement('a');
-        link.download = '나의_웹툰_시간표.png'; // 저장될 파일 이름
+        link.download = '나의_웹툰_시간표.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     });
