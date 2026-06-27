@@ -626,35 +626,43 @@ window.renderReadingEntries = function() {
 }
 
 // ====================================================================
-// 📸 시간표 이미지로 다운로드 기능 (모바일 잘림 현상 완벽 해결!)
+// 📸 시간표 이미지로 다운로드 기능 (모바일 잘림 현상 완벽 해결 끝판왕!)
 // ====================================================================
 window.downloadTimetable = function() {
     const targetElement = document.querySelector('.timetable-container');
     if (!targetElement) return;
 
-    // 1. 캡처하기 직전, 모바일 화면에서 숨겨진(스크롤된) 부분까지 다 나오게 박스를 쫙 늘립니다.
+    // 1. 캡처 전, 스크롤을 맨 왼쪽/맨 위로 초기화 (안 그러면 중간부터 찍혀서 잘립니다)
+    window.scrollTo(0, 0);
+    targetElement.scrollLeft = 0;
+
     const originalOverflow = targetElement.style.overflow;
     const originalWidth = targetElement.style.width;
     
+    // 2. 강제로 넓히기
     targetElement.style.overflow = 'visible';
-    targetElement.style.width = targetElement.scrollWidth + 'px'; // 숨겨진 실제 표 길이만큼 강제 확장!
+    targetElement.style.width = targetElement.scrollWidth + 'px'; 
 
-    // 2. 전체가 펼쳐진 상태로 찰칵! 캡처합니다.
+    // 3. 사진 찍기 (옵션 추가)
     html2canvas(targetElement, {
-        scale: 2, // 2배 화질
-        backgroundColor: "#ffffff" // 시간표 배경색 (흰색)
+        scale: 2, // 화질 2배
+        backgroundColor: "#ffffff",
+        // 💡 핵심! 캔버스와 카메라 렌즈 크기 자체를 표의 실제 넓이만큼 강제로 찢어버립니다.
+        width: targetElement.scrollWidth,
+        windowWidth: targetElement.scrollWidth
     }).then(canvas => {
-        // 3. 사진을 다 찍었으면 유저가 눈치채기 전에 다시 원래 스크롤되던 모바일 크기로 되돌려 놓습니다.
+        // 4. 원상 복구
         targetElement.style.overflow = originalOverflow;
         targetElement.style.width = originalWidth;
 
-        // 4. 저장 (다운로드)
+        // 5. 다운로드
         const link = document.createElement('a');
         link.download = '나의_웹툰_시간표.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
     });
-}// ====================================================================
+}
+// ====================================================================
 // 🗂️ 웹툰 그룹 분류 관리 및 워크스페이스 동적 연동 로직
 // ====================================================================
 
