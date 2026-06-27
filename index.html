@@ -52,6 +52,7 @@
           <button id="btn-open-reading-log" class="dash-card bg-purple">📝 독서 기록장 (리뷰)</button>
           <button id="btn-open-wishlist" class="dash-card bg-purple-dark">🛒 보고 싶은 위시리스트</button>
           <button id="btn-open-scrap" class="dash-card bg-dark">📌 스크랩 보드</button>
+          <button id="btn-open-groups" class="dash-card" style="background:#F59E0B;">🗂️ 작품 그룹 분류 관리</button>
         </div>
       </div>
     </div>
@@ -145,6 +146,11 @@
       <input type="file" id="item-image" accept="image/*">
       <input type="text" id="item-memo" placeholder="선정 이유 (메모)">
       <button id="add-item-btn">추가</button>
+    </div>
+
+    </div> <div id="workspace-group-filters" style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 20px; display: none; flex-direction: column; gap: 10px;">
+      <span style="font-weight: 800; color: #374151; font-size: 14px;">📁 후보군 그룹 필터링 (선택한 그룹의 작품만 아래 풀에 로드됩니다):</span>
+      <div id="ws-group-checkboxes" style="display: flex; gap: 15px; flex-wrap: wrap;"></div>
     </div>
 
     <div class="workspace-layout">
@@ -410,6 +416,15 @@
 
   <script src="script.js?v=100"></script>
 
+  <div id="group-screen" style="display: none;" class="game-screen">
+    <div class="header" style="padding-top: 20px;"><button class="go-home-btn">⬅</button></div>
+    <div class="wc-title" style="text-align: left;">🗂️ 작품 그룹 분류 관리</div>
+    <div style="display: flex; gap: 10px; margin-bottom: 25px; background: white; padding: 15px; border-radius: 12px; border: 1px solid #e5e7eb;">
+      <input type="text" id="new-group-name" placeholder="새 그룹 이름 입력 (예: 집착공 모음, 리만물)" style="flex:1; padding:12px; border-radius:8px; border:1px solid #d1d5db; font-weight: bold;">
+      <button onclick="createWebtoonGroup()" style="background:#F59E0B; color:white; padding:12px 25px; border-radius:8px; font-weight:bold; border:none; cursor:pointer;">그룹 생성</button>
+    </div>
+    <div id="group-management-area" style="display: flex; flex-direction: column; gap: 25px;"></div>
+  </div>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
