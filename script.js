@@ -75,31 +75,70 @@ const heartRankData = [
 
 function getDynamicWebtoonList() { return readWorksList.map(w => w.name); }
 
-// ====================================================================
-// 2. 파이어베이스 데이터 로드 및 저장
-// ====================================================================
 async function initApp() {
   if (!window.db) { setTimeout(initApp, 100); return; }
+  
+  let cloudData = null;
+  let localData = null;
+
+  // ☁️ 1단계: 클라우드에서 데이터 꺼내오기 시도
   try {
     const { doc, getDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     const dbRef = doc(window.db, "ti_me_data", "my_shared_data"); 
     const snap = await getDoc(dbRef);
     if (snap.exists()) {
-      const data = snap.data(); 
-      projects = data.projects || {}; wishList = data.wishList || []; scrapList = data.scrapList || []; compareLogs = data.compareLogs || []; deletedCands = data.deletedCands || []; taggedWorksData = data.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData)); tagCategories = data.tagCategories || initialTagCategories; readWorksList = data.readWorksList || []; readingBooks = data.readingBooks || [];
-      timetableData = data.timetableData || initialTimetableData; // 📅 추가
-      webtoonGroups = data.webtoonGroups || {}; // 🗂️ 요기 추가! (데이터 불러오기)
-    } else { 
-        taggedWorksData = JSON.parse(JSON.stringify(initialWorksData)); tagCategories = initialTagCategories; timetableData = initialTimetableData;
-        webtoonGroups = {}; // 🗂️ 요기도 추가! (처음 빈 데이터일 때)
+      cloudData = snap.data(); 
     }
   } catch (e) { 
-      console.error("로드 실패:", e); taggedWorksData = JSON.parse(JSON.stringify(initialWorksData)); tagCategories = initialTagCategories; timetableData = initialTimetableData;
-      webtoonGroups = {}; // 🗂️ 요기도 추가! (에러 났을 때 방어)
+    console.error("클라우드 로드 실패, 브라우저 백업본을 확인합니다:", e);
   }
+
+  // 💾 2단계: 브라우저 로컬 스토리지에서 백업본 꺼내기 시도
+  try {
+    const backupStr = localStorage.getItem("ti_me_backup_data");
+    if (backupStr) {
+      localData = JSON.parse(backupStr);
+    }
+  } catch(e) {
+    console.warn("로컬 백업 데이터 파싱 실패", e);
+  }
+
+  // 🛡️ 3단계: 심폐소생술 판별 로직 (클라우드가 비정상적으로 비었으면 백업본 사용!)
+  let finalData = {};
   
-  // (아래에 initReadWorksList() 등 기존 코드들은 그대로 두시면 됩니다!)
-  initReadWorksList(); renderHome();
+  const hasCloudData = cloudData && (Object.keys(cloudData.projects || {}).length > 0 || (cloudData.readWorksList && cloudData.readWorksList.length > 0));
+  const hasLocalData = localData && (Object.keys(localData.projects || {}).length > 0 || (localData.readWorksList && localData.readWorksList.length > 0));
+
+  if (hasCloudData) {
+    finalData = cloudData; // 클라우드 데이터가 빵빵하게 잘 있으면 정상 사용
+  } else if (hasLocalData) {
+    console.warn("🚨 클라우드 데이터 증발 감지! 로컬 백업 데이터로 긴급 복구합니다.");
+    finalData = localData; // 클라우드가 비었지만 폰에 백업이 있으면 부활!
+    
+    // 부활시킨 데이터로 텅 빈 클라우드를 다시 덮어써서 원상복구
+    try {
+      const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+      const dbRef = doc(window.db, "ti_me_data", "my_shared_data");
+      await setDoc(dbRef, finalData);
+    } catch(e) {}
+  }
+
+  // 4단계: 최종 결정된 데이터로 변수 세팅
+  projects = finalData.projects || {}; 
+  wishList = finalData.wishList || []; 
+  scrapList = finalData.scrapList || []; 
+  compareLogs = finalData.compareLogs || []; 
+  deletedCands = finalData.deletedCands || []; 
+  taggedWorksData = finalData.taggedWorksData || JSON.parse(JSON.stringify(initialWorksData)); 
+  tagCategories = finalData.tagCategories || initialTagCategories; 
+  readWorksList = finalData.readWorksList || []; 
+  readingBooks = finalData.readingBooks || [];
+  timetableData = finalData.timetableData || initialTimetableData; 
+  webtoonGroups = finalData.webtoonGroups || {}; 
+
+  // 초기 화면 렌더링
+  initReadWorksList(); 
+  renderHome();
   if(document.getElementById('work-grid-view')) renderTaggingGrid();
   if(document.getElementById('read-works-grid')) renderReadWorks();
   if(document.getElementById('reading-book-grid')) renderReadingBooks();
@@ -108,11 +147,31 @@ initApp();
 
 window.saveAllData = async function() {
   if (!window.db) return;
+
+  // 📦 저장할 현재 데이터들을 하나의 꾸러미로 묶기
+  const dataToSave = { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList, readingBooks, timetableData, webtoonGroups };
+
+  // 🛡️ 절대 방어막: 데이터가 비정상적으로 텅 비어있으면 덮어쓰기 전면 차단!
+  if (readWorksList.length === 0 && Object.keys(projects).length === 0) {
+    console.error("비정상적인 빈 데이터입니다! 클라우드 및 로컬 덮어쓰기를 차단합니다.");
+    return; 
+  }
+
+  // 💾 1단계: 브라우저 로컬 스토리지에 몰래 이중 백업 (인터넷 끊겨도 안전함)
+  try {
+    localStorage.setItem("ti_me_backup_data", JSON.stringify(dataToSave));
+  } catch (e) {
+    console.warn("브라우저 로컬 백업 실패:", e);
+  }
+
+  // ☁️ 2단계: 파이어베이스 클라우드에 본 데이터 저장
   try {
     const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     const dbRef = doc(window.db, "ti_me_data", "my_shared_data");
-    await setDoc(dbRef, { projects, wishList, scrapList, compareLogs, deletedCands, taggedWorksData, tagCategories, readWorksList, readingBooks, timetableData, webtoonGroups });
-  } catch (error) { console.error("저장 실패:", error); }
+    await setDoc(dbRef, dataToSave);
+  } catch (error) { 
+    console.error("클라우드 저장 실패:", error); 
+  }
 }
 
 function saveData() { saveAllData(); } function saveWish() { saveAllData(); } function saveScraps() { saveAllData(); } function saveLogs() { saveAllData(); } function saveDeletedCands() { saveAllData(); } function saveTaggingData() { saveAllData(); } function saveReadWorks() { saveAllData(); } function saveReadingLogData() { saveAllData(); }
