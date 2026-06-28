@@ -340,6 +340,7 @@ function renderItems() {
     const dropZone = document.querySelector(`#workspace-screen [data-zone="${item.zone}"]`); if(dropZone) dropZone.appendChild(itemEl);
   });
   updateRanking();
+  syncWorkspaceGroups();
 }
 
 document.querySelectorAll('.tier-items, .pool, .ranking-list').forEach(zone => {
